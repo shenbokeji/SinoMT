@@ -14,7 +14,7 @@
 #include "FPGA.h"
 /*****************Global variable for FPGA configure Table*****************/
 tFPGACfg g_tFPGACfg;
-
+UInt32 g_uiRegBaseAddr = 0;//EMIF FPGA register base address
 /*----------------------------------------------------------------------------
  * name			: GetFpgaReg
  * function 		: Get the fpga reg value 
@@ -25,12 +25,13 @@ tFPGACfg g_tFPGACfg;
 */
 Int16 GetFpgaReg( const UInt32 * const uiAddr )
 {
-    Int16 sTmp ;
+    Int16 wRead;
 
-    //get the value
-    sTmp = *(volatile UInt32 *)(uiAddr);
-    // DelayUsec(50);
-    return sTmp;
+
+    EMIF_FPGA_READ_UINT16( uiAddr, wRead );
+
+
+    return wRead;
 }
  /*----------------------------------------------------------------------------
  * name			: SetFpgaReg
@@ -42,26 +43,27 @@ Int16 GetFpgaReg( const UInt32 * const uiAddr )
 */
 Int SetFpgaReg( const UInt32 * const uiAddr, const Int16 sValue )
 {
-    Int16 sTmp ;
+     Int16 wRead;
     Int iErrCnt;
 	
     while(1)
     {
         //set the reg 
-        *(volatile UInt32 *)(uiAddr) = sValue;
+        EMIF_FPGA_WRITE_UINT16( uiAddr ,sValue );
+
         //DelayUsec(50);
         
         //get the value again 
-        sTmp = *(volatile UInt32 *)(uiAddr);
+       EMIF_FPGA_READ_UINT16( uiAddr, wRead );
         // DelayUsec(50);
 
-        if ( sTmp != sValue )
+        if ( sValue != wRead )
         {
              iErrCnt++;
 
              if ( 3 == iErrCnt )
             {
-                return FPGA_REG_ERROR;/* ´íÎó */
+                return FPGA_SET_REG_ERROR;/* ´íÎó */
             }
         }
         else

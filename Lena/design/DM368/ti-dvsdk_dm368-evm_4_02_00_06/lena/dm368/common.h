@@ -56,7 +56,7 @@
 
 #define LENA_OK (0)
 /*****************system error code *****************/
-#define FPGA_REG_ERROR (0x10010001)
+#define FPGA_SET_REG_ERROR (0x10010001)
 
 /*****************extern function declaration*****************/
 extern Codec *getCodec(Char *extension, Codec *codecs);

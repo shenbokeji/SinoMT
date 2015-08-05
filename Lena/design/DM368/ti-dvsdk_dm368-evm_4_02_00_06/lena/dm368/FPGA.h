@@ -14,6 +14,19 @@
 #define __FPGA_H
 
 #include "../common.h"
+
+
+/*****************global variable  declaration *****************/
+extern UInt32 g_uiRegBaseAddr ;
+
+
+//define the EMIF FPGA register read write 
+#define  EMIF_FPGA_WRITE_UINT16(offsetaddr,value)   (*(volatile UInt32 *)(((UInt32)g_uiRegBaseAddr) + offsetaddr) = (UInt16)(value))
+#define  EMIF_FPGA_READ_UINT16(offsetaddr,value)    ((value) = *(volatile UInt32 *)(((UInt32)g_uiRegBaseAddr) + offsetaddr))
+
+
+
+
 /*****************structure type definition*****************/
 typedef struct FPGARegStruct {
     UInt uiAddr;//EMIF 32bit address bus
