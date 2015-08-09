@@ -46,6 +46,7 @@
 #include "ctrl.h"
 #include "FPGA.h"
 #include "AD9363.h"
+
 //This is the air and ground station flag, configured by GPIO29 pin u2
 #define AIR_STATION (1)
 #define GROUND_STATION (0)
@@ -60,6 +61,7 @@
 
 /*****************extern function declaration*****************/
 extern Codec *getCodec(Char *extension, Codec *codecs);
-extern Int GetAirGroundStationFlag();
-extern Int InitMmapAddress(  const Int iAirorGround  );
+extern Int GetAirGroundStationFlag( void );
+extern Int InitMmapAddress( void );
 #endif /* _COMMON_H */
+

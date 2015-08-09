@@ -23,15 +23,15 @@ UInt32 g_uiRegBaseAddr = 0;//EMIF FPGA register base address
  * feller	1.0		20150805
  *----------------------------------------------------------------------------
 */
-Int16 GetFpgaReg( const UInt32 * const uiAddr )
+UInt16 GetFpgaReg( const UInt32 * const uiAddr )
 {
-    Int16 wRead;
+    UInt16 usRead;
 
 
-    EMIF_FPGA_READ_UINT16( uiAddr, wRead );
+    EMIF_FPGA_READ_UINT16( uiAddr, usRead );
 
 
-    return wRead;
+    return usRead;
 }
  /*----------------------------------------------------------------------------
  * name			: SetFpgaReg
@@ -41,23 +41,23 @@ Int16 GetFpgaReg( const UInt32 * const uiAddr )
  * feller	1.0		20150805
  *----------------------------------------------------------------------------
 */
-Int SetFpgaReg( const UInt32 * const uiAddr, const Int16 sValue )
+Int SetFpgaReg( const UInt32 * const uiAddr, const UInt16 usValue )
 {
-     Int16 wRead;
+    UInt16 usRead;
     Int iErrCnt;
 	
     while(1)
     {
         //set the reg 
-        EMIF_FPGA_WRITE_UINT16( uiAddr ,sValue );
+        EMIF_FPGA_WRITE_UINT16( uiAddr, usValue );
 
         //DelayUsec(50);
         
         //get the value again 
-       EMIF_FPGA_READ_UINT16( uiAddr, wRead );
+       EMIF_FPGA_READ_UINT16( uiAddr, usRead );
         // DelayUsec(50);
 
-        if ( sValue != wRead )
+        if ( usValue != usRead )
         {
              iErrCnt++;
 
@@ -84,8 +84,8 @@ Int SetFpgaReg( const UInt32 * const uiAddr, const Int16 sValue )
 void InitFPGAReg( void )
 {
     g_tFPGACfg.FPGAReg[GROUND_STATION][0].uiAddr = 0;
-    g_tFPGACfg.FPGAReg[GROUND_STATION][1].iValue = 1;
-    g_tFPGACfg.iValidLen[GROUND_STATION]  = 5;
+    g_tFPGACfg.FPGAReg[GROUND_STATION][1].usValue = 1;
+    g_tFPGACfg.iValidLen[GROUND_STATION]  = 0;
 
 
 
@@ -94,8 +94,8 @@ void InitFPGAReg( void )
 
 
     g_tFPGACfg.FPGAReg[AIR_STATION][0].uiAddr = 0;
-    g_tFPGACfg.FPGAReg[AIR_STATION][1].iValue = 1;
-    g_tFPGACfg.iValidLen[AIR_STATION]  = 8;
+    g_tFPGACfg.FPGAReg[AIR_STATION][1].usValue = 1;
+    g_tFPGACfg.iValidLen[AIR_STATION]  = 0;
 
 
 	
@@ -114,22 +114,20 @@ void InitFPGAReg( void )
 void InitFPGA( const Int iAirorGround )
 {
     Int iLoop;
-    UInt uiTmp;
-    Int iTmp;
+    UInt32 *puiTmp;
+    Int16 sTmp;
     Int iLen;
 	
     InitFPGAReg();
     iLen =  g_tFPGACfg.iValidLen[iAirorGround];
     for( iLoop = 0; iLoop < iLen; iLoop++ )
     {
-        uiTmp = g_tFPGACfg.FPGAReg[iAirorGround][iLoop].uiAddr;
-	 iTmp = g_tFPGACfg.FPGAReg[iAirorGround][iLoop].iValue;	
+        puiTmp = ( UInt32 * )g_tFPGACfg.FPGAReg[iAirorGround][iLoop].uiAddr;
+	 sTmp = g_tFPGACfg.FPGAReg[iAirorGround][iLoop].usValue;	
 
         //configure FPGA by EMIF
-	 
+	 SetFpgaReg( puiTmp, sTmp );
     }
 		
     return ;
 }
-
-

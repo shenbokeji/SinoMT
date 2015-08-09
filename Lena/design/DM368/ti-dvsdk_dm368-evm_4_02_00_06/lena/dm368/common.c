@@ -10,7 +10,8 @@
  * feller	1.0		20150728	create         
  *----------------------------------------------------------------------------
 */
-
+#include <sys/mman.h>
+#include <fcntl.h>
 #include "common.h"
 
 /******************************************************************************
@@ -52,16 +53,36 @@ Int GetAirGroundStationFlag()
     return iAirorGround;
 }
  /*--------------------------------------------------------------------------
- * function		: InitMmapAddress
- * 				  initialize the mmap address 
- * output 		: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
+ * name			: InitMmapAddress
+ * function		:  initialize the mmap address 
+ * output 		:
  * author	version		date		note
- * feller	1.0		20150801	
+ * feller	1.0		20150807	
  *----------------------------------------------------------------------------
 */
-Int InitMmapAddress(  const Int iAirorGround  )
+Int InitMmapAddress( void  )
  {
+
+    Int32 fd = -1;
  
-     return 0 ;
+    fd = open( DEV_MEM_MMAP, O_RDWR | O_CREAT );	 
+    if( fd < 0)
+    {
+        exit( 1 );
+    }
+
+    g_uiRegBaseAddr=( UInt32 )mmap( 
+	 	( void * )EMIF_BASE_ADDRESS, 
+	 	LINUX_PAGE_SIZE,
+	 	PROT_READ | PROT_WRITE,
+	 	MAP_SHARED,
+	 	fd,  
+	 	0);
+    if( MAP_FAILED == ( void* )g_uiRegBaseAddr )
+    {
+        close( fd );
+        exit( 0 );
+    }
+    return 0 ;
  }
  
