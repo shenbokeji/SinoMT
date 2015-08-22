@@ -336,7 +336,7 @@ Int main(Int argc, Char *argv[])
     /* Set the priority of this whole process to max (requires root) */
     setpriority(PRIO_PROCESS, 0, -20);
     //mmap the physical address to virtual address
-    status = InitMmapAddress( AIR_STATION );
+    status = InitMmapAddress(  );
     if( 0 != status )
     {
         ERR("******Encoder Failed InitMmapAddress******\n");

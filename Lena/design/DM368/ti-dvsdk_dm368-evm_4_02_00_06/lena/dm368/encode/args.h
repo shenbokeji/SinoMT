@@ -38,8 +38,8 @@ typedef struct Args {
     Int            keyboard;
     Int            time;
     Int            osd;
-    Bool           previewDisabled;
-    Bool           writeDisabled;	
+    Bool           previewDisabled;//FALSE:preview enabled ; TRUE:preview disabled
+    Bool           writeDisabled;//FALSE:write enabled ; TRUE:write disabled	
 } Args;
 
 /*****************macro definition*****************/
@@ -60,7 +60,7 @@ typedef struct Args {
       FALSE,\
       FOREVER,\
       FALSE,\
-      FALSE,\
+      TRUE,\
       FALSE}
 
 /* Add argument number x of string y */

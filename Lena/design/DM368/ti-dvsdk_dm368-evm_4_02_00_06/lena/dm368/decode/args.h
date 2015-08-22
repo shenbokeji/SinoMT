@@ -51,11 +51,7 @@ typedef struct Args {
     Display_Output displayOutput;
     VideoStd_Type  videoStd;
     Char          *videoStdString;
-   // Char          *speechFile;
-   // Char          *audioFile;
     Char          *videoFile;
-    //Codec         *audioDecoder;
-   // Codec         *speechDecoder;
     Codec         *videoDecoder;
     Int            loop;
     Int            keyboard;
