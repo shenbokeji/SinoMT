@@ -1,3 +1,0 @@
-git add *
-git commit ¨Cm ¡°XX¡± 
-git push ¨Cu  origin master
