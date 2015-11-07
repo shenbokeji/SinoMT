@@ -316,8 +316,20 @@ cleanup:
 
 Int main(Int argc, Char *argv[])
 {
-    Args                args                = DEFAULT_ARGS;
-    Int                 status              = EXIT_SUCCESS;	
+    Args args = DEFAULT_ARGS;
+    Int status = EXIT_SUCCESS;	
+	Int	iReturn;				
+	iReturn = ushell_init();
+	if( 0 == iReturn )
+	{
+		printf( "\nushell_init ok (~!~)\n" );
+	}
+	else
+	{
+		printf( "\nushell_init error\n" );
+		return 0;
+	}
+#if 0	
     //Get the Air or Ground Station flag
     GetAirGroundStationFlag();
 
@@ -354,6 +366,7 @@ Int main(Int argc, Char *argv[])
 
     //Initialize the air station video process,include capture/encode/write pthread
     status = InitAirVideoProcess( &args );
+#endif
 cleanup:    
 	
     return 0;

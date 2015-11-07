@@ -46,7 +46,7 @@
 #include "ctrl.h"
 #include "FPGA.h"
 #include "AD9363.h"
-
+#include "../ushellagent.h"
 //This is the air and ground station flag, configured by GPIO29 pin u2
 #define AIR_STATION (1)
 #define GROUND_STATION (0)

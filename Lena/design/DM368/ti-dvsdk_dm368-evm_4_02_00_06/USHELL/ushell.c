@@ -55,7 +55,7 @@
 
 #define   SIGTASKWAKUP               (SIGRTMAX-1)       /* »½ÐÑfifo thread select*/
 
-#define  PASSWORD "zte"
+#define  PASSWORD "lena"
 
 #define  TRYLOGINNUM 3
 

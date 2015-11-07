@@ -69,7 +69,6 @@ CONFIGURO = $(XDC_INSTALL_DIR)/xs xdc.tools.configuro
 CONFIG_BLD = ../../config.bld
 
 C_FLAGS += -Wall -g
-
 LD_FLAGS += -L$(LINUXLIBS_INSTALL_DIR)/lib -lpthread -lasound
 
 COMPILE.c = $(VERBOSE) $(CSTOOL_PREFIX)gcc $(CPP_FLAGS) $(C_FLAGS) $(CPP_FLAGS) -c
@@ -100,7 +99,7 @@ install_$(TARGET):
 $(TARGET):	$(OBJFILES) $(XDC_LFILE)
 	@echo
 	@echo Linking $@ from $^..
-	$(LINK.c) -o $@ $^ 
+	$(LINK.c) -o $@ $^ $(USHELLAGENT_LIB)
 
 $(OBJFILES):	%.o: %.c $(HEADERS) $(XDC_CFLAGS)
 	@echo Compiling $@ from $<..

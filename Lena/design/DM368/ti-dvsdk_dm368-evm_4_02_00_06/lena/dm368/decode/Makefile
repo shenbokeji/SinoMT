@@ -100,7 +100,7 @@ install_$(TARGET):
 $(TARGET):	$(OBJFILES) $(XDC_LFILE)
 	@echo
 	@echo Linking $@ from $^..
-	$(LINK.c) -o $@ $^ 
+	$(LINK.c) -o $@ $^ $(USHELLAGENT_LIB)
 
 $(OBJFILES):	%.o: %.c $(HEADERS) $(XDC_CFLAGS)
 	@echo Compiling $@ from $<..

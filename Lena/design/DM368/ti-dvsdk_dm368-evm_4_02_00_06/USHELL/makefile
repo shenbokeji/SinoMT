@@ -1,4 +1,4 @@
-TOOLPATH = /opt/arm-2009q1-203/bin
+TOOLPATH = /opt/arm-2009q1/bin
 CC = $(TOOLPATH)/arm-none-linux-gnueabi-gcc
 
 ARM9:ushell.c

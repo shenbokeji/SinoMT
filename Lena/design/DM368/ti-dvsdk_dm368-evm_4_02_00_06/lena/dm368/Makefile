@@ -47,7 +47,7 @@ endif
 
 .PHONY: install clean $(SUBDIRS) $(INSTALLSUBDIRS) $(CLEANSUBDIRS) decode encode
 
-all:	decode encode 
+all:	decode encode
 
 decode:
 	@echo
