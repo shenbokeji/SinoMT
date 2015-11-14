@@ -72,7 +72,7 @@ C_FLAGS += -Wall -g
 LD_FLAGS += -L$(LINUXLIBS_INSTALL_DIR)/lib -lpthread -lasound
 
 COMPILE.c = $(VERBOSE) $(CSTOOL_PREFIX)gcc $(CPP_FLAGS) $(C_FLAGS) $(CPP_FLAGS) -c
-LINK.c = $(VERBOSE) $(CSTOOL_PREFIX)gcc $(LD_FLAGS)
+LINK.c = $(VERBOSE) $(CSTOOL_PREFIX)gcc $(LD_FLAGS) 
 
 SOURCES = $(wildcard *.c) $(wildcard ../*.c)
 HEADERS = $(wildcard *.h) $(wildcard ../*.h)

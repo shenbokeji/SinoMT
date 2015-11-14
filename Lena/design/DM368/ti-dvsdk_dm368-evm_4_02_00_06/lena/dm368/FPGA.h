@@ -44,6 +44,13 @@ typedef struct FPGACfgStruct{
 #define EMIF_BASE_ADDRESS (0X2000000)
 #define LINUX_PAGE_SIZE (0X1000)
 #define DEV_MEM_MMAP "dev/mem/"
+
+#define EMIF_FPGA_START_ADDR (0x600)
+#define EMIF_FPGA_END_ADDR (0x700)
+#define EMIF_FPGA_RAM_ADDR (0xC0)
+#define EMIF_FPGA_SAMP_EN_ADDR (0x610)
+#define FPGA_ADDR_VALID(a) ( ( a > EMIF_FPGA_END_ADDR ) || ( a < EMIF_FPGA_START_ADDR ) )
+
 /*****************extern function declaration*****************/
 extern void InitFPGA( const Int iAirorGround );
 extern UInt16 GetFpgaReg( const UInt32 * const uiAddr );

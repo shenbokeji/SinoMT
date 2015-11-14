@@ -367,6 +367,10 @@ Int main(Int argc, Char *argv[])
     //Initialize the air station video process,include capture/encode/write pthread
     status = InitAirVideoProcess( &args );
 #endif
+	while(1)
+	{
+		sleep(1);
+	}
 cleanup:    
 	
     return 0;

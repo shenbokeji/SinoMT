@@ -24,6 +24,10 @@ typedef struct AD9363CfgStruct{
     Int iValidLen[2];
 } tAD9363Cfg;
 
+/*****************macro definition*****************/
+
+#define AD9363_REG_END_ADDR (0x3FE)
+#define AD9363_ADDR_VALID(a) ( a > AD9363_REG_END_ADDR ) 
 
 /*****************extern function declaration*****************/
 extern void InitAD9363( const Int iAirorGround );
