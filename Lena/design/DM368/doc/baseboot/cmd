@@ -1,0 +1,11 @@
+1) Load a UBL or small UBL-like application to the DM36x IRAM
+	
+	slh_DM36x.exe -load2IRAM <UBL binary file>
+	
+2) Load a larger image compiled to run at start of DDR space 
+	
+	slh_DM36x.exe -load2DDR <binary application file>
+
+
+	slh_DM36x.exe -load2IRAM ubl_DM36x_spi.bin  -startAddr 0x100
+	slh_DM36x.exe -load2DDR  u-boot.bin
