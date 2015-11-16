@@ -419,10 +419,10 @@ int do_fpga_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	return 0;
 }
 
-
 U_BOOT_CMD(
 	updatefpga,	1,	0,	do_fpga_update,
-	"update fpga version form pc by UART"
+	"update fpga version form pc by UART",
+	"no parameter"
 );
 
 int do_fpga_load( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
@@ -442,7 +442,8 @@ int do_fpga_load( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 U_BOOT_CMD(
 	loadfpga,	1,	0,	do_fpga_load,
-	"load fpga from flash"
+	"load fpga from flash",
+	"no parameter"
 );
 
 int do_uboot_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
@@ -468,5 +469,6 @@ int do_uboot_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 U_BOOT_CMD(
 	updateuboot,	1,	0,	do_uboot_update,
-	"update u-boot from pc by UART"
+	"update u-boot from pc by UART",
+	"no parameter"
 );
