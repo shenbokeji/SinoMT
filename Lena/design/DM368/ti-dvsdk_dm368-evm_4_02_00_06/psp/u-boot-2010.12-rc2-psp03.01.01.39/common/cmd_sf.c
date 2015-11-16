@@ -11,7 +11,7 @@
 #include <asm/io.h>
 
 #ifndef CONFIG_SF_DEFAULT_SPEED
-# define CONFIG_SF_DEFAULT_SPEED	1000000
+# define CONFIG_SF_DEFAULT_SPEED	42500000
 #endif
 #ifndef CONFIG_SF_DEFAULT_MODE
 # define CONFIG_SF_DEFAULT_MODE		SPI_MODE_3
@@ -190,4 +190,42 @@ U_BOOT_CMD(
 	"sf write addr offset len	- write `len' bytes from memory\n"
 	"				  at `addr' to flash at `offset'\n"
 	"sf erase offset len		- erase `len' bytes from `offset'"
+);
+
+int do_ubl_write ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	char buf[128];
+	ulong	num, dir, data;
+	ulong *p=NULL;
+
+	p = (ulong *)0x84000000;
+	*p++ =0xA1ACED00;
+	*p++=0x100;
+	*p++=0x02000;
+	*p++=0x07f;
+	*p++=0x40000;
+	*p++=0x20;
+
+	run_command("sf probe 0:0 42500000",0);
+	udelay(500000);
+	run_command("sf erase 0x0 0x80000",0);
+	udelay(500000);
+	run_command("sf write 0x84000000 0x0 0x18",0);
+	udelay(500000);
+
+	run_command("loady 0x85000000",0);
+	udelay(500000);
+	run_command("sf write 0x85000000 0x40000 0x2000",0);
+	udelay(500000);	
+
+	printf("UBL write into SPI FLASH OK!!\n",num,dir);
+	
+	return 0;
+}
+
+
+U_BOOT_CMD(
+	ubl,	1,	0,	do_ubl_write,
+	"ubl flash write (fill)",
+	"[.b, .w, .l] address value [count]"
 );

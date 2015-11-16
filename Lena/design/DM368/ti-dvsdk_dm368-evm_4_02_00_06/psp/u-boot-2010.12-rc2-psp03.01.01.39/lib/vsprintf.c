@@ -39,10 +39,11 @@ static inline char *pack_hex_byte(char *buf, u8 byte)
 unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
 {
 	unsigned long result = 0,value;
-
+	unsigned int uiFlag = 0 ;
 	if (*cp == '0') {
 		cp++;
-		if ((*cp == 'x') && isxdigit(cp[1])) {
+		uiFlag = ( (*cp == 'x') || (*cp == 'X') ) && isxdigit(cp[1]);
+		if ( uiFlag ) {
 			base = 16;
 			cp++;
 		}

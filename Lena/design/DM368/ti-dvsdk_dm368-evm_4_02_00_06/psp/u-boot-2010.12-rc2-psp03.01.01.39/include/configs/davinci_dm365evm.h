@@ -24,7 +24,7 @@
 #define DAVINCI_DM365EVM
 
 #define CONFIG_SKIP_LOWLEVEL_INIT	/* U-Boot is a 3rd stage loader */
-//#define CONFIG_SYS_NO_FLASH		/* that is, no *NOR* flash */
+#define CONFIG_SYS_NO_FLASH		/* that is, no *NOR* flash */
 #define CONFIG_SYS_CONSOLE_INFO_QUIET
 #define	CONFIG_DISPLAY_CPUINFO
 
@@ -38,8 +38,8 @@
 /* Memory Info */
 #define CONFIG_NR_DRAM_BANKS		1
 #define PHYS_SDRAM_1			0x80000000
-#define PHYS_SDRAM_1_SIZE		(256 << 20)	/* 128 MiB */
-#define CONFIG_MAX_RAM_BANK_SIZE	(256 << 20)	/* Max supported */
+#define PHYS_SDRAM_1_SIZE		(64<< 20)	/* 128 MiB */
+#define CONFIG_MAX_RAM_BANK_SIZE	(64 << 20)	/* Max supported */
 
 /* Serial Driver info: UART0 for console  */
 #define CONFIG_SYS_NS16550
@@ -47,7 +47,7 @@
 #define CONFIG_SYS_NS16550_REG_SIZE	-4
 #define CONFIG_SYS_NS16550_COM1		0x01c20000
 #define CONFIG_SYS_NS16550_CLK		CONFIG_SYS_HZ_CLOCK
-#define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200 }
+#define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200, 230400 }
 #define CONFIG_CONS_INDEX		1
 #define CONFIG_BAUDRATE			115200
 
@@ -75,28 +75,21 @@
 #define CONFIG_SYS_I2C_SPEED		400000
 #define CONFIG_SYS_I2C_SLAVE		0x10	/* SMBus host address */
 
-#if 0
+/*
+ * FPGA memory timing
+ */
 
-/* NAND: socketed, two chipselects, normally 2 GBytes */
-#define CONFIG_NAND_DAVINCI
-#define CONFIG_SYS_NAND_CS		2
-#define CONFIG_SYS_NAND_USE_FLASH_BBT
-#define CONFIG_SYS_NAND_4BIT_HW_ECC_OOBFIRST
-#define CONFIG_SYS_NAND_PAGE_2K
+#define CONFIG_SYS_DM368_CS2CFG	(	\
+	DAVINCI_ABCR_WSETUP(2) |	\
+	DAVINCI_ABCR_WSTROBE(5)	|	\
+	DAVINCI_ABCR_WHOLD(3) |		\
+	DAVINCI_ABCR_RSETUP(1) |	\
+	DAVINCI_ABCR_RSTROBE(14) |	\
+	DAVINCI_ABCR_RHOLD(0) |		\
+	DAVINCI_ABCR_TA(3) |		\
+	DAVINCI_ABCR_ASIZE_16BIT)
 
-#define CONFIG_SYS_NAND_LARGEPAGE
-#define CONFIG_SYS_NAND_BASE_LIST	{ 0x02000000, }
-/* socket has two chipselects, nCE0 gated by address BIT(14) */
-#define CONFIG_SYS_MAX_NAND_DEVICE	1
-#define CONFIG_SYS_NAND_MAX_CHIPS	2
-
-/* SD/MMC */
-#define CONFIG_MMC
-#define CONFIG_GENERIC_MMC
-#define CONFIG_DAVINCI_MMC
-#define CONFIG_DAVINCI_MMC_SD1
-#define CONFIG_MMC_MBLOCK
-#endif
+/* FPGA single device connected to CS2  */
 
 #define PINMUX4_USBDRVBUS_BITCLEAR       0x3000
 #define PINMUX4_USBDRVBUS_BITSET         0x2000
@@ -139,9 +132,9 @@
 /* U-Boot command configuration */
 #include <config_cmd_default.h>
 
-#undef CONFIG_CMD_BDI
+//#undef CONFIG_CMD_BDI
 #undef CONFIG_CMD_FLASH
-#undef CONFIG_CMD_FPGA
+//#undef CONFIG_CMD_FPGA
 #undef CONFIG_CMD_SETGETDCR
 
 #define CONFIG_CMD_ASKENV
@@ -150,12 +143,7 @@
 //#define CONFIG_CMD_PING
 #define CONFIG_CMD_SAVES
 
-#ifdef CONFIG_MMC
-#define CONFIG_DOS_PARTITION
-#define CONFIG_CMD_EXT2
-#define CONFIG_CMD_FAT
-#define CONFIG_CMD_MMC
-#endif
+//#undef CONFIG_SPI
 
 #define CONFIG_SPI
 #ifdef CONFIG_SPI
@@ -165,17 +153,18 @@
 //#define CONFIG_SPI_FLASH_WINBOND
 #define CONFIG_UNI_SLLD
 #define CONFIG_CMD_SF
+#define CONFIG_CMD_SPI
 #define CONFIG_SF_DEFAULT_SPEED	(48000000)
 #define CONFIG_JFFS2_IN_SPI_FLASH
 #endif
 
-#define CONFIG_SPI_ENV
+//#define CONFIG_SPI_ENV
 /* ENV in SPI */
-#if defined(CONFIG_SPI_ENV)
-#undef CONFIG_ENV_IS_NOWHERE
-#define CFG_ENV_IS_IN_SPI_FLASH	1
-#define CONFIG_ENV_IS_IN_SPI_FLASH
-#ifdef CFG_ENV_IS_IN_SPI_FLASH
+#if 1
+#define CONFIG_ENV_IS_NOWHERE
+//#define CFG_ENV_IS_IN_SPI_FLASH	1
+//#define CONFIG_ENV_IS_IN_SPI_FLASH
+
 #define CFG_FLASH_BASE		(0)
 /* env size */
 #define CFG_ENV_SECT_SIZE	(256 * 1024)
@@ -194,7 +183,7 @@
 #define CONFIG_SYS_MAX_FLASH_BANKS (1)
 #define BOOT_FLASH_SIZE  (64*1024*1024)
 #define CFG_MONITOR_BASE (0x0)
-# endif
+
 #endif /* SPI support */
 
 #ifdef CONFIG_NAND_DAVINCI
@@ -212,7 +201,7 @@
 /* U-Boot general configuration */
 #undef CONFIG_USE_IRQ				/* No IRQ/FIQ in U-Boot */
 #define CONFIG_BOOTFILE		"uImage"	/* Boot file name */
-#define CONFIG_SYS_PROMPT	"DM36x EVM # "	/* Monitor Command Prompt */
+#define CONFIG_SYS_PROMPT	"LENA## "	/* Monitor Command Prompt */
 #define CONFIG_SYS_CBSIZE	1024		/* Console I/O Buffer Size  */
 #define CONFIG_SYS_PBSIZE			/* Print buffer size */ \
 		(CONFIG_SYS_CBSIZE + sizeof(CONFIG_SYS_PROMPT) + 16)
@@ -224,26 +213,14 @@
 #define CONFIG_ENV_SIZE		(256 << 10)	/* 256 KiB */
 
 
-#ifdef CONFIG_NAND_DAVINCI
-#define CONFIG_ENV_SIZE		(256 << 10)	/* 256 KiB */
-#define CONFIG_ENV_IS_IN_NAND
-#define CONFIG_ENV_OFFSET	0x3C0000
-#undef CONFIG_ENV_IS_IN_FLASH
-#endif
 
-#if defined(CONFIG_MMC) && !defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_CMD_ENV
-#define CONFIG_ENV_SIZE		(16 << 10)	/* 16 KiB */
-#define CONFIG_ENV_OFFSET	(51 << 9)	/* Sector 51 */
-#define CONFIG_ENV_IS_IN_MMC
-#undef CONFIG_ENV_IS_IN_FLASH
-#endif
+
 
 #define CONFIG_BOOTDELAY	3
-#define CONFIG_BOOTCOMMAND	"if mmc rescan 0; then if fatload mmc 0 0x80600000 boot.scr; then source 0x80600000; else fatload mmc 0 0x80700000 uImage; bootm 80700000; fi; fi"
+#define CONFIG_BOOTCOMMAND	"sf probe 0:0 42500000; sf read 0x80700000 0x500000 0x180000; bootm 0x80700000"
 #define CONFIG_BOOTARGS \
-		"console=ttyS0,115200n8 " \
-		"root=/dev/mmcblk0p2 rw rootwait ip=off"
+		"console=ttyS0,115200n8 rw rdinit=/sbin/init mem=64M" 
+
 
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_VERSION_VARIABLE
@@ -251,8 +228,8 @@
 
 /* U-Boot memory configuration */
 #define CONFIG_STACKSIZE		(256 << 10)	/* 256 KiB */
-#define CONFIG_SYS_MALLOC_LEN		(1 << 20)	/* 1 MiB */
-#define CONFIG_SYS_MEMTEST_START	0x87000000	/* physical address */
+#define CONFIG_SYS_MALLOC_LEN		(5 << 20)	/* 1 MiB */
+#define CONFIG_SYS_MEMTEST_START	0x84000000	/* physical address */
 #define CONFIG_SYS_MEMTEST_END		0x88000000	/* test 16MB RAM */
 
 /* Linux interfacing */
@@ -285,7 +262,7 @@
 #define MTDPARTS_DEFAULT	\
 	"mtdparts=davinci_nand.0:" PART_BOOT PART_KERNEL PART_REST
 
-#define CONFIG_MAX_RAM_BANK_SIZE	(256 << 20)	/* 256 MB */
+#define CONFIG_MAX_RAM_BANK_SIZE	(64 << 20)	/* 256 MB */
 
 #define CONFIG_SYS_SDRAM_BASE		PHYS_SDRAM_1
 #define CONFIG_SYS_INIT_SP_ADDR		\

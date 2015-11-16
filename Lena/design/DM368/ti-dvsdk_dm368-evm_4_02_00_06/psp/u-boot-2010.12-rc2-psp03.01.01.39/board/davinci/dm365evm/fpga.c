@@ -66,11 +66,14 @@ int dm365_init_fpga(void)
 	/* Configure PINMUX 3 to enable FPGA pins */
 	writel((readl(PINMUX3) & 0xFFFFF81F), PINMUX3);
 
+	
+	writel(0x04222385, DAVINCI_ASYNC_EMIF_CNTRL_BASE+0x10);
+
 	/* set up outputs */
 	gpio_direction_output(GPIO_DCLK,  0);
 	gpio_direction_output(GPIO_nCONFIG, 0);
 	gpio_direction_output(GPIO_DATA0, 0);
-
+	gpio_direction_output(GPIO_RESET, 1);
 
 	/* NB omap_free_gpio() resets to an input, so we can't
 	 * free ie. nCONFIG, or else the FPGA would reset
@@ -158,7 +161,7 @@ static inline int _write_fpga(u8 byte)
 
 	return 0;
 }
-
+#if 0
 int fpga_wr_fn(const void *buf, size_t len, int flush, int cookie)
 {
 	unsigned char *data = (unsigned char *) buf;
@@ -181,4 +184,69 @@ int fpga_wr_fn(const void *buf, size_t len, int flush, int cookie)
 	fpga_debug("-%s\n", __func__);
 
 	return FPGA_SUCCESS;
+}
+#else 
+
+int fpga_wr_fn(const void *buf, size_t len, int flush, int cookie)
+{
+			unsigned char *data = (unsigned char *) buf;
+			int i;
+			size_t bytecount = 0;
+			//int headerlen = len - cyclone2.size;
+
+		/* Load the data */
+		while (bytecount < len) {
+			unsigned char val=0;
+
+			/* Altera detects an error if INIT goes low (active)
+			   while DONE is low (inactive) */
+
+			val = data [bytecount ++ ];
+			i = 8;
+			do {
+				#if 0
+				/* Deassert the clock */
+				(*fn->clk) (false, true, cookie);
+				CONFIG_FPGA_DELAY ();
+				/* Write data */
+				//(*fn->data) ((val & 0x01), true, cookie);
+				gpio_set_value(GPIO_DATA0, val & 0x01);
+				CONFIG_FPGA_DELAY ();
+				/* Assert the clock */
+				(*fn->clk) (true, true, cookie);
+				CONFIG_FPGA_DELAY ();
+				#else
+				/* Write data */
+				gpio_set_value(GPIO_DATA0, val & 0x01);
+				//udelay(1);
+					/* clock */
+				gpio_set_value(GPIO_DCLK, 1);
+				//udelay(1);
+				gpio_set_value(GPIO_DCLK, 0);
+				//udelay(1);		
+
+				#endif
+				val >>= 1;
+				i --;
+			} while (i > 0);
+
+#if 1
+			if (bytecount % (len / 40) == 0)
+				putc ('.');		/* let them know we are alive */
+#endif
+		}
+
+		return FPGA_SUCCESS;
+}
+#endif
+
+int dm365_reset_fpga(void)
+{
+	gpio_set_value(GPIO_RESET, 1);
+	udelay(500);
+	gpio_set_value(GPIO_RESET, 0);
+	udelay(500);
+	gpio_set_value(GPIO_RESET, 1);
+	return 0;
+
 }

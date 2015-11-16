@@ -465,6 +465,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 
 #ifdef CONFIG_SERIAL_MULTI
 	serial_initialize();
+	printf("%s:%d\n",__FUNCTION__,__LINE__);
 #endif
 
 	debug ("Now running in RAM - U-Boot at: %08lx\n", dest_addr);

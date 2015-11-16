@@ -217,13 +217,9 @@ unsigned long flash_init (void)
     struct spi_flash * ptspiflash = NULL;
     unsigned long ulsize = 0;
 
-#ifdef CONFIG_ZX2114XX
-    ptspiflash = spi_flash_probe(0, 0,48000000, SPI_MODE_3);
-#else
-    ptspiflash = spi_flash_probe(0, 0,48000000, SPI_MODE_3);
-#endif
 
-    
+    ptspiflash = spi_flash_probe(0, 0,42500000, SPI_MODE_3);
+
     if(NULL == ptspiflash)
     {
         error("\nspi_flash_probe failed!\n");
@@ -474,7 +470,7 @@ static int sf_wait_ready(struct spi_flash *flash, unsigned long timeout)
 			break;
 	} while (get_timer(timebase) < timeout);
 
-    sf_cmd(spi, 0x70, &status_flag, sizeof(status_flag),uldummy);
+    //sf_cmd(spi, 0x70, &status_flag, sizeof(status_flag),uldummy);
     // printf("status_flag:0x%x.\n",status);
 	if ((status & (1<<(ulwribitoffset))) == 0)
 		return  BSP_OK;
@@ -1106,7 +1102,7 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,unsigned int
 
     s_bus = bus;
 	s_cs = cs;
-	s_max_hz = max_hz;
+	s_max_hz = 42500000;
 	s_spi_mode = spi_mode;
 	
     /*5.根据spi slave初始化spi host */

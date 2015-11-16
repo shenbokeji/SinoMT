@@ -36,6 +36,8 @@
 
 #include <u-boot/md5.h>
 #include <sha1.h>
+#include <asm/arch/gpio_defs.h>
+
 
 #ifdef	CMD_MEM_DEBUG
 #define	PRINTF(fmt,args...)	printf (fmt ,##args)
@@ -1352,3 +1354,199 @@ U_BOOT_CMD(
 	"srcaddr dstaddr [dstsize]"
 );
 #endif /* CONFIG_CMD_UNZIP */
+
+int do_gpio_op ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	ulong	num, dir, data;
+
+	if ( argc > 4 || argc < 3)
+		return cmd_usage(cmdtp);
+
+	/* Address is specified since argc > 1
+	*/
+	num = simple_strtoul(argv[1], NULL, 16);
+
+	if( num > MAX_NUM_GPIOS ) return cmd_usage(cmdtp);
+
+	/* Get the dir to write.
+	*/
+	dir = simple_strtoul(argv[2], NULL, 16);
+
+	if( 0 == dir )  
+	{
+		data = simple_strtoul(argv[3], NULL, 16);
+		gpio_direction_output(num,  data);
+		printf("IO %d set %x  Done!\n",num,data);
+	}
+	else if( 1 == dir ) 
+	{
+		gpio_direction_input(num);
+		printf("IO %d get Done! value=%x\n",num,gpio_get_value(num));
+	}
+	else printf("IO %d dir %x Error!!\n",num,dir);
+	
+	return 0;
+}
+
+
+U_BOOT_CMD(
+	gpio,	4,	1,	do_gpio_op,
+	"GPIO direction and set value command",
+	"GPIO direction value\n"
+	"<number> GPIO numbe\n"
+	"<direction> GPIO direction\n"	
+	"<value> GPIO value\n"
+);
+
+  #define EDMA_CHA_CNT         64
+  #define EDMA_BASE_PRAM       0x01C04000u
+  #define EDMA_PRAM_START      EDMA_BASE_PRAM
+  #define EDMA_PRAM_SIZE       0x00001000u
+  #define EDMA_PRAM_SIZE_ERASE        0x00001400u
+  #define EDMA_PRAM_ERASE      0x00000200u
+
+
+  #define EDMA_ENTRY_SIZE      0x00000020u
+  #define EDMA_LINK_START      (EDMA_PRAM_START+EDMA_ENTRY_SIZE*EDMA_CHA_CNT)
+  #define EDMA_LINK_CNT          64
+
+
+#define _EDMA_OPT_OFFSET			 0
+#define _EDMA_SRC_OFFSET			 1
+#define _EDMA_ABCNT_OFFSET		 2
+#define _EDMA_DST_OFFSET			 3
+#define _EDMA_BIDX_OFFSET			 4
+#define _EDMA_BCNTLINK_OFFSET	 	 5
+#define _EDMA_CIDX_OFFSET			 6
+#define _EDMA_CCNT_OFFSET	 		 7
+
+
+
+
+#define EDMACC_ESR_ADDR              ( 0x01c01010 ) /* reg address: Event Set Register            */
+
+#define EDMACC_EER_ADDR              ( 0x01c01020 ) /* reg address: Event Enable Register            */
+#define EDMACC_EERH_ADDR             ( 0x01c01024 ) /* reg address: Event Enable Register High            */
+#define EDMACC_EECR_ADDR              ( 0x01c01028 ) /* reg address: Event Enable Clear  Register           */
+#define EDMACC_EECRH_ADDR           ( 0x01c0102C ) /* reg address: Event Enable Clear  Register High           */
+#define EDMACC_EESR_ADDR            ( 0x01C01030 ) /* reg address: Event Enable Set  Register          */
+#define EDMACC_EESRH_ADDR          ( 0x01C01034 ) /* reg address: Event Enable Set Register High       */
+#define EDMACC_SER_ADDR              ( 0x01c01038 ) /* reg address: Secondary Event Register            */
+#define EDMACC_SERH_ADDR             ( 0x01c0103C ) /* reg address: Secondary Event Register High            */
+#define EDMACC_SECR_ADDR              ( 0x01c01040 ) /* reg address: Secondary Event Clear Register           */
+#define EDMACC_SECRH_ADDR           ( 0x01c01044 ) /* reg address: Secondary Event Clear Register High           */
+
+#define EDMACC_IER_ADDR              ( 0x01c01050 ) /* reg address: Interrupt Enable Register            */
+#define EDMACC_IERH_ADDR             ( 0x01c01054 ) /* reg address: Interrupt Enable Register High            */
+#define EDMACC_IECR_ADDR              ( 0x01c01058 ) /* reg address: Interrupt Clear Enable Register           */
+#define EDMACC_IECRH_ADDR           ( 0x01c0105C ) /* reg address: Interrupt Clear Enable Register High           */
+#define EDMACC_IESR_ADDR            ( 0x01C01060 ) /* reg address: Interrupt Enable Set  Register          */
+#define EDMACC_IESRH_ADDR          ( 0x01C01064 ) /* reg address: Interrupt Enable Set Register High       */
+#define EDMACC_IPR_ADDR            ( 0x01C01068 ) /* reg address: Interrupt  Pending  Register          */
+#define EDMACC_IPRH_ADDR          ( 0x01C0106C ) /* reg address: Interrupt  Pending Register High       */
+#define EDMACC_ICR_ADDR            ( 0x01C01070 ) /* reg address: Interrupt  Clear  Register          */
+#define EDMACC_ICRH_ADDR          ( 0x01C01074 ) /* reg address: Interrupt  Clear Register High       */
+#define EDMACC_IEVAL_ADDR          ( 0x01C01078 ) /* reg address: Interrupt Evaluate Register       */
+
+#define IO_WRITE(addr, val) (*(volatile unsigned int *)(addr) = (val))
+#define IO_READ(addr) (*(volatile unsigned int *)(addr))
+
+typedef struct {
+  unsigned int opt;
+  unsigned int src;
+  unsigned short acnt;
+  unsigned short bcnt;
+  unsigned int dst;
+  short srcbidx;	  
+  short dstbidx;  
+  unsigned short link;	  
+  unsigned short bcntrld;  
+  short srccidx;	  
+  short dstcidx;  
+  unsigned short ccnt;	
+  unsigned short resv; 
+
+} EDMA_Config;
+
+static inline void EDMA_config(unsigned char channel_num, EDMA_Config *config) 
+{
+  volatile unsigned int *base;
+
+  base = (volatile unsigned int *)(channel_num*EDMA_ENTRY_SIZE+EDMA_PRAM_START);
+  base[_EDMA_OPT_OFFSET] = 0x00000000;
+  base[_EDMA_SRC_OFFSET] = config->src;
+  base[_EDMA_ABCNT_OFFSET] = (config->acnt)|((config->bcnt)<<16);
+  base[_EDMA_DST_OFFSET] = config->dst;
+  base[_EDMA_BIDX_OFFSET] = (config->srcbidx)|((config->dstbidx)<<16);
+  base[_EDMA_BCNTLINK_OFFSET] = (config->link)|((config->bcntrld)<<16);
+  base[_EDMA_CIDX_OFFSET] = (config->srccidx)|((config->dstcidx)<<16);
+  base[_EDMA_CCNT_OFFSET] = config->ccnt;
+  base[_EDMA_OPT_OFFSET] = config->opt;
+
+}
+
+int do_dma_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	ulong	addr, dest, count;
+	int	size;
+	EDMA_Config image_transfer;
+
+	if (argc != 4)
+		return cmd_usage(cmdtp);
+
+	/* Check for size specification.
+	*/
+	if ((size = cmd_get_data_size(argv[0], 4)) < 0)
+		return 1;
+
+	addr = simple_strtoul(argv[1], NULL, 16);
+	addr += base_address;
+
+	dest = simple_strtoul(argv[2], NULL, 16);
+	dest += base_address;
+
+	count = simple_strtoul(argv[3], NULL, 16);
+
+	if (count == 0) {
+		puts ("Zero length ???\n");
+		return 1;
+	}
+
+	
+	//hEdma=_EDMA_MK_HANDLE(10*_EDMA_ENTRY_SIZE,EDMA_RSV6,_EDMA_TYPE_C);
+	
+	{
+		image_transfer.opt=0x0010A00C;
+		image_transfer.src=addr;
+		image_transfer.acnt=size;
+		image_transfer.bcnt=count/size;
+		image_transfer.dst=dest;
+		image_transfer.srcbidx=size;
+		image_transfer.dstbidx=size;
+		image_transfer.link=0xffff;
+		image_transfer.bcntrld=0x0;
+		image_transfer.srccidx=0x0;
+		image_transfer.dstcidx=0x0;
+		image_transfer.ccnt=0x01;
+
+	}			
+		
+	EDMA_config(10, &image_transfer);
+
+	//EDMA_enableChannel(10);                        //EESR
+	IO_WRITE(EDMACC_EESR_ADDR, 1<<10);
+	//EDMA_setChannel(10);                              //ESR
+	IO_WRITE(EDMACC_ESR_ADDR, 1<<10);
+
+	while((IO_READ(EDMACC_IPR_ADDR)&(1<<10)) ==0);
+	IO_WRITE(EDMACC_ICR_ADDR, 1<<10);	
+
+	return 0;
+
+}
+
+U_BOOT_CMD(
+	dmacp,	4,	1,	do_dma_cp,
+	"memory copy with dma",
+	"[.b, .w, .l] source target count"
+);

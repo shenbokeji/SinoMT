@@ -118,7 +118,7 @@ int saveenv(void)
 void env_relocate_spec(void)
 {
 	int ret;
-
+printf("%s:%d\n",__FUNCTION__,__LINE__);
 	env_flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
 			CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
 	if (!env_flash)
@@ -141,8 +141,9 @@ err_read:
 err_probe:
 err_crc:
 	puts("using default environment\n\n");
-
+printf("%s:%d\n",__FUNCTION__,__LINE__);
 	set_default_env("!bad CRC");
+printf("%s:%d\n",__FUNCTION__,__LINE__);
 }
 
 int env_init(void)

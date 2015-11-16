@@ -111,7 +111,7 @@ void __udelay(unsigned long usec)
 {
 	unsigned long long endtime;
 
-	endtime = ((unsigned long long)usec * gd->timer_rate_hz) / 1000000UL;
+	endtime = ((unsigned long long)usec * 24) / TIM_CLK_DIV;
 	endtime += get_ticks();
 
 	while (get_ticks() < endtime)

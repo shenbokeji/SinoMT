@@ -196,7 +196,7 @@ static int CYC2_ps_load (Altera_desc * desc, void *buf, size_t bsize)
 	} else {
 		printf ("%s: NULL Interface function table!\n", __FUNCTION__);
 	}
-
+	dm365_reset_fpga();
 	return ret_val;
 }
 

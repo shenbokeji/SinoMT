@@ -212,7 +212,7 @@ int stdio_init (void)
 	drv_arm_dcc_init ();
 #endif
 #if defined(CONFIG_HARD_I2C) || defined(CONFIG_SOFT_I2C)
-	i2c_init (CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
+	//i2c_init (CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
 #endif
 #ifdef CONFIG_LCD
 	drv_lcd_init ();
@@ -229,6 +229,7 @@ int stdio_init (void)
 	drv_system_init ();
 #ifdef CONFIG_SERIAL_MULTI
 	serial_stdio_init ();
+printf("%s:%d\n",__FUNCTION__,__LINE__);
 #endif
 #ifdef CONFIG_USB_TTY
 	drv_usbtty_init ();

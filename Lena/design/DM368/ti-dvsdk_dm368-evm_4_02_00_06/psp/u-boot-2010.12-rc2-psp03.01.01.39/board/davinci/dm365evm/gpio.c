@@ -50,9 +50,11 @@ int gpio_set_value(unsigned gpio, int value)
 	bank = GPIO_BANK(gpio);
 
 	if (value)
-		bank->set_data = 1U << GPIO_BIT(gpio);
+		//bank->set_data = 1U << GPIO_BIT(gpio);
+		setbits_le32(&bank->out_data, 1U << GPIO_BIT(gpio));
 	else
-		bank->clr_data = 1U << GPIO_BIT(gpio);
+		//bank->clr_data = 1U << GPIO_BIT(gpio);
+		clrbits_le32(&bank->out_data, 1U << GPIO_BIT(gpio));
 
 	return 0;
 }
