@@ -196,7 +196,7 @@ LIBS += arch/$(ARCH)/lib/lib$(ARCH).o
 LIBS += fs/cramfs/libcramfs.o fs/fat/libfat.o fs/fdos/libfdos.o fs/jffs2/libjffs2.o \
 	fs/reiserfs/libreiserfs.o fs/ext2/libext2fs.o fs/yaffs2/libyaffs2.o \
 	fs/ubifs/libubifs.o
-LIBS += net/libnet.o
+##LIBS += net/libnet.o
 LIBS += disk/libdisk.o
 LIBS += drivers/bios_emulator/libatibiosemu.o
 LIBS += drivers/block/libblock.o
@@ -213,9 +213,9 @@ LIBS += drivers/mtd/nand/libnand.o
 LIBS += drivers/mtd/onenand/libonenand.o
 LIBS += drivers/mtd/ubi/libubi.o
 LIBS += drivers/mtd/spi/libspi_flash.o
-LIBS += drivers/net/libnet.o
-LIBS += drivers/net/phy/libphy.o
-LIBS += drivers/pci/libpci.o
+##LIBS += drivers/net/libnet.o
+##LIBS += drivers/net/phy/libphy.o
+##LIBS += drivers/pci/libpci.o
 LIBS += drivers/pcmcia/libpcmcia.o
 LIBS += drivers/power/libpower.o
 LIBS += drivers/spi/libspi.o
