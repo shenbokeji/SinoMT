@@ -95,12 +95,13 @@ static struct fpga_data fpga_transfer_param;
 #define EDMACC_ICRH_ADDR          ( 0x01C01074 ) /* reg address: Interrupt  Clear Register High       */
 #define EDMACC_IEVAL_ADDR          ( 0x01C01078 ) /* reg address: Interrupt Evaluate Register       */
 
+extern void __iomem *fpga;
 #define IO_WRITE(addr, val) (*(volatile unsigned short *)(addr) = (val))
 #define IO_READ(addr) (*(volatile unsigned short *)(addr))
 
-#define WRFPGA( b,addr ) ((*(volatile unsigned short *) ( ( addr << 1 )+ fpga ) ) = (b))
+#define WRFPGA( addr,b ) ((*(volatile unsigned short *) ( ( addr << 1 )+ fpga ) ) = (b))
 #define RDFPGA( addr ) (*(volatile unsigned short *) ( ( addr << 1 ) + fpga ) )
-extern void __iomem *fpga;
+
 typedef struct {
   unsigned int opt;
   unsigned int src;
@@ -207,7 +208,7 @@ static int fpga_close(struct inode *inode, struct file *file)
 ssize_t fpga_read(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
 	copy_from_user(&fpga_reg, buf, count);
-	//fpga_reg.uiValue = (unsigned int)( IO_READ( fpga+ (fpga_reg.uiAddr<<1) ) |0XFFFF ); 
+	//fpga_reg.uiValue = (unsigned int)( IO_READ( fpga+ (fpga_reg.uiAddr<<1) ) & 0XFFFF ); 
 	fpga_reg.uiValue = (unsigned int)RDFPGA( fpga_reg.uiAddr );
 	copy_to_user(buf, &fpga_reg, count); 
 	return count;
@@ -216,10 +217,11 @@ ssize_t fpga_read(struct file *file, const char __user *buf, size_t count, loff_
 
 ssize_t fpga_write(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
-    copy_from_user(&fpga_reg, buf, count);
-    //IO_WRITE(fpga+(unsigned int)(fpga_reg.uiAddr<<1), (unsigned short)(fpga_reg.uiValue |0XFFFF) );   
-    WRFPGA( (unsigned short)( fpga_reg.uiValue | 0XFFFF ), fpga_reg.uiAddr );
-    return count;
+
+    copy_from_user(&fpga_reg, buf, 8);
+    //IO_WRITE(fpga+(unsigned int)(fpga_reg.uiAddr<<1), (unsigned short)(fpga_reg.uiValue & 0XFFFF) );   
+    WRFPGA( fpga_reg.uiAddr, (unsigned short)( fpga_reg.uiValue & 0XFFFF ) );
+    return 8;
 }
 
 
