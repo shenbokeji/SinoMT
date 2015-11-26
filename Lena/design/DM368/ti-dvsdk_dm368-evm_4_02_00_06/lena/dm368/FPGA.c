@@ -14,24 +14,44 @@
 #include "FPGA.h"
 /*****************Global variable for FPGA configure Table*****************/
 tFPGACfg g_tFPGACfg;
-UInt32 g_uiRegBaseAddr = 0;//EMIF FPGA register base address
+//UInt32 g_uiRegBaseAddr = 0;//EMIF FPGA register base address
 /*----------------------------------------------------------------------------
  * name			: GetFpgaReg
- * function 		: Get the fpga reg value 
- * input 			:
+ * function 	: Get the fpga reg value 
+ * input 		:
  * author	version		date		note
  * feller	1.0		20150805
+ * feller   1.0     20151119        I am at home with phyliss
  *----------------------------------------------------------------------------
 */
-UInt16 GetFpgaReg( const UInt32 * const uiAddr )
+Int GetFpgaReg( const UInt32 uiAddr, UInt16 * const pusRdValue )
 {
-    UInt16 usRead;
+	int iRdByteNum;
+	FILE *fid;
+	tFPGAReg tFPGARegTmp;
 
 
-    EMIF_FPGA_READ_UINT16( uiAddr, usRead );
-
-
-    return usRead;
+	tFPGARegTmp.uiAddr = uiAddr;
+	
+	fid = (FILE *)open( DEVICE_FPGA, O_RDONLY | O_RSYNC, 0 );
+	if( fid < 0 )
+	{
+		printf( "ERROR:open failed "DEVICE_FPGA"!\n" );
+		exit(1);
+	}
+	
+	iRdByteNum = read( (int)fid, &tFPGARegTmp, BYTE_EIGHT ); //8 byte for addr and value
+	if( BYTE_EIGHT != iRdByteNum )
+	{
+		printf( "ERROR:Read Byte is not %d "DEVICE_FPGA"!\n", BYTE_EIGHT );
+		exit(1);
+	}
+   	close( (int)fid );
+   	fid = NULL;
+	
+	*pusRdValue = (UInt16)tFPGARegTmp.uiValue;
+		
+    return LENA_OK;
 }
  /*----------------------------------------------------------------------------
  * name			: SetFpgaReg
@@ -41,42 +61,36 @@ UInt16 GetFpgaReg( const UInt32 * const uiAddr )
  * feller	1.0		20150805
  *----------------------------------------------------------------------------
 */
-Int SetFpgaReg( const UInt32 * const uiAddr, const UInt16 usValue )
+Int SetFpgaReg( const UInt32 uiAddr, const UInt16 usValue )
 {
-    UInt16 usRead;
-    Int iErrCnt;
+	Int iWrByteNum;
+	FILE *fid;
+	tFPGAReg tFPGARegTmp;
+
+	tFPGARegTmp.uiAddr = uiAddr;
+	tFPGARegTmp.uiValue = (unsigned int)usValue;
 	
-    while(1)
-    {
-        //set the reg 
-        EMIF_FPGA_WRITE_UINT16( uiAddr, usValue );
-
-        //DelayUsec(50);
-        
-        //get the value again 
-       EMIF_FPGA_READ_UINT16( uiAddr, usRead );
-        // DelayUsec(50);
-
-        if ( usValue != usRead )
-        {
-             iErrCnt++;
-
-             if ( 3 == iErrCnt )
-            {
-                return FPGA_SET_REG_ERROR;/* 错误 */
-            }
-        }
-        else
-        {
-            return LENA_OK;/* 正常 */
-        }
-    }
+	fid = (FILE *)open( DEVICE_FPGA, O_RDONLY | O_RSYNC, 0 );
+	if( fid < 0 )
+	{
+		printf( "ERROR:open failed "DEVICE_FPGA"!\n" );
+		exit(1);
+	}
+	iWrByteNum = write( (int)fid, &tFPGARegTmp, BYTE_EIGHT );
+ 	if( BYTE_EIGHT != iWrByteNum )
+	{
+		printf( "ERROR:Read Byte is not %d "DEVICE_FPGA"!\n", BYTE_EIGHT );
+		exit(1);
+	} 
+	close( (int)fid );
+   	fid = NULL;
+	return LENA_OK;/* 正常 */
 
 }
 
  /*----------------------------------------------------------------------------
  * name			: InitFPGAReg
- * function 		: initialize FPGA Reg addr and value
+ * function 	: initialize FPGA Reg addr and value
  * author	version		date		note
  * feller	1.0		20150729
  *----------------------------------------------------------------------------
@@ -84,7 +98,7 @@ Int SetFpgaReg( const UInt32 * const uiAddr, const UInt16 usValue )
 void InitFPGAReg( void )
 {
     g_tFPGACfg.FPGAReg[GROUND_STATION][0].uiAddr = 0;
-    g_tFPGACfg.FPGAReg[GROUND_STATION][1].usValue = 1;
+    g_tFPGACfg.FPGAReg[GROUND_STATION][1].uiValue = 1;
     g_tFPGACfg.iValidLen[GROUND_STATION]  = 0;
 
 
@@ -94,7 +108,7 @@ void InitFPGAReg( void )
 
 
     g_tFPGACfg.FPGAReg[AIR_STATION][0].uiAddr = 0;
-    g_tFPGACfg.FPGAReg[AIR_STATION][1].usValue = 1;
+    g_tFPGACfg.FPGAReg[AIR_STATION][1].uiValue = 1;
     g_tFPGACfg.iValidLen[AIR_STATION]  = 0;
 
 
@@ -114,20 +128,20 @@ void InitFPGAReg( void )
 void InitFPGA( const Int iAirorGround )
 {
     Int iLoop;
-    UInt32 *puiTmp;
-    Int16 sTmp;
+    UInt32 uiTmp;
+    UInt16 usTmp;
     Int iLen;
 	
-    InitFPGAReg();
     iLen =  g_tFPGACfg.iValidLen[iAirorGround];
     for( iLoop = 0; iLoop < iLen; iLoop++ )
     {
-        puiTmp = ( UInt32 * )g_tFPGACfg.FPGAReg[iAirorGround][iLoop].uiAddr;
-	 sTmp = g_tFPGACfg.FPGAReg[iAirorGround][iLoop].usValue;	
+        uiTmp = g_tFPGACfg.FPGAReg[iAirorGround][iLoop].uiAddr;
+	 	usTmp = (UInt16)g_tFPGACfg.FPGAReg[iAirorGround][iLoop].uiValue;	
 
         //configure FPGA by EMIF
-	 SetFpgaReg( puiTmp, sTmp );
+	 	SetFpgaReg( uiTmp, usTmp );
     }
 		
     return ;
 }
+ 

@@ -14,6 +14,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +26,10 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+
 #include <signal.h>
+#include <fcntl.h>
 
 #include <xdc/std.h>
 
@@ -56,8 +60,11 @@
 #define GROUND_VERSION "GROUND_V0.01.001"
 
 #define LENA_OK (0)
+#define LENA_FALSE (-1)
+
 /*****************system error code *****************/
 #define FPGA_SET_REG_ERROR (0x10010001)
+#define BYTE_EIGHT (8)
 
 /*****************extern function declaration*****************/
 extern Codec *getCodec(Char *extension, Codec *codecs);

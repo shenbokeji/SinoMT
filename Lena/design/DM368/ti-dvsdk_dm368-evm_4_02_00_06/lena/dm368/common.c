@@ -52,6 +52,7 @@ Int GetAirGroundStationFlag()
     
     return iAirorGround;
 }
+ #if 0
  /*--------------------------------------------------------------------------
  * name			: InitMmapAddress
  * function		:  initialize the mmap address 
@@ -85,4 +86,4 @@ Int InitMmapAddress( void  )
     }
     return 0 ;
  }
-
+#endif

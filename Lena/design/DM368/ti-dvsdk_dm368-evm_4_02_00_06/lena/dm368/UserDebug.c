@@ -13,52 +13,72 @@
 
 #include "FPGA.h"
 
- /*--------------------------------------------------------------------------
- * name			: wrfpga
- * function 	: debug function for user
- * input 		:uiAddr:11bit offset address in FPGA, usValue: value 
+ /*----------------------------------------------------------------------------
+ * name		: wrfpga
+ * function	: write FPGA register
+ * input 	: uiAddr:FPGA regiser address 
+ 			  usValue: write value
+ 			  uiFlag: read back flag
  * author	version		date		note
- * feller	1.0		20150809	
+ * feller	1.0		20151016      
  *----------------------------------------------------------------------------
 */
-void wrfpga( const UInt32 uiAddr, const UInt16 usValue )
+void wrfpga(  const UInt32 uiAddr, const UInt16 usValue, const UInt uiFlag ) 
 {
-    // Address left shift 1bit ,please check the EMIF 16bit mode .it is connected with the  UB/LB pin
-    SetFpgaReg( ( UInt32 * )( uiAddr << 1 ), usValue );
-    //unsigned int be used directly for complie warning
-    printf( "FPGAReg:%#X,data:%#X\n" , ( unsigned int )uiAddr, usValue );
-    return;
+    Int iReturn;
+	UInt16 usRdValue;
+	
+	if( FPGA_ADDR_VALID(uiAddr) )
+	{
+		printf( "******error: address is invalid******\n");		
+		printf( "addr = %#X \n", (unsigned int)uiAddr );	
+	}
+	
+	iReturn = SetFpgaReg( uiAddr<<1, usValue );
+	if( 0 != uiFlag ) 
+	{
+	    iReturn = GetFpgaReg( uiAddr<<1, &usRdValue );
+		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, usRdValue );	
+	}
+	return;
 }
-
- /*--------------------------------------------------------------------------
- * name			: wrfpga
- * function 	: debug function for user
- * input 		:uiAddr:11bit offset address in FPGA, uiLength: register number ,every 16bit 
+/*----------------------------------------------------------------------------
+ * name		: rdfpga
+ * function	: read FPGA register
+ * input 	: uiAddr:FPGA regiser start address 
+ 			  uiRdNum: read register number
  * author	version		date		note
- * feller	1.0		20150809	
+ * feller	1.0		20151016      
  *----------------------------------------------------------------------------
 */
-void rdfpga(  const UInt32 uiAddr, UInt32 uiLength )
+void rdfpga(  const UInt32 uiAddr, const UInt uiRdNum ) 
 {
-    UInt16 usValue = 0;
-    Int32 uiLoop = 0;
-   	
-    if ( 0 == uiLength )
-    {
-    	uiLength = 1;
-    }
+    Int ii;
+	UInt32 uiAddrTmp;
+    Int iReturn;
+	UInt16 usRdValue;
 
-    printf("\n");
-    for ( uiLoop = 0; uiLoop < uiLength; uiLoop++)
-    {
-        // Address left shift 1bit ,please check the EMIF 16bit mode .it is connected with the  UB/LB pin
-        usValue = GetFpgaReg( ( UInt32 * )( uiAddr << 1 ) ); 
-        printf( "FPGAReg:%#X,data:%#X\n" , ( unsigned int )uiAddr, usValue );		
-    }
-    
-    return ;
+	if( FPGA_ADDR_VALID(uiAddr) )
+	{
+		printf( "******error: start address is invalid******\n"); 	
+		printf( "addr = %#X \n", (unsigned int)uiAddr );	
+	}
+
+	
+	uiAddrTmp = uiAddr;
+	for ( ii = 0; ii < uiRdNum; ii++ )
+	{
+		if( FPGA_ADDR_VALID(uiAddrTmp) )
+		{
+			break;
+		}
+
+	    iReturn = GetFpgaReg( uiAddr<<1, &usRdValue );
+		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, usRdValue );	
+	}
+
+	return;
 }
-
  /*--------------------------------------------------------------------------
  * name			: physta
  * function		: wireless phyical layer KPI static
@@ -67,24 +87,7 @@ void rdfpga(  const UInt32 uiAddr, UInt32 uiLength )
  * feller	1.0		20151107
  *----------------------------------------------------------------------------
 */
-	 
-#define TB_STREAM_NUM (2)
-#define SFN_NUM (8)
-	 
-typedef struct SFNStruct {
-	 unsigned int iSFN;
-	 float fBLER;//block error ratio
-	 float fBER;//bit error ratio
-} tSFNInfo;
-	 
-typedef struct FRAMEKPIStruct {
-	 unsigned int iFN;//frame number
-	 tSFNInfo tSFN[ SFN_NUM ];//subframe number
-	 unsigned int iTBSize;//transfer block
-	 unsigned int iMod;//modem 
-	 float fTO;//throught output
-} tFRAMEKPI;
- tFRAMEKPI tTBStream[ TB_STREAM_NUM ];
+
 	 
 char * sp[] = { "TB:", "FN:", "SFN:", "TBSIZE:", "BLER:", "BER:", "TO:", "Mbps" };
 	 
@@ -97,7 +100,7 @@ void physta( int iFlag )
 {
 	int ii;
 	int jj;
-	int kk;
+	//int kk;
 	unsigned int iFNtmp;
 	float fBLERTmp;
 	float fBERTmp;
@@ -149,16 +152,46 @@ void physta( int iFlag )
 }
 
 
+/*----------------------------------------------------------------------------
+ * name		: wr9363
+ * function	: config AD9363 by spi4
+ * input 	: 
+ * author	version		date		note
+ * feller	1.0		20151007      
+ *----------------------------------------------------------------------------
+*/
 
-void wr9363()
+void wr9363(   const UInt32 uiAddr, const unsigned char usValue, const UInt uiFlag  )
 {
+	
 	return;
 }
+/*----------------------------------------------------------------------------
+ * name		: SPIWrite
+ * function	: the same as wr9363,for somebody is used to use it
+ * input 	: 
+ * author	version		date		note
+ * feller	1.0		20151119   
+ *----------------------------------------------------------------------------
+*/
+
 void SPIWrite()
 {
+
 	return;
 }
+/*----------------------------------------------------------------------------
+ * name		: rd9363
+ * function	: read AD9363 by spi4
+ * input 	: 
+ * author	version		date		note
+ * feller	1.0		20151119      
+ *----------------------------------------------------------------------------
+*/
+
 void rd9363()
 {
 	return;
 }
+
+

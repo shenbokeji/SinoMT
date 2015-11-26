@@ -15,8 +15,8 @@
 #include "ushellagent.h"
 
  /*****************************************************************************
- * filename	: testushell
- * function	: testushell
+ * filename	: ushellver
+ * function	: ushellver
  * author	version		date		note
  * feller	1.0		20150928	create         
  ******************************************************************************/

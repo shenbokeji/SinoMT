@@ -325,6 +325,7 @@ Int main(Int argc, Char *argv[])
 		printf( "\nushell_init error\n" );
 		return 0;
 	}
+	//fpga_init();
 #if 0	
     //Get the Air or Ground Station flag
     GetAirGroundStationFlag();    

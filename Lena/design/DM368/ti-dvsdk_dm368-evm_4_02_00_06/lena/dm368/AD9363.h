@@ -16,7 +16,7 @@
 /*****************structure type definition*****************/
 typedef struct AD9363RegStruct {
     UInt uiAddr;	//SPI bus, address  
-    Int iValue;		//SPI bus,data
+    UInt uiValue;		//SPI bus,data
 } tAD9363Reg;
 
 typedef struct AD9363CfgStruct{
@@ -28,6 +28,7 @@ typedef struct AD9363CfgStruct{
 
 #define AD9363_REG_END_ADDR (0x3FE)
 #define AD9363_ADDR_VALID(a) ( a > AD9363_REG_END_ADDR ) 
+#define DEVICE_AD9363 "/dev/ad9363"
 
 /*****************extern function declaration*****************/
 extern void InitAD9363( const Int iAirorGround );
