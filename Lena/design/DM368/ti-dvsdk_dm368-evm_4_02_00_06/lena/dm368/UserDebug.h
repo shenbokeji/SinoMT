@@ -1,6 +1,9 @@
 #ifndef _USERDEBUG_H_
 #define _USERDEBUG_H_
-	 
+
+#include "FPGA.h"
+#include "AD9363.h"
+#include "common.h"
 #define TB_STREAM_NUM (2)
 #define SFN_NUM (8)
 	 
@@ -17,6 +20,6 @@ typedef struct FRAMEKPIStruct {
 	 unsigned int iMod;//modem 
 	 float fTO;//throught output
 } tFRAMEKPI;
- tFRAMEKPI tTBStream[ TB_STREAM_NUM ];
+tFRAMEKPI tTBStream[ TB_STREAM_NUM ];
 
 #endif

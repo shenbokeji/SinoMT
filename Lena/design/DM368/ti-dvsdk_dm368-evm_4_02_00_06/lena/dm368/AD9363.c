@@ -26,34 +26,39 @@ tAD9363Cfg g_tAD9363Cfg;
   * feller	 1.0	 20151119		 I am at home with phyliss
   *----------------------------------------------------------------------------
  */
- Int GetAD9363Reg( const UInt32 uiAddr, UInt16 * const pusRdValue )
+ Int GetAD9363Reg( const UInt32 uiAddr, unsigned char * const pucRdValue )
  {
 	 int iRdByteNum;
 	 FILE *fid;
+	 int iReturn = LENA_OK;
 	 tAD9363Reg tAD9363RegTmp;
  
  
 	 tAD9363RegTmp.uiAddr = uiAddr;
 	 
-	 fid = (FILE *)open( DEVICE_AD9363, O_RDONLY | O_RSYNC, 0 );
-	 if( fid < 0 )
+	 fid = (FILE *)open( DEVICE_AD9363, O_RDONLY, 0 );
+
+	 if( (int)fid < 0 )
 	 {
-		 printf( "ERROR:open failed "DEVICE_FPGA"!\n" );
-		 exit(1);
+		 printf( "ERROR:open failed "DEVICE_AD9363"!\n" );
+		 return LENA_FALSE;
 	 }
 	 
 	 iRdByteNum = read( (int)fid, &tAD9363RegTmp, BYTE_EIGHT ); //8 byte for addr and value
 	 if( BYTE_EIGHT != iRdByteNum )
 	 {
-		 printf( "ERROR:Read Byte is not %d "DEVICE_FPGA"!\n", BYTE_EIGHT );
-		 exit(1);
+		 printf( "ERROR:Read Byte is not %d "DEVICE_AD9363"! \n", BYTE_EIGHT );
+		 iReturn = LENA_FALSE;
+		*pucRdValue = (unsigned char)ERROR_STRING;
 	 }
+	else
+	{
+		*pucRdValue = (unsigned char)tAD9363RegTmp.uiValue;
+	}
 	 close( (int)fid );
 	 fid = NULL;
-	 
-	 *pusRdValue = (UInt16)tAD9363RegTmp.uiValue;
-		 
-	 return LENA_OK;
+	 		 
+	 return iReturn;
  }
   /*----------------------------------------------------------------------------
   * name		 : SetFpgaReg
@@ -68,26 +73,26 @@ tAD9363Cfg g_tAD9363Cfg;
 	 Int iWrByteNum;
 	 FILE *fid;
 	 tAD9363Reg tAD9363RegTmp;
- 
+	 int iReturn = LENA_OK;
+
 	 tAD9363RegTmp.uiAddr = uiAddr;
 	 tAD9363RegTmp.uiValue = (unsigned int)ucValue;
 	 
-	 fid = (FILE *)open( DEVICE_AD9363, O_RDONLY | O_RSYNC, 0 );
-	 if( fid < 0 )
+	 fid = (FILE *)open( DEVICE_AD9363, O_RDWR, 0 );
+	 if( (int)fid < 0 )
 	 {
-		 printf( "ERROR:open failed "DEVICE_FPGA"!\n" );
-		 exit(1);
+		 printf( "ERROR:open failed "DEVICE_AD9363"!\n" );
+		 return LENA_FALSE;
 	 }
 	 iWrByteNum = write( (int)fid, &tAD9363RegTmp, BYTE_EIGHT );
 	 if( BYTE_EIGHT != iWrByteNum )
 	 {
-		 printf( "ERROR:Read Byte is not %d "DEVICE_FPGA"!\n", BYTE_EIGHT );
-		 exit(1);
+		 printf( "ERROR:Write Byte is not %d "DEVICE_AD9363"!\n", BYTE_EIGHT );
+		 iReturn =  LENA_FALSE;
 	 } 
 	 close( (int)fid );
 	 fid = NULL;
-	 return LENA_OK;/* ?y3¡ê */
- 
+	 return iReturn;
  }
 
 
@@ -120,7 +125,24 @@ void InitAD9363Reg( void )
 	
     return ;
 }
-
+void initclock()
+{
+	int iReturn;
+	iReturn = SetAD9363Reg( 0x000, 0x00 );
+	iReturn |= SetAD9363Reg( 0x000, 0x81 );
+	iReturn |= SetAD9363Reg( 0x000, 0x00 );
+	iReturn |= SetAD9363Reg( 0x3DF, 0x01 );
+	iReturn |= SetAD9363Reg( 0x2A6, 0x0E );
+	iReturn |= SetAD9363Reg( 0x2A8, 0x0E );
+	iReturn |= SetAD9363Reg( 0x2AB, 0x07 );
+	iReturn |= SetAD9363Reg( 0x2AC, 0xFF );
+	iReturn |= SetAD9363Reg( 0x009, 0x17 );
+	iReturn |= SetAD9363Reg( 0x002, 0xCE );
+	iReturn |= SetAD9363Reg( 0x003, 0xCE );
+	iReturn |= SetAD9363Reg( 0x004, 0x03 );
+	iReturn |= SetAD9363Reg( 0x00A, 0x12 );
+	return;
+}
 
 
  /*--------------------------------------------------------------------------

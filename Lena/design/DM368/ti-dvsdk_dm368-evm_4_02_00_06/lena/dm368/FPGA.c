@@ -29,29 +29,33 @@ Int GetFpgaReg( const UInt32 uiAddr, UInt16 * const pusRdValue )
 	int iRdByteNum;
 	FILE *fid;
 	tFPGAReg tFPGARegTmp;
+	int iReturn = LENA_OK;
 
 
 	tFPGARegTmp.uiAddr = uiAddr;
 	
-	fid = (FILE *)open( DEVICE_FPGA, O_RDONLY | O_RSYNC, 0 );
-	if( fid < 0 )
+	fid = (FILE *)open( DEVICE_FPGA, O_RDONLY, 0 );
+	if( (int)fid < 0 )
 	{
 		printf( "ERROR:open failed "DEVICE_FPGA"!\n" );
-		exit(1);
+		return LENA_FALSE;
 	}
-	
 	iRdByteNum = read( (int)fid, &tFPGARegTmp, BYTE_EIGHT ); //8 byte for addr and value
 	if( BYTE_EIGHT != iRdByteNum )
 	{
-		printf( "ERROR:Read Byte is not %d "DEVICE_FPGA"!\n", BYTE_EIGHT );
-		exit(1);
+		iReturn = LENA_FALSE;
+		*pusRdValue = ERROR_STRING;
+		printf( "ERROR:read byte is not equal!\n" );
+	}
+	else 
+	{
+		*pusRdValue = (UInt16)tFPGARegTmp.uiValue;
 	}
    	close( (int)fid );
    	fid = NULL;
-	
-	*pusRdValue = (UInt16)tFPGARegTmp.uiValue;
+
 		
-    return LENA_OK;
+    return iReturn;
 }
  /*----------------------------------------------------------------------------
  * name			: SetFpgaReg
@@ -66,25 +70,29 @@ Int SetFpgaReg( const UInt32 uiAddr, const UInt16 usValue )
 	Int iWrByteNum;
 	FILE *fid;
 	tFPGAReg tFPGARegTmp;
-
+	int iReturn = LENA_OK;
 	tFPGARegTmp.uiAddr = uiAddr;
 	tFPGARegTmp.uiValue = (unsigned int)usValue;
 	
-	fid = (FILE *)open( DEVICE_FPGA, O_RDONLY | O_RSYNC, 0 );
-	if( fid < 0 )
+	fid = (FILE *)open( DEVICE_FPGA, O_RDWR, 0 );
+	if( (int)fid < 0 )
 	{
 		printf( "ERROR:open failed "DEVICE_FPGA"!\n" );
-		exit(1);
+		return LENA_FALSE;
 	}
 	iWrByteNum = write( (int)fid, &tFPGARegTmp, BYTE_EIGHT );
  	if( BYTE_EIGHT != iWrByteNum )
 	{
-		printf( "ERROR:Read Byte is not %d "DEVICE_FPGA"!\n", BYTE_EIGHT );
-		exit(1);
+		iReturn = LENA_FALSE;
+		printf( "ERROR:write byte is not equal!\n" );		
 	} 
+	else
+	{
+		;
+	}
 	close( (int)fid );
    	fid = NULL;
-	return LENA_OK;/* Õý³£ */
+	return iReturn;
 
 }
 

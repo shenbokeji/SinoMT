@@ -56,16 +56,16 @@
 #define GROUND_STATION (0)
 
 //air and ground version string
-#define AIR_VERSION "AIR_V1.01.001"
-#define GROUND_VERSION "GROUND_V0.01.001"
-
+#define AIR_VERSION "AIR_V1.01.001\n"
+#define GROUND_VERSION "GROUND_V0.01.001p\n"
+#define DSP_TIME "DSP_"__DATE__ __TIME__"\n"
 #define LENA_OK (0)
 #define LENA_FALSE (-1)
 
 /*****************system error code *****************/
 #define FPGA_SET_REG_ERROR (0x10010001)
 #define BYTE_EIGHT (8)
-
+#define ERROR_STRING (0X4553)
 /*****************extern function declaration*****************/
 extern Codec *getCodec(Char *extension, Codec *codecs);
 extern Int GetAirGroundStationFlag( void );

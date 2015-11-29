@@ -10,9 +10,20 @@
  * feller	1.0		20150729	create         
  *----------------------------------------------------------------------------
 */
-
-#include "FPGA.h"
-
+#include "UserDebug.h"
+/*----------------------------------------------------------------------------
+ * name		: reset
+ * function	: reboot the system
+ * input 	: 
+ * author	version		date		note
+ * feller	1.0		20151126      
+ *----------------------------------------------------------------------------
+*/
+int  reset( void )
+{
+	system("reboot");
+	return LENA_OK;
+}
  /*----------------------------------------------------------------------------
  * name		: wrfpga
  * function	: write FPGA register
@@ -23,7 +34,7 @@
  * feller	1.0		20151016      
  *----------------------------------------------------------------------------
 */
-void wrfpga(  const UInt32 uiAddr, const UInt16 usValue, const UInt uiFlag ) 
+int wrfpga(  const UInt32 uiAddr, const UInt16 usValue, const UInt uiFlag ) 
 {
     Int iReturn;
 	UInt16 usRdValue;
@@ -33,14 +44,13 @@ void wrfpga(  const UInt32 uiAddr, const UInt16 usValue, const UInt uiFlag )
 		printf( "******error: address is invalid******\n");		
 		printf( "addr = %#X \n", (unsigned int)uiAddr );	
 	}
-	
-	iReturn = SetFpgaReg( uiAddr<<1, usValue );
+	iReturn = SetFpgaReg( uiAddr, usValue );
 	if( 0 != uiFlag ) 
 	{
-	    iReturn = GetFpgaReg( uiAddr<<1, &usRdValue );
+	    iReturn = GetFpgaReg( uiAddr, &usRdValue );
 		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, usRdValue );	
 	}
-	return;
+	return LENA_OK;
 }
 /*----------------------------------------------------------------------------
  * name		: rdfpga
@@ -51,7 +61,7 @@ void wrfpga(  const UInt32 uiAddr, const UInt16 usValue, const UInt uiFlag )
  * feller	1.0		20151016      
  *----------------------------------------------------------------------------
 */
-void rdfpga(  const UInt32 uiAddr, const UInt uiRdNum ) 
+int rdfpga(  const UInt32 uiAddr, const UInt uiRdNum ) 
 {
     Int ii;
 	UInt32 uiAddrTmp;
@@ -73,12 +83,96 @@ void rdfpga(  const UInt32 uiAddr, const UInt uiRdNum )
 			break;
 		}
 
-	    iReturn = GetFpgaReg( uiAddr<<1, &usRdValue );
-		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, usRdValue );	
+	    iReturn = GetFpgaReg( uiAddrTmp, &usRdValue );
+		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddrTmp, usRdValue );	
+		uiAddrTmp += 2;
 	}
 
-	return;
+	return LENA_OK;
 }
+
+ 
+ /*----------------------------------------------------------------------------
+  * name	 : wr9363
+  * function : config AD9363 by spi4
+  * input	 : 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151007	   
+  *----------------------------------------------------------------------------
+ */
+ 
+ int wr9363(	const UInt32 uiAddr, const unsigned char ucValue, const UInt uiFlag  )
+ {
+    	Int iReturn;
+	unsigned char  ucRdValue;
+	
+	if( AD9363_ADDR_VALID(uiAddr) )
+	{
+		printf( "******error: address is invalid******\n");		
+		printf( "addr = %#X \n", (unsigned int)uiAddr );	
+	}
+	
+	iReturn = SetAD9363Reg( uiAddr, ucValue );
+	if( 0 != uiFlag ) 
+	{
+	    	iReturn = GetAD9363Reg( uiAddr, &ucRdValue );
+		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, ucRdValue );	
+	}
+	return LENA_OK;	 
+ }
+ /*----------------------------------------------------------------------------
+  * name	 : SPIWrite
+  * function : the same as wr9363,for somebody is used to use it
+  * input	 : 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151119	
+  *----------------------------------------------------------------------------
+ */
+ 
+ int SPIWrite( const UInt32 uiAddr, const unsigned char ucValue, const UInt uiFlag )
+ {
+ 	wr9363( uiAddr, ucValue, uiFlag );
+	return LENA_OK;
+ }
+ /*----------------------------------------------------------------------------
+  * name	 : rd9363
+  * function : read AD9363 by spi4
+  * input	 : 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151119	   
+  *----------------------------------------------------------------------------
+ */
+ 
+ int rd9363( const UInt32 uiAddr, const UInt uiRdNum )
+ {
+  	Int ii;
+  	UInt32 uiAddrTmp;
+  	Int iReturn;
+  	unsigned char ucRdValue = 0;
+	
+ 	if( AD9363_ADDR_VALID(uiAddr) )
+  	{
+	  	printf( "******error: start address is invalid******\n");   
+	  	printf( "addr = %#X \n", (unsigned int)uiAddr );	  
+  	}
+ 
+  
+  	uiAddrTmp = uiAddr;
+  	for ( ii = 0; ii < uiRdNum; ii++ )
+  	{
+	  	if( AD9363_ADDR_VALID(uiAddrTmp) )
+	  	{
+		  	break;
+	  	}
+ 
+	  	iReturn = GetAD9363Reg( uiAddrTmp, &ucRdValue );
+	  	printf( "addr = %#X value =%#X\n", (unsigned int)uiAddrTmp, ucRdValue );   
+		uiAddrTmp++;
+  	}
+	return LENA_OK;
+ }
+ 
+
  /*--------------------------------------------------------------------------
  * name			: physta
  * function		: wireless phyical layer KPI static
@@ -96,7 +190,7 @@ int iSFN[8] = { 0, 3, 4, 5, 6, 7, 8, 9 };
 int iTBSize[2] = { 35160, 2728 };
 char *sModemStr[] = { "16QAM" , "QPSK"};
 
-void physta( int iFlag )
+int physta( int iFlag )
 {
 	int ii;
 	int jj;
@@ -149,49 +243,7 @@ void physta( int iFlag )
 		printf( "\n*********************************************************************************************\n");
 		sleep( 1 );
 	}
-}
-
-
-/*----------------------------------------------------------------------------
- * name		: wr9363
- * function	: config AD9363 by spi4
- * input 	: 
- * author	version		date		note
- * feller	1.0		20151007      
- *----------------------------------------------------------------------------
-*/
-
-void wr9363(   const UInt32 uiAddr, const unsigned char usValue, const UInt uiFlag  )
-{
-	
-	return;
-}
-/*----------------------------------------------------------------------------
- * name		: SPIWrite
- * function	: the same as wr9363,for somebody is used to use it
- * input 	: 
- * author	version		date		note
- * feller	1.0		20151119   
- *----------------------------------------------------------------------------
-*/
-
-void SPIWrite()
-{
-
-	return;
-}
-/*----------------------------------------------------------------------------
- * name		: rd9363
- * function	: read AD9363 by spi4
- * input 	: 
- * author	version		date		note
- * feller	1.0		20151119      
- *----------------------------------------------------------------------------
-*/
-
-void rd9363()
-{
-	return;
+	return LENA_OK;
 }
 
 

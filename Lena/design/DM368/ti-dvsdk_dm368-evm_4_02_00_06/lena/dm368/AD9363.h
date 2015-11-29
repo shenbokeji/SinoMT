@@ -28,9 +28,11 @@ typedef struct AD9363CfgStruct{
 
 #define AD9363_REG_END_ADDR (0x3FE)
 #define AD9363_ADDR_VALID(a) ( a > AD9363_REG_END_ADDR ) 
-#define DEVICE_AD9363 "/dev/ad9363"
+#define DEVICE_AD9363 "/dev/misc/ad9363"
 
 /*****************extern function declaration*****************/
 extern void InitAD9363( const Int iAirorGround );
+extern Int GetAD9363Reg( const UInt32 uiAddr, unsigned char * const pusRdValue );
+extern Int SetAD9363Reg( const UInt32 uiAddr, const unsigned char ucValue );
 #endif /* __AD9363_H */
 
