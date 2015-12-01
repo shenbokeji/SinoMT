@@ -1,0 +1,13 @@
+Package: kernel-module-mtd-oobtest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Description: mtd-oobtest kernel module; Out-of-band test module
+Section: kernel
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: GPLv2
+Architecture: dm368-evm
+OE: linux-davinci
+Homepage: unknown
+Build: install/afa4844
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Source: git://arago-project.org/git/projects/linux-davinci.git;protocol=git;branch=master file://defconfig

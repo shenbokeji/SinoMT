@@ -1,0 +1,13 @@
+Package: module-init-tools-depmod
+Version: 3.4-r6.6
+Description: This package contains a set of programs for loading, inserting, and removing kernel modules for Linux (versions 2.5.48 and above). It serves the same function that the modutils package serves for Linux 2.4.
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: GPLv2
+Architecture: armv5te
+OE: module-init-tools
+Homepage: unknown
+Build: install/afa4844
+Depends: libgcc1, libc6
+Source: http://kernel.org/pub/linux/utils/kernel/module-init-tools/module-init-tools-3.4.tar.bz2 file://modutils_extension;apply=yes

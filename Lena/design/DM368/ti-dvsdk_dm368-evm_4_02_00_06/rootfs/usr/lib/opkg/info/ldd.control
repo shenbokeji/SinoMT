@@ -1,0 +1,12 @@
+Package: ldd
+Version: 2.8-r7.6
+Description: glibc: print shared library dependencies
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: LGPLv2.1+
+Architecture: armv5te
+OE: external-toolchain-csl
+Homepage: unknown
+Build: install/afa4844
+Source: file://SUPPORTED

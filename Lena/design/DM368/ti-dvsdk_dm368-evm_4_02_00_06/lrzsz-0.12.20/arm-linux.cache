@@ -1,0 +1,1 @@
+ac_cv_prog_CC=${ac_cv_prog_CC='arm-none-linux-gnueabi-gcc'}

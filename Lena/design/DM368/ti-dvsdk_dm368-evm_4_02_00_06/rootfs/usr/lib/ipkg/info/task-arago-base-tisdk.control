@@ -1,0 +1,13 @@
+Package: task-arago-base-tisdk
+Version: 1.0-r5.6
+Description: Additional packages beyond console packages shared by TI SDKs
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: MIT
+Architecture: dm368-evm
+OE: task-arago-base-tisdk
+Homepage: unknown
+Build: install/afa4844
+Depends: dbus, dbus-x11, libexpat1, libglib-2.0-0, libxml2, libpcre0, iptables, iperf, psplash-ti, u-boot
+Source: file:///sdk/build/DVSDK_4_02/4_02_00_06/arago-install/arago/recipes/tasks/task-arago-base-tisdk.bb

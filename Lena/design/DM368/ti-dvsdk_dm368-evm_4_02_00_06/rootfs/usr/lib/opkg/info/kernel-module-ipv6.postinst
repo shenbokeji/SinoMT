@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ -n "$D" ]; then
+	arm-none-linux-gnueabi-depmod-2.6 -A -b $D -F /sdk/build/DVSDK_4_02/4_02_00_06/arago-install/arago-tmp/sysroots/dm368-evm-none-linux-gnueabi/kernel/System.map-2.6.32.17-davinci1 2.6.32.17-davinci1
+else
+	depmod -a 2.6.32.17-davinci1
+	update-modules || true
+fi
+
+if [ x"$D" = "x" ]; then
+	modprobe ipv6 || true
+fi

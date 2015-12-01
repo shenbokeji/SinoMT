@@ -207,20 +207,20 @@ static int fpga_close(struct inode *inode, struct file *file)
 //static unsigned int rw_buf=0;
 ssize_t fpga_read(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
-	copy_from_user(&fpga_reg, buf, count);
-	//fpga_reg.uiValue = (unsigned int)( IO_READ( fpga+ (fpga_reg.uiAddr<<1) ) & 0XFFFF ); 
+	unsigned long ulRet;
+	ulRet = copy_from_user( (void*)&fpga_reg, buf, count);
 	fpga_reg.uiValue = (unsigned int)RDFPGA( fpga_reg.uiAddr );
-	copy_to_user(buf, &fpga_reg, count); 
+	ulRet = copy_to_user( (void*)buf, &fpga_reg, count); 
+	
 	return count;
 }
 
 
 ssize_t fpga_write(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
-
-    copy_from_user(&fpga_reg, buf, 8);
-    //IO_WRITE(fpga+(unsigned int)(fpga_reg.uiAddr<<1), (unsigned short)(fpga_reg.uiValue & 0XFFFF) );   
-    WRFPGA( fpga_reg.uiAddr, (unsigned short)( fpga_reg.uiValue & 0XFFFF ) );
+	unsigned long ulRet;
+    ulRet = copy_from_user(&fpga_reg, buf, 8);
+	WRFPGA( fpga_reg.uiAddr, (unsigned short)( fpga_reg.uiValue & 0XFFFF ) );
     return 8;
 }
 
@@ -235,7 +235,7 @@ ssize_t fpga_write(struct file *file, const char __user *buf, size_t count, loff
 static int fpga_ioctl(struct inode *inode, struct file *file,
 		     u_int cmd, u_long arg)
 {
-	int ret = 0;
+	int  ret = 0;
 
 	//DEBUG(MTD_DEBUG_LEVEL0, "MTD_ioctl\n");
 
@@ -243,11 +243,11 @@ static int fpga_ioctl(struct inode *inode, struct file *file,
 
 	switch (cmd) {
 		case GET_INFO:
-			copy_to_user((void __user *)arg, &fpga_transfer_param, sizeof(fpga_transfer_param));
+			ret = copy_to_user((void __user *)arg, &fpga_transfer_param, sizeof(fpga_transfer_param));
 			break;
 
 		case SET_INFO:
-			copy_from_user(&fpga_transfer_param, arg, sizeof(fpga_transfer_param));
+			ret = copy_from_user( (void*)&fpga_transfer_param, (void*)arg, sizeof(fpga_transfer_param));
 			dma_cpy (&fpga_transfer_param);
 			break;
 				

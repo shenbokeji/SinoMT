@@ -1,0 +1,13 @@
+Package: arago-feed-configs
+Version: 1.0-r11.6
+Description: Configuration files for online package repositories aka feeds
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: MIT
+Architecture: armv5te
+OE: arago-feed-configs
+Homepage: unknown
+Build: install/afa4844
+Recommends: opkg
+Source: file:///sdk/build/DVSDK_4_02/4_02_00_06/arago-install/arago/recipes/arago/arago-feed-configs.bb

@@ -305,19 +305,7 @@ cleanup:
 
     exit(status);
 }
- /*****************************************************************************
- * filename	: ushellver
- * function	: ushellver
- * author	version		date		note
- * feller	1.0		20150928	create         
- ******************************************************************************/
- int ver( void )
- {
- 	
-	 printf( DSP_TIME );
-	 printf( GROUND_VERSION );
-	 return 0;
- }
+
 
 
  /*****************************************************************************

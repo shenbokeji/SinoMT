@@ -123,7 +123,7 @@ void __iomem *fpga;
 
 
 #define	LENA_AIR  0
-#define	LENA_EARTH  1
+#define	LENA_GROUND  1
 #define	LENA_NULL  2
 
 unsigned char device_lena_air_id=LENA_NULL;
@@ -699,12 +699,65 @@ static struct spi_board_info dm365_evm_spi_info[] __initconst = {
 };
 
 
+static struct spi_board_info dm365_evm_spi4_info[] __initconst = {
+	{
+		.modalias	= "ad9363",
+		.platform_data	= NULL,
+		.max_speed_hz	= 800 * 1000,	/* at 3v3 */
+		.bus_num	= 4,
+		.chip_select	= 0,
+		.mode		= SPI_MODE_1,
+	},
+};
+
+#define AIR_GROUND_GPIO (29) 
+#define SPI0_CS_GPIO (25) 
+#define SPI4_CS_GPIO (37) 
+/*--------------------------------------------------------------------------
+  * function : GPIO_init
+  * output	 : GPIO init
+  * author	 version	 date		 note
+  * feller	 1.0	 20151129	 
+  *----------------------------------------------------------------------------
+*/
+void GPIORequsetInit()
+{
+	gpio_request( SPI0_CS_GPIO, "SPI0_CS_GPIO" );
+	gpio_request( SPI4_CS_GPIO, "SPI4_CS_GPIO" );
+  	gpio_request( AIR_GROUND_GPIO, "AIR_GROUND_GPIO" );
+  return;
+}
+ /*--------------------------------------------------------------------------
+ * function	: GetAirGroundStationFlag
+ * output 	: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
+ * author	version		date		note
+ * feller	1.0		20151129	
+ *----------------------------------------------------------------------------
+*/
+void GetAirGroundStationFlag()
+{
+	unsigned int uiFlag = 0;
+	//uiFlag = (__raw_readl( IO_ADDRESS( 0x01c67020) ) & 0x20000000 );
+	uiFlag = gpio_direction_input( AIR_GROUND_GPIO );
+	if( 0 != uiFlag ) 
+	{
+		device_lena_air_id = LENA_AIR;
+		printk("EVM: LENA AIR device!\n");
+	}
+	else 
+	{
+		device_lena_air_id = LENA_GROUND;
+		printk("EVM: LENA GROUND device!\n");
+	}
+	return ;
+}
+
 static __init void dm365_evm_init(void)
 {
 	//davinci_cfg_reg(DM365_GPIO29);
 
 	//gpio_direction_input(29);
-
+#if 0
 	if((__raw_readl(IO_ADDRESS(0x01c67020))&0x20000000)!=0) 
 		{
 			device_lena_air_id = LENA_AIR;
@@ -712,9 +765,12 @@ static __init void dm365_evm_init(void)
 		}
 	else 
 		{
-			device_lena_air_id = LENA_EARTH;
-			printk("EVM: LENA earth device!\n");
+			device_lena_air_id = LENA_GROUND;
+			printk("EVM: LENA GROUND device!\n");
 		}	
+#endif
+	GPIORequsetInit();
+	GetAirGroundStationFlag();
 		
 	evm_init_i2c();
 	davinci_serial_init(&uart_config);
@@ -734,6 +790,8 @@ static __init void dm365_evm_init(void)
 	dm365_init_spi0(BIT(0), dm365_evm_spi_info,
 			ARRAY_SIZE(dm365_evm_spi_info));
 
+	dm365_init_spi4(BIT(0), dm365_evm_spi4_info,
+			ARRAY_SIZE(dm365_evm_spi4_info));
 	//dm365_init_tsc2004();
 }
 

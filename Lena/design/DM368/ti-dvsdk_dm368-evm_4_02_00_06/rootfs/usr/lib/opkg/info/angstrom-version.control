@@ -1,0 +1,12 @@
+Package: angstrom-version
+Version: 1:2011.02-r6.6
+Description: Version 2011.02-r6 of package angstrom-version
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: MIT
+Architecture: dm368-evm
+OE: angstrom-version
+Homepage: unknown
+Build: install/afa4844
+Source: file://lsb_release

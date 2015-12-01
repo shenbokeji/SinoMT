@@ -1,0 +1,14 @@
+Package: alsa-state
+Version: 0.2.0-r22-arago1.6
+Description: Alsa Scenario Files
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: MIT
+Architecture: all
+OE: alsa-state
+Homepage: unknown
+Build: install/afa4844
+Depends: update-rc.d
+Recommends: alsa-states
+Source: file://asound.conf file://asound.state file://alsa-state

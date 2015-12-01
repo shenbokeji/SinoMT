@@ -1,0 +1,12 @@
+Package: opkg-collateral
+Version: 1.0-r3.6
+Description: opkg configuration files
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: MIT
+Architecture: all
+OE: opkg-collateral
+Homepage: unknown
+Build: install/afa4844
+Source: file://opkg.conf.comments file://lists file://dest file://tmp_dir file://src

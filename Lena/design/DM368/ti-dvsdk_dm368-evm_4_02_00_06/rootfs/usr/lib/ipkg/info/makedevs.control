@@ -1,0 +1,13 @@
+Package: makedevs
+Version: 1.0.0-r9.6
+Description: A tool to make device nodes
+Section: base
+Priority: required
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: GPL
+Architecture: armv5te
+OE: makedevs
+Homepage: unknown
+Build: install/afa4844
+Depends: libgcc1, libc6
+Source: file://makedevs.c

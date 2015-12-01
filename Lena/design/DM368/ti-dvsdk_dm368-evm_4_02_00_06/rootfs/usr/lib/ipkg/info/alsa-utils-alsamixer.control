@@ -1,0 +1,13 @@
+Package: alsa-utils-alsamixer
+Version: 1.0.23-r4.6
+Description: ncurses based control for ALSA mixer and settings
+Section: console/utils
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: GPLv2
+Architecture: armv5te
+OE: alsa-utils
+Homepage: http://www.alsa-project.org
+Build: install/afa4844
+Depends: libformw, libmenuw, libpanelw5, libncursesw5, libtinfo5, libasound2, libc6, libgcc1
+Source: ftp://ftp.alsa-project.org/pub/utils/alsa-utils-1.0.23.tar.bz2 file://alsa-utils-remove-xmlto-1.0.19plus.patch

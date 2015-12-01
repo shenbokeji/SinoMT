@@ -1,0 +1,12 @@
+Package: u-boot
+Version: 2010.12-rc2-psp03.01.01.39-r1.6
+Description: u-boot bootloader for DaVinci devices
+Section: bootloaders
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: GPLv2
+Architecture: dm368-evm
+OE: u-boot
+Homepage: http://www.denx.de/wiki/U-Boot/WebHome
+Build: install/afa4844
+Source: git://arago-project.org/git/projects/u-boot-davinci.git;protocol=git;branch=master

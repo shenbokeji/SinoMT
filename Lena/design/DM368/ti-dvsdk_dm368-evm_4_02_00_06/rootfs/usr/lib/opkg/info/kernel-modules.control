@@ -1,0 +1,13 @@
+Package: kernel-modules
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Description: Kernel modules meta package
+Section: kernel
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: GPLv2
+Architecture: dm368-evm
+OE: linux-davinci
+Homepage: unknown
+Build: install/afa4844
+Recommends: kernel-module-nls-ascii, kernel-module-nls-utf8, kernel-module-minix, kernel-module-smbfs, kernel-module-nfsd, kernel-module-xfs, kernel-module-autofs4, kernel-module-crc-t10dif, kernel-module-xfrm6-mode-beet, kernel-module-xfrm6-mode-transport, kernel-module-xfrm6-mode-tunnel, kernel-module-sit, kernel-module-loop, kernel-module-mtd-stresstest, kernel-module-mtd-subpagetest, kernel-module-mtd-oobtest, kernel-module-mtd-speedtest, kernel-module-mtd-pagetest, kernel-module-mtd-readtest, kernel-module-mtd-torturetest, kernel-module-scsi-wait-scan, kernel-module-ppp-synctty, kernel-module-ppp-async, kernel-module-tun, kernel-module-ppp-deflate, kernel-module-libertas-sdio, kernel-module-hid-monterey, kernel-module-hid-ezkey, kernel-module-hid-cypress, kernel-module-hid-gyration, kernel-module-hid-cherry, kernel-module-hid-sony, kernel-module-hid-chicony, kernel-module-hid-samsung, kernel-module-hid-petalynx, kernel-module-hid-sunplus, kernel-module-hid-belkin, kernel-module-hid-apple, kernel-module-hid-pl, kernel-module-hid-a4tech, kernel-module-ledtrig-timer, kernel-module-ledtrig-heartbeat, kernel-module-leds-gpio
+Source: git://arago-project.org/git/projects/linux-davinci.git;protocol=git;branch=master file://defconfig

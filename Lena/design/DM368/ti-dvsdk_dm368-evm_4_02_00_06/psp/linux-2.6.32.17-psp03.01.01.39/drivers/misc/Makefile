@@ -1,6 +1,8 @@
 #
 # Makefile for misc devices that really don't fit anywhere else.
 #
+obj-y 				+= davinci_gpio.o
+obj-y 				+= ad9363.o
 obj-y				+= fpga.o
 obj-$(CONFIG_IBM_ASM)		+= ibmasm/
 obj-$(CONFIG_HDPU_FEATURES)	+= hdpuftrs/

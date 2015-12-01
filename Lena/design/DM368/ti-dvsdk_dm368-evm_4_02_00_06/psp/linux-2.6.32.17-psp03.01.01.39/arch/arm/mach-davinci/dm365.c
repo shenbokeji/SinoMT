@@ -510,8 +510,8 @@ MUX_CFG(DM365,	MCBSP0_BFSR,	0,   18,    1,	  1,	 false)
 MUX_CFG(DM365,	SPI0_SCLK,	3,   28,    1,    1,	 false)
 MUX_CFG(DM365,	SPI0_SDI,	3,   26,    3,    1,	 false)
 MUX_CFG(DM365,	SPI0_SDO,	3,   25,    1,    1,	 false)
-MUX_CFG(DM365,	SPI0_SDENA0,	3,   29,    3,    1,	 false)
-MUX_CFG(DM365,	SPI0_SDENA1,	3,   26,    3,    2,	 false)
+MUX_CFG(DM365,	SPI0_SDENA0,	3,   29,    3,    0,	 false)
+MUX_CFG(DM365,	SPI0_SDENA1,	3,   26,    3,    1,	 false)
 
 MUX_CFG(DM365,	UART0_RXD,	3,   20,    1,    1,	 false)
 MUX_CFG(DM365,	UART0_TXD,	3,   19,    1,    1,	 false)
@@ -574,8 +574,8 @@ MUX_CFG(DM365,	SPI3_SDENA1,	0,   6,     3,    3,	 false)
 MUX_CFG(DM365,	SPI4_SCLK,	4,   18,    3,    1,	 false)
 MUX_CFG(DM365,	SPI4_SDI,	4,   14,    3,    1,	 false)
 MUX_CFG(DM365,	SPI4_SDO,	4,   16,    3,    1,	 false)
-MUX_CFG(DM365,	SPI4_SDENA0,	4,   20,    3,    1,	 false)
-MUX_CFG(DM365,	SPI4_SDENA1,	4,   16,    3,    2,	 false)
+MUX_CFG(DM365,	SPI4_SDENA0,	4,   20,    3,    0,	 false)
+MUX_CFG(DM365,	SPI4_SDENA1,	4,   16,    3,    1,	 false)
 
 MUX_CFG(DM365,	GPIO20,		3,   21,    3,    0,	 false)
 MUX_CFG(DM365,	GPIO29, 	4,   4,	    3,	  0,	 false)
@@ -687,7 +687,59 @@ void __init dm365_init_spi0(unsigned chipselect_mask,
 
 	platform_device_register(&dm365_spi0_device);
 }
+static struct davinci_spi_platform_data dm365_spi4_pdata = {
+	.version 	= SPI_VERSION_1,
+	.num_chipselect = 1,
+	.clk_internal	= 1,
+	.cs_hold	= 1,
+	.intr_level	= 0,
+	.poll_mode	= 1,	/* 0 -> interrupt mode 1-> polling mode */
+	.use_dma	= 0,	/* when 1, value in poll_mode is ignored */
+	.c2tdelay	= 0,
+	.t2cdelay	= 0,
+};
+static struct resource dm365_spi4_resources[] = {
+	{
+		.start = 0x01c23000,
+		.end   = 0x01c237ff,
+		.flags = IORESOURCE_MEM,
+	},
+	{
+		.start = IRQ_DM365_SPIINT0_0,
+		.flags = IORESOURCE_IRQ,
+	},
+};
+static struct platform_device dm365_spi4_device = {
+	.name = "spi_davinci",
+	.id = 4,
+	.dev = {
+		.dma_mask = NULL,
+		//.coherent_dma_mask = DMA_BIT_MASK(32),
+		.platform_data = &dm365_spi4_pdata,
+	},
+	.num_resources = ARRAY_SIZE(dm365_spi4_resources),
+	.resource = dm365_spi4_resources,
+};
+void __init dm365_init_spi4(unsigned chipselect_mask,
+		struct spi_board_info *info, unsigned len)
+{
+	davinci_cfg_reg(DM365_SPI4_SCLK);
+	davinci_cfg_reg(DM365_SPI4_SDI);
+	davinci_cfg_reg(DM365_SPI4_SDO);
+	//davinci_cfg_reg(DM365_SPI4_SDENA1);
 
+	/* not all slaves will be wired up */
+	if (chipselect_mask & BIT(0))
+		davinci_cfg_reg(DM365_SPI4_SDENA0);
+
+	//register for SPI4_CS for GPIO
+	gpio_request( 37, "SPI4_CS" );
+	gpio_direction_output(37, 1);
+
+	spi_register_board_info(info, len);
+
+	platform_device_register(&dm365_spi4_device);
+}
 
 /* IPIPEIF device configuration */
 static u64 dm365_ipipeif_dma_mask = DMA_BIT_MASK(32);

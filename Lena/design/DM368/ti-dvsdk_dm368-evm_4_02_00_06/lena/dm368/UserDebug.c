@@ -11,6 +11,22 @@
  *----------------------------------------------------------------------------
 */
 #include "UserDebug.h"
+ /*****************************************************************************
+ * filename	: ver
+ * function	: print version info
+ * author	version		date		note
+ * feller	1.0		20150928	create         
+ ******************************************************************************/
+ int ver( void )
+ {
+	unsigned int uiFlag = 0XFFFFFFFF;
+ 	uiFlag = GetAirGroundStationFlag();
+
+	printf( DSP_TIME"%s", uiFlag ? AIR_VERSION : GROUND_VERSION );
+
+	return 0;
+ }
+#include "UserDebug.h"
 /*----------------------------------------------------------------------------
  * name		: reset
  * function	: reboot the system

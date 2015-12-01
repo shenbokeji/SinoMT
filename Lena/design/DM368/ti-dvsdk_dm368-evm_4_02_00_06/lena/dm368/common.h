@@ -54,11 +54,14 @@
 //This is the air and ground station flag, configured by GPIO29 pin u2
 #define AIR_STATION (1)
 #define GROUND_STATION (0)
-
+#define AIR_GROUND_GPIO (29)
 //air and ground version string
 #define AIR_VERSION "AIR_V1.01.001\n"
 #define GROUND_VERSION "GROUND_V0.01.001p\n"
-#define DSP_TIME "DSP_"__DATE__ __TIME__"\n"
+#define DSP_TIME "DSP_"__DATE__" "__TIME__"\n"
+
+#define DEVICE_GPIO "/dev/misc/davinci_gpio"
+
 #define LENA_OK (0)
 #define LENA_FALSE (-1)
 
@@ -70,5 +73,6 @@
 extern Codec *getCodec(Char *extension, Codec *codecs);
 extern Int GetAirGroundStationFlag( void );
 extern Int InitMmapAddress( void );
+
 #endif /* _COMMON_H */
 

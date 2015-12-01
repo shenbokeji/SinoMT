@@ -1,0 +1,1970 @@
+Package: kernel-module-hid-samsung
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: busybox-mountall
+Version: 1.13.2-r42.3-arago3.6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-ledtrig-heartbeat
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-mail
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: module-init-tools-depmod
+Version: 3.4-r6.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-filter
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: util-linux-ng-umount
+Version: 2.17-r35-arago1.6
+Depends: libblkid1, libuuid1, libgcc1, libc6
+Provides: util-linux-umount
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libpam
+Version: 1.1.1-r2.6
+Depends: libc6, libgcc1
+Recommends: libpam-meta, libpam-base-files
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: busybox-syslog
+Version: 1.13.2-r42.3-arago3.6
+Depends: busybox
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Conffiles:
+ /etc/default/busybox-syslog a6ca0459d1639b4cad15efc04d6c2f93
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-wheel
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-ppp-synctty
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-ppp-generic, kernel-module-slhc
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-leds-gpio
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-led-class
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-slhc
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libc6
+Version: 2.8-r7.6
+Depends: libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: opkg
+Version: 0.1.8+svnr599-r3.6
+Depends: libopkg0, libgcc1, libc6
+Provides: update-alternatives
+Replaces: opkg-nogpg, opkg-nogpg-nocurl
+Status: install user installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: iperf
+Version: 2.0.4-r1.1.6
+Depends: libstdc++6, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-ledtrig-timer
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libcom-err2
+Version: 1.41.14-r29.6
+Depends: libc6, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-lib
+Version: 1.0.23-r0.6
+Depends: libasound2, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: busybox
+Version: 1.13.2-r42.3-arago3.6
+Depends: busybox-mountall, update-rc.d, libc6
+Recommends: libgcc1, libgcc1, busybox-syslog
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: makedevs
+Version: 1.0.0-r9.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: tslib-conf
+Version: 1.0-r28.6.6
+Provides: libts-0.0-conf
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: util-linux-ng-mountall
+Version: 2.17-r35-arago1.6
+Provides:
+Replaces: busybox-mountall
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-group
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: util-linux-ng-readprofile
+Version: 2.17-r35-arago1.6
+Depends: libgcc1, libc6
+Provides: util-linux-readprofile
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-access
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-ppp-async
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-ppp-generic, kernel-module-slhc, kernel-module-crc-ccitt
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libusb-0.1-4
+Version: 1:0.1.3-r0.6
+Depends: libusb-1.0-0, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-states
+Version: 0.2.0-r22-arago1.6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: initscript-telnetd
+Version: 1.0-r2.6
+Depends: update-rc.d
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: task-arago-console
+Version: 1.0-r15.6
+Depends: alsa-conf, alsa-conf-base, alsa-server, alsa-utils, alsa-utils-aconnect, alsa-utils-alsaconf, alsa-utils-alsactl, alsa-utils-alsamixer, alsa-utils-amixer, alsa-utils-iecset, alsa-utils-midi, alsa-utils-speakertest, alsa-state, tslib-conf, tslib-calibrate, tslib-tests, ncurses, ncurses-terminfo, ncurses-tools, e2fsprogs, e2fsprogs-e2fsck, e2fsprogs-mke2fs, dosfstools, util-linux-ng-fdisk, fbset, usbutils, i2c-tools, gdbserver, iproute2, libz1, libpng12-0, libjpeg8, libjpeg-tools, libfreetype6, thttpd, cppstub
+Recommends: kernel-modules
+Provides:
+Status: install user installed
+Architecture: all
+Installed-Time: 1301011341
+
+Package: modutils-initscripts
+Version: 1.0-r3.6
+Depends: update-rc.d
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: util-linux-ng-mount
+Version: 2.17-r35-arago1.6
+Depends: libblkid1, libuuid1, libgcc1, libc6
+Provides: util-linux-mount
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-modules
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Recommends: kernel-module-nls-ascii, kernel-module-nls-utf8, kernel-module-minix, kernel-module-smbfs, kernel-module-nfsd, kernel-module-xfs, kernel-module-autofs4, kernel-module-crc-t10dif, kernel-module-xfrm6-mode-beet, kernel-module-xfrm6-mode-transport, kernel-module-xfrm6-mode-tunnel, kernel-module-sit, kernel-module-loop, kernel-module-mtd-stresstest, kernel-module-mtd-subpagetest, kernel-module-mtd-oobtest, kernel-module-mtd-speedtest, kernel-module-mtd-pagetest, kernel-module-mtd-readtest, kernel-module-mtd-torturetest, kernel-module-scsi-wait-scan, kernel-module-ppp-synctty, kernel-module-ppp-async, kernel-module-tun, kernel-module-ppp-deflate, kernel-module-libertas-sdio, kernel-module-hid-monterey, kernel-module-hid-ezkey, kernel-module-hid-cypress, kernel-module-hid-gyration, kernel-module-hid-cherry, kernel-module-hid-sony, kernel-module-hid-chicony, kernel-module-hid-samsung, kernel-module-hid-petalynx, kernel-module-hid-sunplus, kernel-module-hid-belkin, kernel-module-hid-apple, kernel-module-hid-pl, kernel-module-hid-a4tech, kernel-module-ledtrig-timer, kernel-module-ledtrig-heartbeat, kernel-module-leds-gpio
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: util-linux-ng-sfdisk
+Version: 2.17-r35-arago1.6
+Depends: libgcc1, libc6
+Provides: util-linux-sfdisk
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-securetty
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-utils-amixer
+Version: 1.0.23-r4.6
+Depends: libc6, libasound2, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libjpeg8
+Version: 8b-r1.6
+Depends: libgcc1, libc6
+Provides: libjpeg8
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libopkg0
+Version: 0.1.8+svnr599-r3.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: libusb-1.0-0
+Version: 1.0.8-r0.6
+Depends: libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libuuid1
+Version: 2.17-r35-arago1.6
+Depends: libgcc1, libc6, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: ncurses-tools
+Version: 5.7+20110115-r16.6
+Depends: ncurses, ncurses, libtic5, libtinfo5, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-minix
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-hid-cypress
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: base-files
+Version: 3.0.14-r99-arago1.6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Conffiles:
+ /etc/fstab fcfdf6cb2d8b134ba87f9519e13c58ef
+ /etc/hostname 82efc0a2abc7e59fd1239edcf2244896
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: alsa-conf-base
+Version: 1.0.23-r0.6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: sysvinit-inittab
+Version: 2.86-r63-arago2.6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Conffiles:
+ /etc/inittab e669c133bb90f4290a3eb1aa958c3bab
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-hid-sony
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: dosfstools
+Version: 2.11-r2.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: devmem2
+Version: 1.0-r7.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: libstdc++6
+Version: 4.3.3-r7.6
+Depends: libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-motd
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-warn
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libdbus-1-3
+Version: 1.2.24-r20.1-arago2.6
+Depends: libc6, libgcc1
+Recommends: dbus
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-rootok
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: task-arago-base
+Version: 1.0-r13.6
+Depends: base-files, base-passwd, busybox, initscripts, modutils-initscripts, netbase, update-alternatives, module-init-tools, alsa-lib, alsa-utils-aplay, ldd, mtd-utils, curl, arago-feed-configs, initscript-telnetd, devmem2
+Provides:
+Status: install user installed
+Architecture: all
+Installed-Time: 1301011339
+
+Package: u-boot
+Version: 2010.12-rc2-psp03.01.01.39-r1.6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: usbutils
+Version: 0.86-r1.6
+Depends: libusb-0.1-4, libz1, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libjpeg-tools
+Version: 8b-r1.6
+Depends: libjpeg8, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: initscripts
+Version: 1.0-r126.6
+Depends: makedevs
+Provides:
+Status: install user installed
+Architecture: armv5te
+Conffiles:
+ /etc/device_table 19faee0e28d44f1840c39c4f944141a2
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-tally2
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libtinfo5
+Version: 5.7+20110115-r16.6
+Depends: libc6, libgcc1
+Recommends: ncurses-terminfo-base
+Suggests: ncurses-terminfo
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-time
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-hid-petalynx
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-ppp-generic
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-slhc
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-scsi-wait-scan
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libpam-meta
+Version: 1.1.1-r2.6
+Depends: pam-plugin-xauth, pam-plugin-debug, pam-plugin-keyinit, pam-plugin-unix, pam-plugin-faildelay, pam-plugin-shells, pam-plugin-env, pam-plugin-ftp, pam-plugin-motd, pam-plugin-rhosts, pam-plugin-limits, pam-plugin-permit, pam-plugin-mail, pam-plugin-deny, pam-plugin-userdb, pam-plugin-warn, pam-plugin-echo, pam-plugin-issue, pam-plugin-exec, pam-plugin-localuser, pam-plugin-nologin, pam-plugin-mkhomedir, pam-plugin-time, pam-plugin-namespace, pam-plugin-wheel, pam-plugin-stress, pam-plugin-group, pam-plugin-timestamp, pam-plugin-umask, pam-plugin-lastlog, pam-plugin-tally2, pam-plugin-loginuid, pam-plugin-rootok, pam-plugin-tally, pam-plugin-listfile, pam-plugin-succeed-if, pam-plugin-pwhistory, pam-plugin-access, pam-plugin-filter, pam-plugin-securetty
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-hid-ezkey
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-xfrm6-mode-beet
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-ipv6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: dbus-x11
+Version: 1.2.24-r20.1-arago2.6
+Depends: dbus, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-permit
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: iproute2
+Version: 2.6.35.1-r4.0.6
+Depends: libc6, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: psplash-support
+Version: 0.0+svnr422--arago1.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-echo
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pointercal
+Version: 0.0-r22.6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-utils-alsaconf
+Version: 1.0.23-r4.6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: libts-1.0-0
+Version: 1.0-r28.6.6
+Depends: tslib-conf, libc6, libgcc1
+Recommends: pointercal
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libxml2
+Version: 2.7.8-r9.1.6
+Depends: libc6, libz1, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: util-linux-ng
+Version: 2.17-r35-arago1.6
+Depends: util-linux-ng-mountall, util-linux-ng-umount, util-linux-ng-swaponoff, util-linux-ng-losetup, util-linux-ng-fsck, util-linux-ng-blkid, libgcc1, libc6, libpam, libtinfo5, libuuid1, libncursesw5, libblkid1, libz1
+Recommends: util-linux-ng-fdisk, util-linux-ng-cfdisk, util-linux-ng-sfdisk, util-linux-ng-mount, util-linux-ng-readprofile
+Provides: util-linux
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libblkid1
+Version: 2.17-r35-arago1.6
+Depends: libuuid1, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-state
+Version: 0.2.0-r22-arago1.6
+Depends: update-rc.d
+Recommends: alsa-states
+Provides:
+Status: install ok installed
+Architecture: all
+Conffiles:
+ /etc/asound.conf 7bf719bea3608da6c21382a4f5d4d3b3
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-hid-cherry
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libthread-db1
+Version: 2.8-r7.6
+Depends: libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: alsa-conf
+Version: 1.0.23-r0.6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-hid-apple
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: mtd-utils
+Version: 1.4.1-r0.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: gdbserver
+Version: 6.6-r9.0.6
+Depends: libthread-db1, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: udev-utils
+Version: 141-r30.6-arago2.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-libertas-sdio
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-libertas
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: util-linux-ng-swaponoff
+Version: 2.17-r35-arago1.6
+Depends: libblkid1, libuuid1, libgcc1, libc6
+Provides: util-linux-swaponoff
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-autofs4
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-umask
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libtic5
+Version: 5.7+20110115-r16.6
+Depends: libc6, libtinfo5, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: dbus
+Version: 1.2.24-r20.1-arago2.6
+Depends: update-rc.d, libexpat1, libc6, libgcc1, libdbus-1-3
+Provides: dbus-1
+Replaces: dbus-1
+Conflicts: dbus-1
+Status: install ok unpacked
+Architecture: armv5te
+Conffiles:
+ /etc/dbus-1/system.conf cde0a6ef9dad7b80fce3b227753fa64e
+ /etc/dbus-1/session.conf 673ab3651353e67a32593236f7410d2f
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-sit
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-tunnel4, kernel-module-ipv6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libpcre0
+Version: 7.6-r8.6
+Depends: libstdc++6, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: curl
+Version: 7.21.2-r4.0-arago1.6
+Depends: libcurl4, libc6, libz1, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-smbfs
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libpam-base-files
+Version: 1.0-r7.6
+Depends: libpam
+Recommends: libpam-meta
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-rhosts
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: i2c-tools
+Version: 3.0.3-r0.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-nologin
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: opkg-collateral
+Version: 1.0-r3.6
+Provides:
+Status: install user installed
+Architecture: all
+Conffiles:
+ /etc/opkg/opkg.conf 7df7bcac0ec9573faba2d2d3b7e9bc3b
+Installed-Time: 1301011341
+
+Package: libncursesw5
+Version: 5.7+20110115-r16.6
+Depends: libc6, libtinfo5, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-xfrm6-mode-tunnel
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-ipv6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-stress
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: e2fsprogs-badblocks
+Version: 1.41.14-r29.6
+Depends: libext2fs2, libcom-err2, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-utils-midi
+Version: 1.0.23-r4.6
+Depends: libasound2, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-utils-alsamixer
+Version: 1.0.23-r4.6
+Depends: libformw, libmenuw, libpanelw5, libncursesw5, libtinfo5, libasound2, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: psplash-ti
+Version: 0.0+svnr422--arago1.6
+Depends: psplash-support, update-rc.d, libgcc1, libc6
+Provides: virtual-psplash
+Conflicts: exquisite
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: alsa-utils-iecset
+Version: 1.0.23-r4.6
+Depends: libc6, libasound2, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-nfsd
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-exportfs
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-crc-t10dif
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-hid-gyration
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: fbset-modes
+Version: 0.1.0-r5.6
+Provides:
+Status: install ok installed
+Architecture: all
+Conffiles:
+ /etc/fb.modes b8de2484fab6925beba7fc258292ea2d
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: base-passwd
+Version: 3.5.20-r1.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-exportfs
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-exec
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-hid-monterey
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-deny
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: thttpd
+Version: 2.25b-r8-arago1.6
+Depends: update-rc.d, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-pwhistory
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libmenuw
+Version: 5.7+20110115-r16.6
+Depends: libc6, libncursesw5, libtinfo5, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: e2fsprogs-e2fsck
+Version: 1.41.14-r29.6
+Depends: libext2fs2, libcom-err2, libblkid1, libuuid1, libe2p2, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-unix
+Version: 1.1.1-r2.6
+Depends: libc6, libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: util-linux-ng-fsck
+Version: 2.17-r35-arago1.6
+Depends: libblkid1, libuuid1, libgcc1, libc6
+Provides: e2fsprogs-fsck
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: util-linux-ng-fdisk
+Version: 2.17-r35-arago1.6
+Depends: libblkid1, libuuid1, libgcc1, libc6
+Provides: util-linux-fdisk
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-hid-a4tech
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: sysvinit-utils
+Version: 2.86-r63-arago2.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: iptables
+Version: 1.4.9.1-r7.1.6
+Depends: libgcc1, libc6
+Recommends: kernel-module-ip-tables, kernel-module-iptable-nat, kernel-module-iptable-filter, kernel-module-ipt-masquerade
+Provides: iptables-utils
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-libertas
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-hid-sunplus
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: util-linux-ng-cfdisk
+Version: 2.17-r35-arago1.6
+Depends: libncursesw5, libtinfo5, libgcc1, libc6
+Provides: util-linux-cfdisk
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-nls-utf8
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libformw
+Version: 5.7+20110115-r16.6
+Depends: libc6, libncursesw5, libtinfo5, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: alsa-utils-aplay
+Version: 1.0.23-r4.6
+Depends: libc6, libasound2, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-listfile
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libext2fs2
+Version: 1.41.14-r29.6
+Depends: libcom-err2, libblkid1, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-tally
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-debug
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: util-linux-ng-blkid
+Version: 2.17-r35-arago1.6
+Depends: libblkid1, libuuid1, libgcc1, libc6
+Provides: e2fsprogs-blkid
+Replaces: e2fsprogs-blkid
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-localuser
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: tslib-calibrate
+Version: 1.0-r28.6.6
+Depends: libts-1.0-0, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-xfs
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-exportfs
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-ppp-deflate
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1, kernel-module-ppp-generic, kernel-module-slhc
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: udev
+Version: 141-r30.6-arago2.6
+Depends: module-init-tools-depmod, udev-utils, update-rc.d, libgcc1, libc6
+Provides: hotplug, udev-compat-wrapper
+Status: install user installed
+Architecture: armv5te
+Installed-Time: 1301011341
+
+Package: kernel-module-led-class
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: e2fsprogs
+Version: 1.41.14-r29.6
+Depends: util-linux-ng, e2fsprogs-badblocks, libe2p2, libcom-err2, libgcc1, libc6, libuuid1, libext2fs2, libss2, libblkid1
+Provides:
+Status: install ok unpacked
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-xfrm6-mode-transport
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: arago-feed-configs
+Version: 1.0-r11.6
+Recommends: opkg
+Provides:
+Status: install user installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: module-init-tools
+Version: 3.4-r6.6
+Depends: module-init-tools-depmod, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-hid-chicony
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-issue
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libpanelw5
+Version: 5.7+20110115-r16.6
+Depends: libc6, libncursesw5, libtinfo5, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: ncurses-terminfo-base
+Version: 5.7+20110115-r16.6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: sysvinit-pidof
+Version: 2.86-r63-arago2.6
+Depends: sysvinit-utils
+Provides:
+Status: install user installed
+Architecture: armv5te
+Installed-Time: 1301011341
+
+Package: libss2
+Version: 1.41.14-r29.6
+Depends: libcom-err2, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-env
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: update-rc.d
+Version: 0.7-r2.6
+Provides:
+Status: install ok installed
+Architecture: all
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: alsa-utils-aconnect
+Version: 1.0.23-r4.6
+Depends: libasound2, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-mtd-stresstest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-mtd-subpagetest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: tinylogin
+Version: 1.4-r7.6
+Depends: libc6, libgcc1
+Provides:
+Status: install user installed
+Architecture: armv5te
+Installed-Time: 1301011341
+
+Package: angstrom-version
+Version: 1:2011.02-r6.6
+Provides:
+Status: install user installed
+Architecture: dm368-evm
+Installed-Time: 1301011339
+
+Package: libcurl4
+Version: 7.21.2-r4.0-arago1.6
+Depends: libc6, libz1, libgcc1
+Recommends: curl-certs
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-nls-ascii
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-mtd-speedtest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-ipv6
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-mtd-torturetest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-2.6.32.17-davinci1
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: kernel-module-hid-belkin
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-timestamp
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-crc-ccitt
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-lastlog
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libz1
+Version: 1.2.3-r7.0.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-userdb
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, db, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libglib-2.0-0
+Version: 2.24.1-r2.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-namespace
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-loop
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: netbase
+Version: 4.21-r50-arago1.6
+Depends: update-rc.d
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Conffiles:
+ /etc/network/options a3dfe287e7258722afb9cf254b31815e
+ /etc/hosts 27acad957c7cded40cd6ac50d23ddc66
+ /etc/network/interfaces 0cd24f00623a0426d559617bc9233475
+ /etc/rpc f0b6f6352bf886623adc04183120f83b
+ /etc/protocols e1b2c07d83ff5322a6353945a5c4b7e6
+ /etc/services 8a04f87ad04f4a1d3c7e6ca12e07290d
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-mtd-pagetest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: fbset
+Version: 2.1-r4.6
+Depends: libgcc1, libc6
+Recommends: fbset-modes
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libgcc1
+Version: 4.3.3-r7.6
+Depends: libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-limits
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: tslib-tests
+Version: 1.0-r28.6.6
+Depends: libts-1.0-0, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: task-arago-base-tisdk
+Version: 1.0-r5.6
+Depends: dbus, dbus-x11, libexpat1, libglib-2.0-0, libxml2, libpcre0, iptables, iperf, psplash-ti, u-boot
+Provides:
+Status: install user installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+
+Package: kernel-module-hid-pl
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: cppstub
+Version: 1.0-r4.6
+Depends: libstdc++6, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: ncurses
+Version: 5.7+20110115-r16.6
+Depends: libtinfo5, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libexpat1
+Version: 2.0.1-r3.0.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: alsa-utils-alsactl
+Version: 1.0.23-r4.6
+Depends: libasound2, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-faildelay
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libasound2
+Version: 1.0.23-r0.6
+Depends: alsa-conf-base, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: util-linux-ng-losetup
+Version: 2.17-r35-arago1.6
+Depends: libgcc1, libc6
+Provides: util-linux-losetup
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-utils-speakertest
+Version: 1.0.23-r4.6
+Depends: libc6, libasound2, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libpng12-0
+Version: 1.2.44-r2.0.6
+Depends: libz1, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-keyinit
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: db
+Version: 5.0.21-r3.6
+Depends: libc6, libstdc++6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-tunnel4
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: ncurses-terminfo
+Version: 5.7+20110115-r16.6
+Depends: ncurses-terminfo-base
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: ldd
+Version: 2.8-r7.6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: kernel-module-tun
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: alsa-utils
+Version: 1.0.23-r4.6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: e2fsprogs-mke2fs
+Version: 1.41.14-r29.6
+Depends: libext2fs2, libcom-err2, libblkid1, libuuid1, libe2p2, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-succeed-if
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-loginuid
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: update-modules
+Version: 1.0-r10.6
+Depends: module-init-tools-depmod
+Provides:
+Status: install ok unpacked
+Architecture: all
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: sysvinit
+Version: 2.86-r63-arago2.6
+Depends: sysvinit-inittab, libgcc1, libc6
+Recommends: sysvinit-utils
+Provides:
+Status: install user installed
+Architecture: armv5te
+Installed-Time: 1301011341
+
+Package: kernel-module-mtd-readtest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: libe2p2
+Version: 1.41.14-r29.6
+Depends: libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: alsa-server
+Version: 1.0.23-r0.6
+Depends: libasound2, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011339
+Auto-Installed: yes
+
+Package: pam-plugin-mkhomedir
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: libfreetype6
+Version: 2.4.3-r0-arago1.6
+Depends: libz1, libgcc1, libc6
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011341
+Auto-Installed: yes
+
+Package: pam-plugin-xauth
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-ftp
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: pam-plugin-shells
+Version: 1.1.1-r2.6
+Depends: libpam, libc6, libgcc1
+Provides:
+Status: install ok installed
+Architecture: armv5te
+Installed-Time: 1301011340
+Auto-Installed: yes
+
+Package: kernel-module-mtd-oobtest
+Version: 2.6.32.17-psp03.01.01.39-r52.6
+Depends: update-modules, kernel-2.6.32.17-davinci1
+Provides:
+Status: install ok installed
+Architecture: dm368-evm
+Installed-Time: 1301011341
+Auto-Installed: yes
+

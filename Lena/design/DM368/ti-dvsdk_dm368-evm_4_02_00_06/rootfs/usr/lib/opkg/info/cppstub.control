@@ -1,0 +1,13 @@
+Package: cppstub
+Version: 1.0-r4.6
+Description: C++ stub to link against libstdc++
+Section: base
+Priority: optional
+Maintainer: Angstrom Developers <angstrom-distro-devel@linuxtogo.org>
+License: BSD
+Architecture: armv5te
+OE: cppstub
+Homepage: unknown
+Build: install/afa4844
+Depends: libstdc++6, libc6, libgcc1
+Source: file://cppstub.cpp

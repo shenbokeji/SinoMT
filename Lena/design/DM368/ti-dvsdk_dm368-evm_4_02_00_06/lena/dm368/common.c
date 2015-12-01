@@ -46,11 +46,24 @@ Codec *getCodec(Char *extension, Codec *codecs)
 */
 Int GetAirGroundStationFlag()
 {
-    Int iAirorGround = 0xFFFFFFFF;
+    unsigned int uiAirorGround = 0xFFFFFFFF;
+    FILE *fid;
+
+    fid = (FILE *)open( DEVICE_GPIO, O_RDONLY, 0 );
+    if( (int)fid < 0 )
+    {
+	printf( "ERROR:open failed "DEVICE_GPIO"!\n" );
+	return LENA_FALSE;
+     }
+
     //read the GPIO29 ,get the air ground station flag
-    //iAirorGround = 0;
-    
-    return iAirorGround;
+
+    uiAirorGround = read( (int)fid, NULL, AIR_GROUND_GPIO ); 
+    //printf( "uiAirorGround = %d\n", uiAirorGround );
+    close( (int)fid );
+    fid = NULL;
+
+    return uiAirorGround;
 }
  #if 0
  /*--------------------------------------------------------------------------
