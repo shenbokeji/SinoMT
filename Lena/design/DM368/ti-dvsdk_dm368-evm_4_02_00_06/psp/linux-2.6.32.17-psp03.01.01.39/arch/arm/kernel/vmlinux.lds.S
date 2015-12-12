@@ -19,84 +19,16 @@ jiffies = jiffies_64 + 4;
 
 SECTIONS
 {
-	/DISCARD/ : {			/* Exit code and data		*/
-		EXIT_TEXT
-		EXIT_DATA
-		*(.exitcall.exit)
-		*(.discard)
-		*(.ARM.exidx.exit.text)
-		*(.ARM.extab.exit.text)
-#ifndef CONFIG_HOTPLUG_CPU
-		*(.ARM.exidx.cpuexit.text)
-		*(.ARM.extab.cpuexit.text)
-#endif
-#ifndef CONFIG_HOTPLUG
-		*(.ARM.exidx.devexit.text)
-		*(.ARM.extab.devexit.text)
-#endif
-#ifndef CONFIG_MMU
-		*(.fixup)
-		*(__ex_table)
-#endif
-	}
-
 #ifdef CONFIG_XIP_KERNEL
 	. = XIP_VIRT_ADDR(CONFIG_XIP_PHYS_ADDR);
 #else
 	. = PAGE_OFFSET + TEXT_OFFSET;
 #endif
 	.text.head : {
-		_text = .;
+		_stext = .;
 		_sinittext = .;
 		*(.text.head)
 	}
-
-	.text : {			/* Real text segment		*/
-		_stext = .;		/* Text and read-only data	*/
-			__exception_text_start = .;
-			*(.exception.text)
-			__exception_text_end = .;
-			IRQENTRY_TEXT
-			TEXT_TEXT
-			SCHED_TEXT
-			LOCK_TEXT
-			KPROBES_TEXT
-#ifdef CONFIG_MMU
-			*(.fixup)
-#endif
-			*(.gnu.warning)
-			*(.rodata)
-			*(.rodata.*)
-			*(.glue_7)
-			*(.glue_7t)
-		*(.got) 		/* Global offset table		*/
-	}
-
-	RO_DATA(PAGE_SIZE)
-
-#ifdef CONFIG_ARM_UNWIND
-	/*
-	 * Stack unwinding tables
-	 */
-	. = ALIGN(8);
-	.ARM.unwind_idx : {
-		__start_unwind_idx = .;
-		*(.ARM.exidx*)
-		__stop_unwind_idx = .;
-	}
-	.ARM.unwind_tab : {
-		__start_unwind_tab = .;
-		*(.ARM.extab*)
-		__stop_unwind_tab = .;
-	}
-#endif
-
-	_etext = .; 		/* End of text and rodata section */
-
-#ifndef CONFIG_XIP_KERNEL
-	. = ALIGN(PAGE_SIZE);
-	__init_begin = .;
-#endif
 
 	.init : {			/* Init code and data		*/
 			INIT_TEXT
@@ -140,15 +72,79 @@ SECTIONS
 			*(.data.percpu.shared_aligned)
 		__per_cpu_end = .;
 #ifndef CONFIG_XIP_KERNEL
+		__init_begin = _stext;
 		INIT_DATA
+		. = ALIGN(PAGE_SIZE);
+		__init_end = .;
 #endif
 	}
+
+	/DISCARD/ : {			/* Exit code and data		*/
+		EXIT_TEXT
+		EXIT_DATA
+		*(.exitcall.exit)
+		*(.discard)
+		*(.ARM.exidx.exit.text)
+		*(.ARM.extab.exit.text)
+#ifndef CONFIG_HOTPLUG_CPU
+		*(.ARM.exidx.cpuexit.text)
+		*(.ARM.extab.cpuexit.text)
+#endif
+#ifndef CONFIG_HOTPLUG
+		*(.ARM.exidx.devexit.text)
+		*(.ARM.extab.devexit.text)
+#endif
+#ifndef CONFIG_MMU
+		*(.fixup)
+		*(__ex_table)
+#endif
+	}
+
+	.text : {			/* Real text segment		*/
+		_text = .;		/* Text and read-only data	*/
+			__exception_text_start = .;
+			*(.exception.text)
+			__exception_text_end = .;
+			TEXT_TEXT
+			SCHED_TEXT
+			LOCK_TEXT
+			KPROBES_TEXT
+#ifdef CONFIG_MMU
+			*(.fixup)
+#endif
+			*(.gnu.warning)
+			*(.rodata)
+			*(.rodata.*)
+			*(.glue_7)
+			*(.glue_7t)
+		*(.got)			/* Global offset table		*/
+	}
+
+	RO_DATA(PAGE_SIZE)
+
+	_etext = .;			/* End of text and rodata section */
+
+#ifdef CONFIG_ARM_UNWIND
+	/*
+	 * Stack unwinding tables
+	 */
+	. = ALIGN(8);
+	.ARM.unwind_idx : {
+		__start_unwind_idx = .;
+		*(.ARM.exidx*)
+		__stop_unwind_idx = .;
+	}
+	.ARM.unwind_tab : {
+		__start_unwind_tab = .;
+		*(.ARM.extab*)
+		__stop_unwind_tab = .;
+	}
+#endif
 
 #ifdef CONFIG_XIP_KERNEL
 	__data_loc = ALIGN(4);		/* location in binary */
 	. = PAGE_OFFSET + TEXT_OFFSET;
 #else
-	__init_end = .;
 	. = ALIGN(THREAD_SIZE);
 	__data_loc = .;
 #endif
