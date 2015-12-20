@@ -98,7 +98,7 @@ Void *displayThrFxn(Void *arg)
 
     /* Signal that initialization is done and wait for other threads */
     Rendezvous_meet(envp->hRendezvousInit);
-
+  printf("**********displayThrFxn.**********\n");
     while (!gblGetQuit()) {
         /* Pause processing? */
         Pause_test(envp->hPauseProcess);

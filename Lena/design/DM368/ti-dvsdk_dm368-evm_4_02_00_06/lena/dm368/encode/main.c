@@ -321,7 +321,7 @@ Int main(Int argc, Char *argv[])
     Int status = EXIT_SUCCESS;	
 
 	Int	iReturn;	
-	ver();
+	
 	iReturn = ushell_init();
 	if( 0 == iReturn )
 	{
@@ -368,8 +368,9 @@ Int main(Int argc, Char *argv[])
 
 
     //Initialize the air station video process,include capture/encode/write pthread
-    status = InitAirVideoProcess( &args );
 #endif
+    //status = InitAirVideoProcess( &args );
+
 	while(1)
 	{
 		sleep(1);

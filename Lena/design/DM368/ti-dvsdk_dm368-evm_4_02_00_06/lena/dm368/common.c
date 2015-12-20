@@ -14,6 +14,8 @@
 #include <fcntl.h>
 #include "common.h"
 
+unsigned int g_AirGround = 0XFFFFFFFF;
+
 /******************************************************************************
  * getCodec
  ******************************************************************************/
@@ -47,10 +49,10 @@ Codec *getCodec(Char *extension, Codec *codecs)
 Int GetAirGroundStationFlag()
 {
     unsigned int uiAirorGround = 0xFFFFFFFF;
-    FILE *fid;
+    int fid;
 
-    fid = (FILE *)open( DEVICE_GPIO, O_RDONLY, 0 );
-    if( (int)fid < 0 )
+    fid = open( DEVICE_GPIO, O_RDONLY, 0 );
+    if( fid < 0 )
     {
 	printf( "ERROR:open failed "DEVICE_GPIO"!\n" );
 	return LENA_FALSE;
@@ -58,11 +60,11 @@ Int GetAirGroundStationFlag()
 
     //read the GPIO29 ,get the air ground station flag
 
-    uiAirorGround = read( (int)fid, NULL, AIR_GROUND_GPIO ); 
-    //printf( "uiAirorGround = %d\n", uiAirorGround );
-    close( (int)fid );
+    uiAirorGround = read( fid, NULL, AIR_GROUND_GPIO ); 
+    printf( "uiAirorGround = %d\n", uiAirorGround );
+    close( fid );
     fid = NULL;
-
+    g_AirGround = uiAirorGround;
     return uiAirorGround;
 }
  #if 0

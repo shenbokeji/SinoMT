@@ -598,7 +598,7 @@ fail:
 
 	/* Read CPLD version number */
 	//soc_info->cpld_version = __raw_readb(cpld + CPLD_VERSION);
-
+	soc_info->cpld_version = 0x21;//for lena,this is init by ourself,please refer to cputype.h
 	/* Read SW5 to set up NAND + keypad _or_ OneNAND (sync read).
 	 * NOTE:  SW4 bus width setting must match!
 	 */
@@ -713,6 +713,8 @@ static struct spi_board_info dm365_evm_spi4_info[] __initconst = {
 #define AIR_GROUND_GPIO (29) 
 #define SPI0_CS_GPIO (25) 
 #define SPI4_CS_GPIO (37) 
+#define SPI4_CS_GPIO (37) 
+#define FPGA_RESET_GPIO	(9)
 /*--------------------------------------------------------------------------
   * function : GPIO_init
   * output	 : GPIO init
@@ -725,6 +727,7 @@ void GPIORequsetInit()
 	gpio_request( SPI0_CS_GPIO, "SPI0_CS_GPIO" );
 	gpio_request( SPI4_CS_GPIO, "SPI4_CS_GPIO" );
   	gpio_request( AIR_GROUND_GPIO, "AIR_GROUND_GPIO" );
+	gpio_request( FPGA_RESET_GPIO, "FPGA_RESET_GPIO" );
   return;
 }
  /*--------------------------------------------------------------------------

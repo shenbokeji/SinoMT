@@ -59,10 +59,10 @@ typedef struct Args {
     Int            osd;
 } Args;
 #define DEFAULT_ARGS \
-    {Display_Output_COUNT,\
+    {Display_Output_COMPONENT,\
     VideoStd_720P_60,\
     "720P 60Hz",\
-    NULL,\
+    "720p.264",\
     NULL,\
     FALSE,\
     FALSE,\

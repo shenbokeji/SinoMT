@@ -20,8 +20,6 @@ Void usage(void)
 {
     fprintf(stderr, "Usage: decode [options]\n\n"
       "Options:\n"
-      "-a | --audiofile        Audio file to play\n"
-      "-s | --speechfile       Speech file to play\n"
       "-v | --videofile        Video file to play\n"
       "-y | --display_standard Video standard to use for display (see below).\n"
       "-O | --display_output   Video output to use (see below).\n"
@@ -51,8 +49,6 @@ Void usage(void)
    // const Char shortOptions[] = "a:s:v:y:O:kt:lfoh";
    const Char shortOptions[] = "v:y:O:kt:lfoh";
     const struct option longOptions[] = {
-        //{"audiofile",        required_argument, NULL, 'a'},
-        //{"speechfile",       required_argument, NULL, 's'},
         {"videofile",        required_argument, NULL, 'v'},
         {"display_standard", required_argument, NULL, 'y'},
         {"display_output",   required_argument, NULL, 'O'},
@@ -79,47 +75,7 @@ Void usage(void)
         switch (c) {
             case 0:
                 break;
-#if 0
-            case 'a':
-                extension = rindex(optarg, '.');
-                if (extension == NULL) {
-                    fprintf(stderr, "Audio file without extension: %s\n",
-                            optarg);
-                    exit(EXIT_FAILURE);
-                }
 
-                argsp->audioDecoder =
-                    getCodec(extension, engine->audioDecoders);
-
-                if (!argsp->audioDecoder) {
-                    fprintf(stderr, "Unknown audio file extension: %s\n",
-                            extension);
-                    exit(EXIT_FAILURE);
-                }
-                argsp->audioFile = optarg;
-
-                break;
-
-            case 's':
-                extension = rindex(optarg, '.');
-                if (extension == NULL) {
-                    fprintf(stderr, "Speech file without extension: %s\n",
-                            optarg);
-                    exit(EXIT_FAILURE);
-                }
-
-                argsp->speechDecoder =
-                    getCodec(extension, engine->speechDecoders);
-
-                if (!argsp->speechDecoder) {
-                    fprintf(stderr, "Unknown speech file extension: %s\n",
-                            extension);
-                    exit(EXIT_FAILURE);
-                }
-                argsp->speechFile = optarg;
-
-                break;
-#endif
             case 'v':
                 extension = rindex(optarg, '.');
                 if (extension == NULL) {

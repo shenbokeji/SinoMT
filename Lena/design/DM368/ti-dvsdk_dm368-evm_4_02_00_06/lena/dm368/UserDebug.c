@@ -11,6 +11,7 @@
  *----------------------------------------------------------------------------
 */
 #include "UserDebug.h"
+#include "common.h"
  /*****************************************************************************
  * filename	: ver
  * function	: print version info
@@ -22,7 +23,7 @@
 	unsigned int uiFlag = 0XFFFFFFFF;
  	uiFlag = GetAirGroundStationFlag();
 
-	printf( DSP_TIME"%s", uiFlag ? AIR_VERSION : GROUND_VERSION );
+	printf( DSP_TIME"%s", ( 1u == uiFlag ) ? AIR_VERSION : GROUND_VERSION );
 
 	return 0;
  }
@@ -107,7 +108,331 @@ int rdfpga(  const UInt32 uiAddr, const UInt uiRdNum )
 	return LENA_OK;
 }
 
- 
+#define FPGA_DMA_RECV	(0U)
+#define FPGA_DMA_SEND	(1U)
+
+
+
+typedef struct fpga_data{
+	unsigned int tb_size;
+	unsigned int source_addr;
+	unsigned int dst_addr;
+	unsigned int byte_size;
+	unsigned char device_busy;
+}tfpgadata;
+
+/*----------------------------------------------------------------------------
+ * name		: sendfile
+ * function	: send local file to another side 
+ * input 	: number: :send times
+		  len:send data length
+ * author	version		date		note
+ * feller	1.0		20151208      
+ *----------------------------------------------------------------------------
+*/
+#define SEND_PHY_ADDR (0x87000000)
+#define RECEIVE_PHY_ADDR (0x88000000)
+#define MEM_FILENAME "/dev/mem"
+#define SEND_VIDEO_FILE_384 "/video384.264"
+#define SEND_VIDEO_FILE_720P "/video720p.264"
+#define SEND_VIDEO_FILE "sendvideo.264"
+#define RECE_VIDEO_FILE "/recevideo.264"
+#define TRANS_ODD2EVEN(i) ( ( i + 1 ) & 0XFFFFFFFE ) 
+int sendfile( int number, size_t ilen ) 
+{
+	FILE *fid;
+	int fidfpga;
+	int fsenddev;
+	tfpgadata tFPGADataTmp;
+	unsigned int uiRet; 
+	unsigned int uiLoop;
+
+	void *ptrSend;
+	size_t uimaplen;
+
+	uimaplen = TRANS_ODD2EVEN( ilen );// for odd length, must even
+
+	//open the video file
+
+	fid = fopen( SEND_VIDEO_FILE, "rb" );
+	if( (int)fid <= 0 )
+	{
+		printf( SEND_VIDEO_FILE"ERROR:open failed!\n" );
+		return LENA_FALSE;
+	}
+
+	//open the mem file 
+	fsenddev = open( MEM_FILENAME,O_RDWR | O_SYNC );
+ 	if( fsenddev > 0 )
+	{
+	        printf( MEM_FILENAME" open the success\n");
+	}else
+	{
+		printf( MEM_FILENAME" open the failed\n");
+		fclose(fid);
+		fid = NULL;
+		return LENA_FALSE;		
+	}	
+	//Map the continus address
+	ptrSend = mmap( NULL,
+                uimaplen,
+                PROT_READ|PROT_WRITE,
+                MAP_SHARED,
+                fsenddev,
+                SEND_PHY_ADDR);
+	if( MAP_FAILED == ptrSend )
+	{
+		fclose(fid);
+		fid = NULL;
+		close(fsenddev);
+		fsenddev = NULL;
+		return LENA_FALSE;
+	}
+	
+	uiRet = fread( ptrSend, 1, ilen, fid );
+	if( uiRet != ilen )
+	{
+		printf( "warning : read data %d byte ,expect data %d byte \n", uiRet,ilen );
+	}
+	fclose(fid);
+	fid = NULL;
+	printf( "read file over\n" );
+	//open the transfer channel
+	fidfpga = open( DEVICE_FPGA, O_RDWR, 0 );
+	if( fidfpga < 0 )
+	{
+		printf( DEVICE_FPGA"ERROR:open failed !\n" );
+		close(fsenddev);
+		fsenddev = NULL;
+		munmap(ptrSend,uimaplen);
+		return LENA_FALSE;
+	}
+
+	tFPGADataTmp.source_addr = (unsigned int)SEND_PHY_ADDR;
+	tFPGADataTmp.byte_size = uimaplen;
+	printf( "send start\n" );
+	for( uiLoop = 0; uiLoop < number; uiLoop++ )
+	{
+		uiRet = ioctl( fidfpga, FPGA_DMA_SEND, &tFPGADataTmp );
+
+		if( uiRet < 0 )
+		{
+			printf( " uiRet = %d \n", uiRet );
+		}
+		printf( "send the %d times \n", uiLoop + 1 );
+		sleep(1);//sleep or not?
+	}
+	close(fsenddev);
+	fsenddev = NULL;
+	munmap(ptrSend,uimaplen);
+	close(fidfpga);
+	fidfpga = NULL;
+	printf( "send over \n" );
+	return 0;
+} 
+
+
+int sf( int number, int iflag ) 
+{
+	int fidfpga;
+	int fsenddev;
+	FILE *fid;
+	tfpgadata tFPGADataTmp;
+	unsigned int uiRet; 
+	unsigned int uiLoop;
+	void *ptrSend;
+	struct stat fstatbuf;
+	int ilen;
+	size_t uimaplen;
+	const char *cvideofile;
+
+
+	cvideofile =  ( 0 == iflag ) ? SEND_VIDEO_FILE_384 : SEND_VIDEO_FILE_720P;
+
+	printf( "send video file : %s\n", cvideofile );
+
+	//open the video file
+	fid = (FILE *)fopen( cvideofile, "rb" );
+	if( (int)fid <= 0 )
+	{
+		printf( "ERROR:open failed %s \n", cvideofile );
+		return LENA_FALSE;
+	}
+	//get the file length
+	stat ( cvideofile, &fstatbuf );
+	ilen = (int)fstatbuf.st_size;
+
+	uimaplen = TRANS_ODD2EVEN( ilen );// for odd length, must even
+
+	//open the mem file 
+	fsenddev = open( MEM_FILENAME,O_RDWR | O_SYNC );
+
+ 	if( fsenddev < 0 )
+	{
+		printf( MEM_FILENAME" open the failed\n");
+		fclose(fid);
+		fid = NULL;
+		return LENA_FALSE;
+	}	
+	//Map the continus address
+	ptrSend = mmap( NULL,
+                uimaplen,
+                PROT_READ|PROT_WRITE,
+                MAP_SHARED,
+                fsenddev,
+                SEND_PHY_ADDR);
+	if( MAP_FAILED == ptrSend )
+	{
+		perror("mmap");
+		fclose(fid);
+		fid = NULL;
+		close(fsenddev);
+		fsenddev = NULL;
+		return LENA_FALSE;
+	}
+
+	printf( "start read file\n" );
+	//read the video file to continus address
+	uiRet = fread( ptrSend, 1, ilen, fid );
+	if( uiRet != ilen )
+	{
+		printf( "warning : read data %d byte ,expect data %d byte \n", uiRet,ilen );
+
+	}
+	fclose(fid);
+	fid = NULL;
+	printf( "read file over\n" );
+
+	//open the transfer channel
+	fidfpga = open( DEVICE_FPGA, O_RDWR, 0 );
+	if( fidfpga < 0 )
+	{
+		printf( DEVICE_FPGA"ERROR:open failed !\n" );
+		close(fsenddev);
+		fsenddev = NULL;
+		munmap(ptrSend,uimaplen);
+		return LENA_FALSE;
+	}
+
+	tFPGADataTmp.source_addr = (unsigned int)SEND_PHY_ADDR;
+	tFPGADataTmp.byte_size = uimaplen;
+	printf( "send start\n" );
+	for( uiLoop = 0; uiLoop < number; uiLoop++ )
+	{
+		uiRet = ioctl( fidfpga, FPGA_DMA_SEND, &tFPGADataTmp );
+		if( uiRet < 0 )
+		{
+			printf( " uiRet = %d \n", uiRet );
+		}
+		printf( "send the %d times \n", uiLoop + 1 );
+		sleep(2);//sleep or not?
+	}
+
+	munmap(ptrSend,uimaplen);	
+	close(fsenddev);
+	fsenddev = NULL;
+	close(fidfpga);
+	fidfpga = NULL;
+	
+	return 0;
+} 
+/*----------------------------------------------------------------------------
+ * name		: receivefile
+ * function	: send local file to another side 
+ * input 	: ilen :data length
+ * author	version		date		note
+ * feller	1.0		20151208      
+ *----------------------------------------------------------------------------
+*/
+
+int receivefile( int ilen ) 
+{
+	int fidfpga;
+	int receivedev;
+	FILE *fid;
+	void *ptrrece;
+	tfpgadata tFPGADataTmp; 
+	unsigned int uiRet; 
+	size_t uirdlen;
+
+	uirdlen = TRANS_ODD2EVEN( ilen );// for odd length, must even
+
+	printf( "receive over ,start write file\n" );
+	//open the mem device
+	receivedev = open( MEM_FILENAME,O_RDWR|O_NDELAY );
+ 	if( receivedev <= 0 )
+	{
+		printf( MEM_FILENAME" ERROR:open failed !\n" );
+		return -1;
+	}
+	ptrrece=mmap( NULL,
+                uirdlen,
+                PROT_READ|PROT_WRITE,
+                MAP_SHARED,
+                receivedev,
+                RECEIVE_PHY_ADDR);
+	if( MAP_FAILED == ptrrece )
+	{
+		close(receivedev);
+		receivedev = NULL;
+		return LENA_FALSE;
+	}
+
+	
+	//open the transfer channel
+	fidfpga = open( DEVICE_FPGA, O_RDONLY, 0 );
+
+	if( fidfpga < 0 )
+	{
+		printf( DEVICE_FPGA"ERROR:open failed !\n" );
+		return LENA_FALSE;
+	}
+
+	tFPGADataTmp.dst_addr = (unsigned int)RECEIVE_PHY_ADDR;
+
+	tFPGADataTmp.byte_size = uirdlen;
+	printf( "receive start\n" );
+	{
+		uiRet = ioctl( fidfpga, FPGA_DMA_RECV, &tFPGADataTmp );
+		if( uiRet < 0 )
+		{
+			printf( " uiRet = %d \n", uiRet );
+		}
+	}	
+
+   	close( fidfpga );
+   	fid = NULL;
+
+	fid = fopen( RECE_VIDEO_FILE, "wb"  );
+	if( (int)fid <= 0 )
+	{
+		printf( RECE_VIDEO_FILE"ERROR:open failed !\n" );
+		munmap( ptrrece,uirdlen ); 
+		close(receivedev);
+		receivedev = NULL;
+		return LENA_FALSE;
+	}
+	uiRet = fwrite( ptrrece, 1, ilen, fid );
+	if( uiRet != ilen )
+	{
+		printf( "write data %d byte ,expect data %d byte \n", uiRet,ilen );
+	}
+
+	fclose(fid);
+	fid = NULL;
+
+	munmap( ptrrece,uirdlen ); 
+	close(receivedev);
+	receivedev = NULL;
+	printf( "receive over\n" );
+	return 0;
+} 
+void rf( int ilen )
+{
+	printf( "receive file length %d", ilen );
+	receivefile( ilen );
+	return;
+}
  /*----------------------------------------------------------------------------
   * name	 : wr9363
   * function : config AD9363 by spi4
@@ -146,6 +471,7 @@ int rdfpga(  const UInt32 uiAddr, const UInt uiRdNum )
  */
  
  int SPIWrite( const UInt32 uiAddr, const unsigned char ucValue, const UInt uiFlag )
+
  {
  	wr9363( uiAddr, ucValue, uiFlag );
 	return LENA_OK;
@@ -188,6 +514,38 @@ int rdfpga(  const UInt32 uiAddr, const UInt uiRdNum )
 	return LENA_OK;
  }
  
+ /*--------------------------------------------------------------------------
+ * name			: resetfpga
+ * function		: reset fpga
+
+ * intput 		: none
+ * author	version		date		note
+ * feller	1.0		20151216
+
+ *----------------------------------------------------------------------------
+*/
+int resetfpga(void)
+{
+	int fid;
+	int ihigh = 1;
+	int ilow = 0;
+
+	fid = open( DEVICE_GPIO, O_RDWR, 0 );
+    	if( fid < 0 )
+    	{
+		printf( "ERROR:open failed "DEVICE_GPIO"!\n" );
+		return LENA_FALSE;
+     	}
+	write( fid, &ihigh, FPGA_RESET_GPIO ); 
+	usleep(500);
+	write( fid, &ilow, FPGA_RESET_GPIO ); 
+	usleep(500);
+	write( fid, &ihigh, FPGA_RESET_GPIO ); 
+	close(fid);
+	fid = NULL;
+	return 0;
+}
+
 
  /*--------------------------------------------------------------------------
  * name			: physta

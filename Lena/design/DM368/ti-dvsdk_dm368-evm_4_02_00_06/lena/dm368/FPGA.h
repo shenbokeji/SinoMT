@@ -47,7 +47,7 @@ typedef struct FPGACfgStruct{
 #define EMIF_OFFSET_ADDRESS (0X0002000)
 
 #define LINUX_PAGE_SIZE (0X1000)
-#define DEVICE_FPGA "/dev/misc/fpga"
+#define DEVICE_FPGA "/dev/fpga"
 
 
 #define EMIF_FPGA_START_ADDR (0x600)

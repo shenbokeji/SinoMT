@@ -300,6 +300,6 @@ module_exit(ad9363_cleanup_module);
 
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("zhushukui&shixiaofei");
+MODULE_AUTHOR("SinoMartin");
 MODULE_DESCRIPTION(" Direct character-device access to AD9363 devices");
 

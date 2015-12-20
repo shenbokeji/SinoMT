@@ -29,8 +29,10 @@
 #include <sys/stat.h>
 
 #include <signal.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 
+#include <sys/ioctl.h>
 #include <xdc/std.h>
 
 #include <ti/sdo/ce/trace/gt.h>
@@ -55,12 +57,13 @@
 #define AIR_STATION (1)
 #define GROUND_STATION (0)
 #define AIR_GROUND_GPIO (29)
+#define FPGA_RESET_GPIO	(9)
 //air and ground version string
 #define AIR_VERSION "AIR_V1.01.001\n"
 #define GROUND_VERSION "GROUND_V0.01.001p\n"
 #define DSP_TIME "DSP_"__DATE__" "__TIME__"\n"
 
-#define DEVICE_GPIO "/dev/misc/davinci_gpio"
+#define DEVICE_GPIO "/dev/davinci_gpio"
 
 #define LENA_OK (0)
 #define LENA_FALSE (-1)

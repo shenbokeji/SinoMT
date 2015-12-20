@@ -1144,12 +1144,12 @@ int main(int argc, char *argv[])
     
 	struct sched_param sp, sp1,sp2;
     sched_getparam(0, &sp1);
-	printf("sched_getscheduler = %d\t prio = %d\n", sched_getscheduler(0), sp1.sched_priority);
+	//printf("sched_getscheduler = %d\t prio = %d\n", sched_getscheduler(0), sp1.sched_priority);
 	sp.sched_priority = 97;
 	sched_setscheduler(0, SCHED_FIFO, &sp);/*预留 99的优先级给中断服务任务，98的优先级给taskLock*/
     sched_getparam(0, &sp2);
-	printf("sched_getscheduler = %d\t prio = %d\n", sched_getscheduler(0), sp2.sched_priority);
-	printf("sched mode is SCHED_FIFO!\n");
+	//printf("sched_getscheduler = %d\t prio = %d\n", sched_getscheduler(0), sp2.sched_priority);
+	//printf("sched mode is SCHED_FIFO!\n");
 	
 	/*Add End*/
 

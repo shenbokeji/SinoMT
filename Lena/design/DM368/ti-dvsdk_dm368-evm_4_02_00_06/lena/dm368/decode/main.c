@@ -53,6 +53,8 @@ Int InitGroundVideoProcess( Args *args )
     Int                     numThreads = 4; /* Determine the number of threads needing synchronization */
     Void                   *ret;
    // Bool                    stopped;
+
+    
 	
     /* Initialize the mutex which protects the global data */
     pthread_mutex_init(&gbl.mutex, NULL);
@@ -62,7 +64,10 @@ Int InitGroundVideoProcess( Args *args )
     Dmai_clear(displayEnv);
     Dmai_clear(videoEnv);
     Dmai_clear(ctrlEnv);
-
+    args->videoDecoder = &engine->videoDecoders[1];//h.264 decoder
+    printf( "args->videoDecoder->codecName = %s\n", args->videoDecoder->codecName );
+//sleep(1);
+printf("****************Dmai_clear over****************\n");
 
     /* Initialize Codec Engine runtime */
     CERuntime_init();
@@ -85,7 +90,7 @@ Int InitGroundVideoProcess( Args *args )
         cleanup(EXIT_FAILURE);
     }
 
-  
+  	
     /* Create the objects which synchronizes the thread init and cleanup */
     hRendezvousInit = Rendezvous_create(numThreads, &rzvAttrs);
     hRendezvousCleanup = Rendezvous_create(numThreads, &rzvAttrs);
@@ -116,7 +121,7 @@ Int InitGroundVideoProcess( Args *args )
         ERR("Failed to set FIFO scheduling policy\n");
         cleanup(EXIT_FAILURE);
     }
-
+	
     /* Create the video threads if a file name is supplied */
     if (args->videoFile) {
         /* Create the display fifos */
@@ -167,9 +172,11 @@ Int InitGroundVideoProcess( Args *args )
         videoEnv.hPausePrime        = hPausePrime;
         videoEnv.hDisplayInFifo     = displayEnv.hInFifo;
         videoEnv.hDisplayOutFifo    = displayEnv.hOutFifo;
+ 
         videoEnv.videoFile          = args->videoFile;
         videoEnv.videoDecoder       = args->videoDecoder->codecName;
         videoEnv.params             = args->videoDecoder->params;
+	
         videoEnv.dynParams          = args->videoDecoder->dynParams;
         videoEnv.loop               = args->loop;
         videoEnv.engineName         = engine->engineName;
@@ -207,8 +214,8 @@ Int InitGroundVideoProcess( Args *args )
         }
 
         initMask |= LOADERTHREADCREATED;
-    }
 
+    }
 
     /* Main thread becomes the control thread */
     ctrlEnv.hRendezvousInit    = hRendezvousInit;
@@ -288,6 +295,7 @@ cleanup:
     if (hPausePrime) {
         Pause_delete(hPausePrime);
     }
+
     /* 
      * In the past, there were instances where we have seen system memory
      * continually reduces by 28 bytes at a time whenever there are file 
@@ -300,6 +308,7 @@ cleanup:
     pthread_mutex_destroy(&gbl.mutex);
 
     exit(status);
+
 }
 
 
@@ -312,23 +321,15 @@ cleanup:
 
 Int main(Int argc, Char *argv[])
 {
-    Args                args                ;//= DEFAULT_ARGS;
-    Int                 status              = EXIT_SUCCESS;	
-	Int	iReturn;				
-	iReturn = ushell_init();
-	if( 0 == iReturn )
-	{
-		printf( "\nushell_init ok (~!~)\n" );
-	}
-	else
-	{
-		printf( "\nushell_init error\n" );
-		return 0;
-	}
-	//fpga_init();
-#if 0	
+    Args args   = DEFAULT_ARGS;
+    Int  status = EXIT_SUCCESS;	
+    Int	iReturn;
+    unsigned int uiFlag = 0XFFFFFFFF;	
+    ver();		
+    iReturn = ushell_init();	
+	
     //Get the Air or Ground Station flag
-    GetAirGroundStationFlag();    
+    uiFlag = GetAirGroundStationFlag();    
 
 	
     /* Parse the arguments given to the app and set the app environment */    
@@ -343,7 +344,8 @@ Int main(Int argc, Char *argv[])
 
     /* Set the priority of this whole process to max (requires root) */
     setpriority(PRIO_PROCESS, 0, -20);
-    //mmap the physical address to virtual address
+#if 0    
+   //mmap the physical address to virtual address
     status = InitMmapAddress( );
     if( 0 != status )
     {
@@ -352,16 +354,20 @@ Int main(Int argc, Char *argv[])
     }
 
     //Initialize FPGA configuration and release reset 
-    InitFPGA( GROUND_STATION );
+    InitFPGA( uiFlag );
 
     //Initialize AD9363 transiver and release reset
-    InitAD9363( GROUND_STATION );
-    
+    InitAD9363( uiFlag );
+ 
     //release the control of AD9363
 #endif
 
     //Initialize the air station video process,include capture/encode/write pthread
-    //status = InitAirVideoProcess( &args );
+    //status = InitGroundVideoProcess( &args );
+	while(1)
+	{
+		sleep(1);
+	}
 cleanup:    
 	
     return 0;
