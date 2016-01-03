@@ -23,11 +23,37 @@
 	unsigned int uiFlag = 0XFFFFFFFF;
  	uiFlag = GetAirGroundStationFlag();
 
-	printf( DSP_TIME"%s", ( 1u == uiFlag ) ? AIR_VERSION : GROUND_VERSION );
-
+	printf( DSP_TIME"%s", uiFlag ? AIR_VERSION : GROUND_VERSION );
 	return 0;
  }
-#include "UserDebug.h"
+/*****************************************************************************
+
+ * filename	: wrgpio
+ * function	: print version info
+ * author	version		date		note
+ * feller	1.0		20160101	create         
+ ******************************************************************************/
+ int wrgpio(  const int iGPIOnumber, const char cvalue  )
+ {
+	char cTmp;
+	SetGPIO( iGPIOnumber, cvalue );
+	cTmp = GetGPIO( iGPIOnumber );
+	printf( "GPIO%d read back : %d\n", iGPIOnumber, (int)cTmp );
+	return LENA_OK;
+ }
+/*****************************************************************************
+ * filename	: rdgpio
+ * function	: print version info
+ * author	version		date		note
+ * feller	1.0		20160101	create         
+ ******************************************************************************/
+ int rdgpio( const int iGPIOnumber )
+ {
+	char cTmp;
+	cTmp = GetGPIO( iGPIOnumber );
+	printf( "GPIO%d : %d\n", iGPIOnumber, (int)cTmp );
+	return LENA_OK;
+ }
 /*----------------------------------------------------------------------------
  * name		: reset
  * function	: reboot the system
@@ -45,8 +71,8 @@ int  reset( void )
  * name		: wrfpga
  * function	: write FPGA register
  * input 	: uiAddr:FPGA regiser address 
- 			  usValue: write value
- 			  uiFlag: read back flag
+ 	          usValue: write value
+ 		  uiFlag: read back flag
  * author	version		date		note
  * feller	1.0		20151016      
  *----------------------------------------------------------------------------
@@ -56,7 +82,7 @@ int wrfpga(  const UInt32 uiAddr, const UInt16 usValue, const UInt uiFlag )
     Int iReturn;
 	UInt16 usRdValue;
 	
-	if( FPGA_ADDR_VALID(uiAddr) )
+	if( FPGA_ADDR_INVALID(uiAddr) )
 	{
 		printf( "******error: address is invalid******\n");		
 		printf( "addr = %#X \n", (unsigned int)uiAddr );	
@@ -85,7 +111,7 @@ int rdfpga(  const UInt32 uiAddr, const UInt uiRdNum )
     Int iReturn;
 	UInt16 usRdValue;
 
-	if( FPGA_ADDR_VALID(uiAddr) )
+	if( FPGA_ADDR_INVALID(uiAddr) )
 	{
 		printf( "******error: start address is invalid******\n"); 	
 		printf( "addr = %#X \n", (unsigned int)uiAddr );	
@@ -95,7 +121,7 @@ int rdfpga(  const UInt32 uiAddr, const UInt uiRdNum )
 	uiAddrTmp = uiAddr;
 	for ( ii = 0; ii < uiRdNum; ii++ )
 	{
-		if( FPGA_ADDR_VALID(uiAddrTmp) )
+		if( FPGA_ADDR_INVALID(uiAddrTmp) )
 		{
 			break;
 		}
@@ -107,20 +133,63 @@ int rdfpga(  const UInt32 uiAddr, const UInt uiRdNum )
 
 	return LENA_OK;
 }
+ 
+ /*--------------------------------------------------------------------------
+ * name			: resetfpga
+ * function		: reset fpga
+ * intput 		: none
+ * author	version		date		note
+ * feller	1.0		20151216
+ *----------------------------------------------------------------------------
 
-#define FPGA_DMA_RECV	(0U)
-#define FPGA_DMA_SEND	(1U)
+*/
+int resetfpga(void)
+{
+	int fid;
+	int ihigh = 1;
+	int ilow = 0;
 
+	fid = open( DEVICE_GPIO, O_RDWR, 0 );
+    	if( fid < 0 )
+    	{
+		printf( "ERROR:open failed "DEVICE_GPIO"!\n" );
+		return LENA_FALSE;
+     	}
+	write( fid, &ihigh, FPGA_RESET_GPIO ); 
+	usleep(500);
+	write( fid, &ilow, FPGA_RESET_GPIO ); 
+	usleep(500);
+	write( fid, &ihigh, FPGA_RESET_GPIO ); 
+	close(fid);
+	fid = NULL;
+	//ResetFPGA();
+	return 0;
+}
 
+ /*--------------------------------------------------------------------------
+ * name			: initfpga
+ * function		: init FPGA register
+ * intput 		: iAirorGround: air or ground flag
+ * author	version		date		note
+ * feller	1.0		20151222
+ *----------------------------------------------------------------------------
 
-typedef struct fpga_data{
-	unsigned int tb_size;
-	unsigned int source_addr;
-	unsigned int dst_addr;
-	unsigned int byte_size;
-	unsigned char device_busy;
-}tfpgadata;
-
+*/
+int initfpga( const int iAirorGround )
+{
+	int iReturn;
+	if( iAirorGround )
+	{
+		iReturn = SetAD9363Reg( 0x006, 0x90 );
+		iReturn = SetAD9363Reg( 0x007, 0xa0 );
+	}
+	InitFPGA( iAirorGround );
+	if( iAirorGround )
+	{
+		iReturn = SetAD9363Reg( 0x3f4, 0x00 );
+	}
+	return 0;
+}
 /*----------------------------------------------------------------------------
  * name		: sendfile
  * function	: send local file to another side 
@@ -130,15 +199,8 @@ typedef struct fpga_data{
  * feller	1.0		20151208      
  *----------------------------------------------------------------------------
 */
-#define SEND_PHY_ADDR (0x87000000)
-#define RECEIVE_PHY_ADDR (0x88000000)
-#define MEM_FILENAME "/dev/mem"
-#define SEND_VIDEO_FILE_384 "/video384.264"
-#define SEND_VIDEO_FILE_720P "/video720p.264"
-#define SEND_VIDEO_FILE "sendvideo.264"
-#define RECE_VIDEO_FILE "/recevideo.264"
-#define TRANS_ODD2EVEN(i) ( ( i + 1 ) & 0XFFFFFFFE ) 
-int sendfile( int number, size_t ilen ) 
+
+int sendfile( const int number, size_t ilen ) 
 {
 	FILE *fid;
 	int fidfpga;
@@ -149,6 +211,8 @@ int sendfile( int number, size_t ilen )
 
 	void *ptrSend;
 	size_t uimaplen;
+	int ifilelen;
+	struct stat fstatbuf;
 
 	uimaplen = TRANS_ODD2EVEN( ilen );// for odd length, must even
 
@@ -187,6 +251,14 @@ int sendfile( int number, size_t ilen )
 		close(fsenddev);
 		fsenddev = NULL;
 		return LENA_FALSE;
+	}
+	
+	//get the file length
+	stat ( SEND_VIDEO_FILE, &fstatbuf );
+	ifilelen = fstatbuf.st_size;
+	if( ifilelen < ilen )
+	{
+		ilen = ifilelen;
 	}
 	
 	uiRet = fread( ptrSend, 1, ilen, fid );
@@ -345,7 +417,7 @@ int sf( int number, int iflag )
  *----------------------------------------------------------------------------
 */
 
-int receivefile( int ilen ) 
+int receivefile( const int ilen ) 
 {
 	int fidfpga;
 	int receivedev;
@@ -442,12 +514,12 @@ void rf( int ilen )
   *----------------------------------------------------------------------------
  */
  
- int wr9363(	const UInt32 uiAddr, const unsigned char ucValue, const UInt uiFlag  )
+ int wr9363( const UInt32 uiAddr, const unsigned char ucValue, const UInt uiFlag  )
  {
     	Int iReturn;
 	unsigned char  ucRdValue;
 	
-	if( AD9363_ADDR_VALID(uiAddr) )
+	if( AD9363_ADDR_INVALID(uiAddr) )
 	{
 		printf( "******error: address is invalid******\n");		
 		printf( "addr = %#X \n", (unsigned int)uiAddr );	
@@ -492,17 +564,16 @@ void rf( int ilen )
   	Int iReturn;
   	unsigned char ucRdValue = 0;
 	
- 	if( AD9363_ADDR_VALID(uiAddr) )
+ 	if( AD9363_ADDR_INVALID(uiAddr) )
   	{
 	  	printf( "******error: start address is invalid******\n");   
 	  	printf( "addr = %#X \n", (unsigned int)uiAddr );	  
   	}
- 
-  
+   
   	uiAddrTmp = uiAddr;
   	for ( ii = 0; ii < uiRdNum; ii++ )
   	{
-	  	if( AD9363_ADDR_VALID(uiAddrTmp) )
+	  	if( AD9363_ADDR_INVALID(uiAddrTmp) )
 	  	{
 		  	break;
 	  	}
@@ -513,40 +584,173 @@ void rf( int ilen )
   	}
 	return LENA_OK;
  }
- 
+
+
+
  /*--------------------------------------------------------------------------
- * name			: resetfpga
- * function		: reset fpga
-
- * intput 		: none
+ * name		: init9363
+ * fucntion 	: initialize AD9363 interface
+ * input 	: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
  * author	version		date		note
- * feller	1.0		20151216
-
+ * feller	1.0		20150728	
  *----------------------------------------------------------------------------
 */
-int resetfpga(void)
+int init9363( const int iAirorGround )
 {
-	int fid;
-	int ihigh = 1;
-	int ilow = 0;
-
-	fid = open( DEVICE_GPIO, O_RDWR, 0 );
-    	if( fid < 0 )
-    	{
-		printf( "ERROR:open failed "DEVICE_GPIO"!\n" );
-		return LENA_FALSE;
-     	}
-	write( fid, &ihigh, FPGA_RESET_GPIO ); 
-	usleep(500);
-	write( fid, &ilow, FPGA_RESET_GPIO ); 
-	usleep(500);
-	write( fid, &ihigh, FPGA_RESET_GPIO ); 
-	close(fid);
-	fid = NULL;
-	return 0;
+    InitAD9363( iAirorGround );
+    return LENA_OK;
 }
 
 
+
+ /*----------------------------------------------------------------------------
+  * name	 : wr66121
+  * function : config AD9363 by spi4
+
+  * input	 : 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151007	   
+  *----------------------------------------------------------------------------
+
+ */
+ 
+ int wr66121( const unsigned int uiAddr, const unsigned char ucValue, const UInt uiFlag  )
+ {
+    	Int iReturn;
+	unsigned char  ucRdValue;
+	
+	if( IT66121_ADDR_INVALID(uiAddr) )
+	{
+		printf( "******error: address is invalid******\n");		
+		printf( "addr = %#X \n", (unsigned int)uiAddr );
+		return LENA_FALSE;
+	}
+	
+	iReturn = SetIT66121Reg( uiAddr, ucValue );
+	if( 0 != uiFlag ) 
+	{
+	    	iReturn = GetIT66121Reg( uiAddr, &ucRdValue );
+		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, ucRdValue );	
+	}
+	return LENA_OK;	 
+ }
+
+ /*----------------------------------------------------------------------------
+  * name	: rd66121
+  * function 	: read it66121 by I2C
+  * input	 : 
+  * author	 version	 date		 note
+  * feller	 1.0		 20151229	   
+  *----------------------------------------------------------------------------
+ */
+ 
+ int rd66121( const unsigned int uiAddr, const unsigned int uiRdNum )
+ {
+  	int ii;
+  	unsigned int uiAddrTmp;
+  	int iReturn;
+  	unsigned char ucRdValue = 0;
+	
+ 	if( IT66121_ADDR_INVALID(uiAddr) )
+  	{
+	  	printf( "******error: start address is invalid******\n");   
+	  	printf( "addr = %#X \n", (unsigned int)uiAddr );
+		return LENA_FALSE;	  
+  	}
+ 
+  
+  	uiAddrTmp = uiAddr;
+  	for ( ii = 0; ii < uiRdNum; ii++ )
+  	{
+	  	if( IT66121_ADDR_INVALID(uiAddrTmp) )
+	  	{
+		  	break;
+	  	}
+ 
+	  	iReturn = GetIT66121Reg( uiAddrTmp, &ucRdValue );
+	  	printf( "addr = %#X value =%#X\n", (unsigned int)uiAddrTmp, ucRdValue );   
+		uiAddrTmp++;
+  	}
+	return LENA_OK;
+ }
+
+
+
+ /*--------------------------------------------------------------------------
+ * name		: attshow
+ * function	: attenuation value show
+ * input 	:none
+ * author	version		date		note
+ * feller	1.0		20151223
+ *----------------------------------------------------------------------------
+*/
+int attshow( void )
+{
+	unsigned char ucValue[4] = {0};
+	float fvalue[2] = {0.0f};
+	int iReturn;
+
+	iReturn = GetAD9363Reg( 0x073, &ucValue[0] );
+	iReturn = GetAD9363Reg( 0x074, &ucValue[1] );
+	iReturn = GetAD9363Reg( 0x075, &ucValue[2] );
+	iReturn = GetAD9363Reg( 0x076, &ucValue[3] );
+
+	fvalue[0] = (float)( ( ucValue[1] << 8 ) | ucValue[0] ) * 0.25f;// LSB FOR 0.25dB
+ 	fvalue[1] = (float)( ( ucValue[3] << 8 ) | ucValue[2] )* 0.25f;// LSB FOR 0.25dB
+
+	printf( "TX 0 att :%f dB\n", fvalue[0] );
+	printf( "TX 1 att :%f dB\n", fvalue[1] );
+	return LENA_OK;
+}
+ /*--------------------------------------------------------------------------
+ * name		: settxatt
+ * function	: set tx attenuation
+ * intput 	: chan:channel num; 0:channel 0 ,1:channel 1; 2 :both channel. other invalid
+		value :attenuation value,0.25dB step, 0 is 0 dB
+ * author	version		date		note
+ * feller	1.0		20151223
+ * note1   this function use some magic number ,you can find them is AD9363 datasheet
+ * note2   can not use float input parameter because of ushell:(
+ * note3   so we use 0.25/100dB unit for input parameter
+ *----------------------------------------------------------------------------
+*/
+int settxatt( const unsigned int ichan, const int iattvalue )
+{
+	int iReturn;
+	int itmp = 0;
+	float ftmp;
+	unsigned int uiAddrTmp[2];
+	
+	ftmp = (float)iattvalue / 100.0f;
+	printf( "INFO: You want set the chan %d att :  %f dB\n", ichan, ftmp );
+	
+	if( AD9363_CHAN_INVALID(ichan) )
+	{
+		printf( "invalid channel number:  %d \n", ichan );	
+		return LENA_FALSE;
+	}
+
+	if( ( iattvalue < 0 ) || ( iattvalue > 359*25 ) )// LSB FOR 0.25dB ,max register value 359
+	{
+		printf( "the tx att value should between 0 dB and 89.75 dB \n" );
+		return LENA_FALSE;
+	}
+
+	iReturn = SetAD9363Reg( 0X014, 0X03 );
+
+	itmp = (int)( iattvalue * 4 / 100 );// LSB FOR 0.25dB, debug command,excute speed is ignore, so we use "/"
+
+
+	uiAddrTmp[0] = ( 0 == ichan ) ? 0x73 : 0x75;
+	uiAddrTmp[1] = ( 0 == ichan ) ? 0x74 : 0x76;
+
+	iReturn = SetAD9363Reg( uiAddrTmp[0], (unsigned char)( itmp & 0XFF ) );
+	iReturn = SetAD9363Reg( uiAddrTmp[1], (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
+
+	iReturn = SetAD9363Reg( 0X014, 0X23 );
+	iReturn = attshow();
+	return iReturn;
+}
  /*--------------------------------------------------------------------------
  * name			: physta
  * function		: wireless phyical layer KPI static
@@ -555,16 +759,13 @@ int resetfpga(void)
  * feller	1.0		20151107
  *----------------------------------------------------------------------------
 */
-
-	 
-char * sp[] = { "TB:", "FN:", "SFN:", "TBSIZE:", "BLER:", "BER:", "TO:", "Mbps" };
-	 
-	 
+ 
+char * sp[] = { "TB:", "FN:", "SFN:", "TBSIZE:", "BLER:", "BER:", "TO:", "Mbps" };	 
 int iSFN[8] = { 0, 3, 4, 5, 6, 7, 8, 9 };
 int iTBSize[2] = { 35160, 2728 };
 char *sModemStr[] = { "16QAM" , "QPSK"};
 
-int physta( int iFlag )
+int physta( const int iFlag )
 {
 	int ii;
 	int jj;

@@ -18,33 +18,33 @@
 tAD9363Cfg g_tAD9363Cfg;
 
  /*----------------------------------------------------------------------------
-  * name		 : GetFpgaReg
-  * function	 : Get the fpga reg value 
-  * input		 :
+  * name	: GetAD9363Reg
+  * function	: Get the AD9363 reg value 
+  * input	:
   * author	 version	 date		 note
   * feller	 1.0	 20150805
   * feller	 1.0	 20151119		 I am at home with phyliss
   *----------------------------------------------------------------------------
  */
- Int GetAD9363Reg( const UInt32 uiAddr, unsigned char * const pucRdValue )
+ int GetAD9363Reg( const unsigned int uiAddr, unsigned char * const pucRdValue )
  {
 	 int iRdByteNum;
-	 FILE *fid;
+	 int fid;
 	 int iReturn = LENA_OK;
 	 tAD9363Reg tAD9363RegTmp;
  
  
 	 tAD9363RegTmp.uiAddr = uiAddr;
 	 
-	 fid = (FILE *)open( DEVICE_AD9363, O_RDONLY, 0 );
+	 fid = open( DEVICE_AD9363, O_RDONLY, 0 );
 
-	 if( (int)fid < 0 )
+	 if( fid < 0 )
 	 {
-		 printf( "ERROR:open failed "DEVICE_AD9363"!\n" );
+		 perror( "ERROR:open failed "DEVICE_AD9363"!\n" );
 		 return LENA_FALSE;
 	 }
 	 
-	 iRdByteNum = read( (int)fid, &tAD9363RegTmp, BYTE_EIGHT ); //8 byte for addr and value
+	 iRdByteNum = read( fid, &tAD9363RegTmp, BYTE_EIGHT ); //8 byte for addr and value
 	 if( BYTE_EIGHT != iRdByteNum )
 	 {
 		 printf( "ERROR:Read Byte is not %d "DEVICE_AD9363"! \n", BYTE_EIGHT );
@@ -55,77 +55,99 @@ tAD9363Cfg g_tAD9363Cfg;
 	{
 		*pucRdValue = (unsigned char)tAD9363RegTmp.uiValue;
 	}
-	 close( (int)fid );
+	 close( fid );
 	 fid = NULL;
 	 		 
 	 return iReturn;
  }
   /*----------------------------------------------------------------------------
-  * name		 : SetFpgaReg
-  * function		 : set the fpga reg 
-  * input			 :
+  * name		: SetAD9363Reg
+  * function		: set the AD9363 reg 
+  * input		:
   * author	 version	 date		 note
   * feller	 1.0	 20150805
   *----------------------------------------------------------------------------
  */
- Int SetAD9363Reg( const UInt32 uiAddr, const unsigned char ucValue )
+ int SetAD9363Reg( const unsigned int uiAddr, const unsigned char ucValue )
  {
 	 Int iWrByteNum;
-	 FILE *fid;
+	 int fid;
 	 tAD9363Reg tAD9363RegTmp;
 	 int iReturn = LENA_OK;
 
 	 tAD9363RegTmp.uiAddr = uiAddr;
 	 tAD9363RegTmp.uiValue = (unsigned int)ucValue;
 	 
-	 fid = (FILE *)open( DEVICE_AD9363, O_RDWR, 0 );
-	 if( (int)fid < 0 )
+	 fid = open( DEVICE_AD9363, O_RDWR, 0 );
+	 if( fid < 0 )
 	 {
-		 printf( "ERROR:open failed "DEVICE_AD9363"!\n" );
+		 perror( "ERROR:open failed "DEVICE_AD9363"!\n" );
 		 return LENA_FALSE;
 	 }
-	 iWrByteNum = write( (int)fid, &tAD9363RegTmp, BYTE_EIGHT );
+	 iWrByteNum = write( fid, &tAD9363RegTmp, BYTE_EIGHT );
 	 if( BYTE_EIGHT != iWrByteNum )
 	 {
 		 printf( "ERROR:Write Byte is not %d "DEVICE_AD9363"!\n", BYTE_EIGHT );
 		 iReturn =  LENA_FALSE;
 	 } 
-	 close( (int)fid );
+	 close( fid );
 	 fid = NULL;
 	 return iReturn;
  }
 
 
-
- /*----------------------------------------------------------------------------
- * name		: InitAD9363Reg
- * function	: initialize AD9363 Reg addr and value
- * input 		: no
+ /*--------------------------------------------------------------------------
+ * name		: InitAD9363
+ * fucntion 	: initialize AD9363 register
+ * input 	: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
  * author	version		date		note
- * feller	1.0		20150729      
+ * feller	1.0		20150728	
  *----------------------------------------------------------------------------
 */
-void InitAD9363Reg( void )
+void InitAD9363( const int iAirorGround )
 {
-    g_tAD9363Cfg.AD9363Reg[GROUND_STATION][0].uiAddr = 0;
-    g_tAD9363Cfg.AD9363Reg[GROUND_STATION][1].uiValue = 1;
-    g_tAD9363Cfg.iValidLen[GROUND_STATION]  = 5;
+	FILE *fid;
+	char *cfile = NULL;
+	unsigned int iReturn;
+	unsigned int str[3] = {0};
 
 
+	if( iAirorGround > 1 )
+	{
+		printf( "command format: init9363 para \n 0:ground;1:air\n");
+		return;
+	}
+
+	cfile = ( iAirorGround == 1 ) ? AD9363_REGVALUE_A_FILE : AD9363_REGVALUE_G_FILE;
 
 
-
-
-
-    g_tAD9363Cfg.AD9363Reg[AIR_STATION][0].uiAddr = 0;
-    g_tAD9363Cfg.AD9363Reg[AIR_STATION][1].uiValue = 1;
-    g_tAD9363Cfg.iValidLen[AIR_STATION]  = 8;
-
-
-	
+	fid = fopen( cfile, "r" );
+	if( NULL == fid )
+	{
+		perror( cfile );
+		return;
+	}
+	printf( "open: %s \n", cfile );
+	while( EOF != fscanf( fid, "%x,%x,%d", &str[0], &str[1], &str[2] ) )
+	{
+		printf( "%#05X,%#04X,%d\n", str[0], str[1], str[2] );
+		iReturn = SetAD9363Reg( (unsigned int)str[0], (unsigned char)str[1] );
+		usleep( str[2] );
+	}
+	printf( "init AD9363 %s over\n", iAirorGround  ? AIR_VERSION : GROUND_VERSION );
+	fclose(fid);
+		
     return ;
 }
-void initclock()
+ /*--------------------------------------------------------------------------
+ * name		: initclock
+ * fucntion 	: initialize AD9363 clock ,so FPGA can work
+ * input 	: none
+ * author	version		date		note
+ * feller	1.0		20151222	
+ *----------------------------------------------------------------------------
+*/
+int initclock( void )
 {
 	int iReturn;
 	iReturn = SetAD9363Reg( 0x000, 0x00 );
@@ -141,39 +163,8 @@ void initclock()
 	iReturn |= SetAD9363Reg( 0x003, 0xCE );
 	iReturn |= SetAD9363Reg( 0x004, 0x03 );
 	iReturn |= SetAD9363Reg( 0x00A, 0x12 );
-	return;
+	return 0;
 }
-
-
- /*--------------------------------------------------------------------------
- * name		: InitAD9363
- * fucntion 	: initialize AD9363 interface
- * input 		: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
- * author	version		date		note
- * feller	1.0		20150728	
- *----------------------------------------------------------------------------
-*/
-void InitAD9363( const Int iAirorGround )
-{
-    Int iLoop;
-    UInt uiTmp;
-    Int iTmp;
-    Int iLen;	
-   
-    iLen =  g_tAD9363Cfg.iValidLen[iAirorGround];	
-    InitAD9363Reg();
-    for( iLoop = 0; iLoop <  iLen; iLoop++ )
-    {
-        uiTmp = g_tAD9363Cfg.AD9363Reg[iAirorGround][iLoop].uiAddr;
-	 iTmp = g_tAD9363Cfg.AD9363Reg[iAirorGround][iLoop].uiValue;	
-
-        //configure AD9363 by SPI,through FPGA
-	 
-    }
-		
-    return ;
-}
-
 
 
 

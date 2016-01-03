@@ -169,16 +169,12 @@ static inline void EDMA_config(unsigned char channel_num, EDMA_Config *config)
 //printk("edma config %x\n",__raw_readl(IO_ADDRESS(base+_EDMA_OPT_OFFSET)));
 
 }
-
-//unsigned char buf[0x42600];
 int emif_send(struct fpga_data *transfer)
 {
-	EDMA_Config image_transfer;
 	ulong	addr,count,write_count;
 	volatile unsigned short *frame_header_p=NULL;
-	//const unsigned short *buf;
+
 	unsigned int len;
-	unsigned int __user *argp;
 
 
 	printk("..");
@@ -191,8 +187,7 @@ int emif_send(struct fpga_data *transfer)
 		printk("ioremap error!\n");
 	}
 	addr =(unsigned int)fpga_buf;
-	//argp = (unsigned int __user *)(transfer->source_addr);
-	//copy_from_user( (void*)(&(buf[0])), argp, len);
+
 	
 
 	while(len>=count)
@@ -252,24 +247,20 @@ int emif_send(struct fpga_data *transfer)
 #define FRAME_HEADER_TIMEOUT (6000)
 int emif_recv(struct fpga_data *transfer)
 {
-		EDMA_Config image_transfer;
 		ulong	addr,count,write_count;
 		volatile unsigned short *frame_header_p=NULL;
-		//const unsigned short *buf;
+
 		unsigned int len;
-		unsigned int __user *argp;
 		unsigned int iSearchFrameHeader = 0 ; // search frame header time out counter
 		unsigned int iRet = 0;
 		count = 0x4260-0x10;
-		//addr =(unsigned int)(&(buf[0]));
-		//addr = __va(transfer->dst_addr);
+
 		len = transfer->byte_size;
 
 		fpga_buf = ioremap(transfer->dst_addr,len);
 		if(fpga_buf==NULL) printk("ioremap error!\n");
 
 		addr =(unsigned int)fpga_buf;
-		//argp = (unsigned int __user *)(transfer->dst_addr);
 
 		while(len>=count)
 		{
@@ -340,9 +331,6 @@ int emif_recv(struct fpga_data *transfer)
 			frame_num++;
 
 		}
-
-		//copy_to_user(argp, (void*)(&(buf[0])), transfer->byte_size); 
-		
 		iounmap(fpga_buf);
 		return iRet;
 	
@@ -420,7 +408,6 @@ static int fpga_open(struct inode *inode, struct file *file)
 	frame_header[2]=0;
 	frame_header[3]=0;
 	frame_num = 0;
-	printk("fpga open OK!\n");
 
 	return 0;
 } /* fpga_open */
@@ -469,47 +456,30 @@ static int fpga_ioctl(struct inode *inode, struct file *file,
 {
 	int  ret = 0;
 	unsigned int __user *argp = (unsigned int __user *)arg;
-	printk("fpga ioctl in!\n");
-	//DEBUG(MTD_DEBUG_LEVEL0, "MTD_ioctl\n");
-	printk("fpga ioctl cmd=%d!\n",cmd);
+
 	if (cmd>FPGA_CMD_SIZE) return -EFAULT;
 
 	switch (cmd) {
-		//case GET_INFO:
-			//printk("fpga ioctl OK!  GET_INFO!\n");
-			//ret = copy_to_user(argp, &fpga_transfer_param, sizeof(fpga_transfer_param));
-			//break;
+	
 		case DMA_RECV:
 			frame_header[0]=0;
 			frame_header[1]=0;
 			frame_header[2]=0;
 			frame_header[3]=0;
 			frame_num = 0;
-			printk("fpga ioctl OK!  DMA_RECV!\n");
-			copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));		
-			printk("fpga_transfer_param.dst_addr =%x\n",fpga_transfer_param.dst_addr );
-			printk("fpga_transfer_param.byte_size =%x\n",fpga_transfer_param.byte_size );
+	
+			ret = copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));		
 			ret = emif_recv(&fpga_transfer_param);
-
 			break;	
 
 		case DMA_SEND:
-			//ret = copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));
 			frame_header[0]=0;
 			frame_header[1]=0;
 			frame_header[2]=0;
 			frame_header[3]=0;
 			frame_num = 0;
-			//dma_cpy (&fpga_transfer_param);
-			printk("fpga ioctl OK! SET_INFO!\n");
-		//	break;
-		//case DMA_SEND:
-			printk("fpga ioctl OK! DMA_SEND IN!\n");
-			copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));
-			printk("fpga_transfer_param.source_addr =%x\n",fpga_transfer_param.source_addr );
-			printk("fpga_transfer_param.byte_size =%x\n",fpga_transfer_param.byte_size );
+			ret = copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));
 			ret = emif_send(&fpga_transfer_param);
-			printk("fpga ioctl OK! DMA_SEND! OUT\n");
 			break;		
 	
 		default:
@@ -522,8 +492,8 @@ static int fpga_ioctl(struct inode *inode, struct file *file,
 
 static const struct file_operations fpga_fops = {
 	.owner		= THIS_MODULE,
-	.read           = fpga_read,
-	.write           = fpga_write,
+	.read       = (void*)fpga_read,
+	.write      = fpga_write,
 	.ioctl		= fpga_ioctl,
 	.open		= fpga_open,
 	.release	= fpga_close,

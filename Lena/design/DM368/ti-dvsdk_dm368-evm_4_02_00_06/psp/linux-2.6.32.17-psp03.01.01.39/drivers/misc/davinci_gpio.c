@@ -10,7 +10,6 @@
 #include <linux/types.h>
 #include <linux/gpio.h>
 #include <linux/miscdevice.h> 
-
 #define GPIO_DEVICE_NAME "davinci_gpio"   
 #define GPIO_DEVICE_MINOR   (225)	 
 
@@ -36,8 +35,16 @@ static int gpio_close(struct inode *inode, struct file *file)
 
 ssize_t gpio_read(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
-	//printk( GPIO_DEVICE_NAME"\t gpio read");
-	return gpio_direction_input( count );
+	unsigned int uiFlag = 0XFFFFFFFF;
+	gpio_direction_input( count );
+	uiFlag = gpio_get_value(count);
+#if 0
+	if( 29 == count )
+	{		
+		uiFlag = (__raw_readl( IO_ADDRESS( 0x01c67020) ) & 0x20000000 );
+	}
+#endif
+	return uiFlag;
 } /* gpio_read */
 
 
@@ -91,6 +98,6 @@ module_init(gpio_init);
 module_exit(gpio_cleanup_module);	  
 	 
 MODULE_LICENSE("GPL");	 
-MODULE_AUTHOR("SinoMartinn");
+MODULE_AUTHOR("SinoMartin");
 MODULE_DESCRIPTION("Davinci DM368 gpio driver");
 

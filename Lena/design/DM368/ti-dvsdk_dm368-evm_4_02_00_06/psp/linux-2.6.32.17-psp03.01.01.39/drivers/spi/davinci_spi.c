@@ -125,6 +125,7 @@ static void davinci_spi_chipselect(struct spi_device *spi, int value)
 	 * Board specific chip select logic decides the polarity and cs
 	 * line for the controller
 	 */
+	 /* use_data be used for district SPI0_CS OR SPI4_CS*/
 	if (value == BITBANG_CS_INACTIVE) {
 		if(pdata->use_dma==1) gpio_direction_output(25,1);
 		else if(pdata->use_dma==0) gpio_direction_output(37,1);	

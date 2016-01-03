@@ -41,12 +41,12 @@ Codec *getCodec(Char *extension, Codec *codecs)
 
  /*--------------------------------------------------------------------------
  * function	: GetAirGroundStationFlag
- * output 		: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
+ * output 	: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
  * author	version		date		note
  * feller	1.0		20150728	
  *----------------------------------------------------------------------------
 */
-Int GetAirGroundStationFlag()
+int GetAirGroundStationFlag()
 {
     unsigned int uiAirorGround = 0xFFFFFFFF;
     int fid;
@@ -66,6 +66,74 @@ Int GetAirGroundStationFlag()
     fid = NULL;
     g_AirGround = uiAirorGround;
     return uiAirorGround;
+}
+
+ /*--------------------------------------------------------------------------
+ * function	: SetGPIO
+ * input 	: iGPIOnumber;ivalue 
+ * author	version		date		note
+ * feller	1.0		20160101	
+ *----------------------------------------------------------------------------
+*/
+int SetGPIO( const int iGPIOnumber, const char cvalue )
+{
+    int fid = -1;
+    int iReturn = -1;
+
+    fid = open( DEVICE_GPIO, O_RDONLY, 0 );
+    if( fid < 0 )
+    {
+	perror( "ERROR:open failed "DEVICE_GPIO"!\n" );
+	return LENA_FALSE;
+    }
+
+    iReturn = write( fid, &cvalue, iGPIOnumber ); 
+    close( fid );
+    fid = NULL;
+    return LENA_OK;
+}
+
+ /*--------------------------------------------------------------------------
+ * function	: GetGPIO
+ * input 	: iGPIOnumber
+ * author	version		date		note
+ * feller	1.0		20160101	
+ *----------------------------------------------------------------------------
+*/
+int GetGPIO( const int iGPIOnumber )
+{
+    int fid = -1;
+    int ivalue = -1;
+
+    fid = open( DEVICE_GPIO, O_RDONLY, 0 );
+    if( fid < 0 )
+    {
+	perror( "ERROR:open failed "DEVICE_GPIO"!\n" );
+	return LENA_FALSE;
+    }
+
+    ivalue = read( fid, NULL, iGPIOnumber ); 
+    close( fid );
+    fid = NULL;
+    return ivalue;
+}
+ /*--------------------------------------------------------------------------
+ * name		: ResetFPGA
+ * function	: reset fpga
+ * intput 	: none
+ * author	version		date		note
+ * feller	1.0		20160101
+
+ *----------------------------------------------------------------------------
+*/
+void ResetFPGA(void)
+{
+	SetGPIO( FPGA_RESET_GPIO, 1 ); 
+	usleep(500);
+	SetGPIO( FPGA_RESET_GPIO, 0 ); 
+	usleep(500);
+	SetGPIO( FPGA_RESET_GPIO, 1 ); 
+	return ;
 }
  #if 0
  /*--------------------------------------------------------------------------

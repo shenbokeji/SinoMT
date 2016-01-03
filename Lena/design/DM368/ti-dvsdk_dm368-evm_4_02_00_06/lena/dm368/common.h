@@ -52,10 +52,12 @@
 #include "ctrl.h"
 #include "FPGA.h"
 #include "AD9363.h"
+#include "I2C.h"
 #include "../ushellagent.h"
 //This is the air and ground station flag, configured by GPIO29 pin u2
 #define AIR_STATION (1)
 #define GROUND_STATION (0)
+
 #define AIR_GROUND_GPIO (29)
 #define FPGA_RESET_GPIO	(9)
 //air and ground version string
@@ -74,8 +76,11 @@
 #define ERROR_STRING (0X4553)
 /*****************extern function declaration*****************/
 extern Codec *getCodec(Char *extension, Codec *codecs);
-extern Int GetAirGroundStationFlag( void );
-extern Int InitMmapAddress( void );
-
+extern int GetAirGroundStationFlag( void );
+extern int GetGPIO( const int iGPIOnumber );
+extern int SetGPIO( const int iGPIOnumber, const char cvalue );
+extern void ResetFPGA(void);
+//extern Int InitMmapAddress( void );
+extern int ver( void );
 #endif /* _COMMON_H */
 

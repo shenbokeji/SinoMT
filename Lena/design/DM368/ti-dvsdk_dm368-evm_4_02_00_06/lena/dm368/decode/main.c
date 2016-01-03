@@ -71,10 +71,11 @@ printf("****************Dmai_clear over****************\n");
 
     /* Initialize Codec Engine runtime */
     CERuntime_init();
+	printf("****************CERuntime_init over****************\n");
 
     /* Initialize Davinci Multimedia Application Interface */
     Dmai_init();
-
+	printf("****************Dmai_init over****************\n");
     initMask |= LOGSINITIALIZED;
 
     /* Create the user interface */
@@ -148,6 +149,7 @@ printf("****************Dmai_clear over****************\n");
         displayEnv.hPauseProcess      = hPauseProcess;
         displayEnv.hPausePrime        = hPausePrime;
         displayEnv.osd                = args->osd;
+		printf("****************displayThrFxn start****************\n");
 
         if (pthread_create(&displayThread, &attr, displayThrFxn, &displayEnv)) {
             ERR("Failed to create display thread\n");
@@ -181,7 +183,7 @@ printf("****************Dmai_clear over****************\n");
         videoEnv.loop               = args->loop;
         videoEnv.engineName         = engine->engineName;
         videoEnv.videoStd           = args->videoStd;        
-
+	printf("****************videoThrFxn start****************\n");
         if (pthread_create(&videoThread, &attr, videoThrFxn, &videoEnv)) {
             ERR("Failed to create video thread\n");
             cleanup(EXIT_FAILURE);
@@ -207,6 +209,7 @@ printf("****************Dmai_clear over****************\n");
         loaderEnv.hRendezvousCleanup = hRendezvousCleanup;
         loaderEnv.loop               = args->loop;
         loaderEnv.hLoader            = videoEnv.hLoader;
+		printf("****************loaderThrFxn start****************\n");
 
         if (pthread_create(&loaderThread, &attr, loaderThrFxn, &loaderEnv)) {
             ERR("Failed to create loader thread\n");
@@ -344,23 +347,13 @@ Int main(Int argc, Char *argv[])
 
     /* Set the priority of this whole process to max (requires root) */
     setpriority(PRIO_PROCESS, 0, -20);
-#if 0    
-   //mmap the physical address to virtual address
-    status = InitMmapAddress( );
-    if( 0 != status )
-    {
-        ERR("******Encoder Failed InitMmapAddress******\n");
-        cleanup(status);
-    }
+	
+    //Initialize AD9363 transiver and release reset, must before FPGA initialization
+    //InitAD9363( uiFlag );
 
     //Initialize FPGA configuration and release reset 
-    InitFPGA( uiFlag );
-
-    //Initialize AD9363 transiver and release reset
-    InitAD9363( uiFlag );
- 
-    //release the control of AD9363
-#endif
+    //InitFPGAReg();
+    //InitFPGA( uiFlag );
 
     //Initialize the air station video process,include capture/encode/write pthread
     //status = InitGroundVideoProcess( &args );

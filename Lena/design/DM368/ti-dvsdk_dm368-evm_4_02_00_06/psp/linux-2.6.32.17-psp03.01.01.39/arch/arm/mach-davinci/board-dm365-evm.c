@@ -457,8 +457,9 @@ static int dm365evm_setup_video_input(enum vpfe_subdev_id id)
 	__raw_writeb(resets, cpld + CPLD_RESETS);
 
 	pr_info("EVM: switch to %s video input\n", label);
-	return 0;
 #endif
+	return 0;
+
 }
 
 static struct vpfe_config vpfe_cfg = {
@@ -479,6 +480,14 @@ static void dm365evm_usb_configure(void)
 	setup_usb(500, 8);
 }
 
+static struct i2c_board_info i2c_info[] = {
+	{
+		I2C_BOARD_INFO("it66121", 0x4d),
+	},
+
+};
+
+
 static struct davinci_i2c_platform_data i2c_pdata = {
 	.bus_freq	= 400	/* kHz */,
 	.bus_delay	= 0	/* usec */,
@@ -486,10 +495,13 @@ static struct davinci_i2c_platform_data i2c_pdata = {
 
 static void __init evm_init_i2c(void)
 {
+	davinci_cfg_reg(DM365_I2C_SDA);
+	davinci_cfg_reg(DM365_I2C_SCL);
+
 	davinci_init_i2c(&i2c_pdata);
 	//if (have_imager())
 	//	i2c_add_driver(&pca9543a_driver);
-	//i2c_register_board_info(1, i2c_info, ARRAY_SIZE(i2c_info));
+	i2c_register_board_info(1, i2c_info, ARRAY_SIZE(i2c_info));
 }
 
 static struct platform_device *dm365_evm_nand_devices[] __initdata = {
@@ -526,7 +538,7 @@ static const struct {
 
 static void cpld_led_set(struct led_classdev *cdev, enum led_brightness b)
 {
-	struct cpld_led *led = container_of(cdev, struct cpld_led, cdev);
+	//struct cpld_led *led = container_of(cdev, struct cpld_led, cdev);
 	//u8 reg = __raw_readb(cpld + CPLD_LEDS);
 
 	//if (b != LED_OFF)
@@ -538,7 +550,7 @@ static void cpld_led_set(struct led_classdev *cdev, enum led_brightness b)
 
 static enum led_brightness cpld_led_get(struct led_classdev *cdev)
 {
-	struct cpld_led *led = container_of(cdev, struct cpld_led, cdev);
+	//struct cpld_led *led = container_of(cdev, struct cpld_led, cdev);
 	//u8 reg = __raw_readb(cpld + CPLD_LEDS);
 
 	//return (reg & led->mask) ? LED_OFF : LED_FULL;
@@ -547,7 +559,7 @@ static enum led_brightness cpld_led_get(struct led_classdev *cdev)
 
 static int __init cpld_leds_init(void)
 {
-	int	i;
+	//int	i;
 
 	if (!have_leds())
 		return 0;
@@ -710,10 +722,10 @@ static struct spi_board_info dm365_evm_spi4_info[] __initconst = {
 	},
 };
 
-#define AIR_GROUND_GPIO (29) 
+
 #define SPI0_CS_GPIO (25) 
 #define SPI4_CS_GPIO (37) 
-#define SPI4_CS_GPIO (37) 
+#define AIR_GROUND_GPIO (29) 
 #define FPGA_RESET_GPIO	(9)
 /*--------------------------------------------------------------------------
   * function : GPIO_init
@@ -722,7 +734,7 @@ static struct spi_board_info dm365_evm_spi4_info[] __initconst = {
   * feller	 1.0	 20151129	 
   *----------------------------------------------------------------------------
 */
-void GPIORequsetInit()
+void GPIORequsetInit(void)
 {
 	gpio_request( SPI0_CS_GPIO, "SPI0_CS_GPIO" );
 	gpio_request( SPI4_CS_GPIO, "SPI4_CS_GPIO" );
@@ -737,12 +749,14 @@ void GPIORequsetInit()
  * feller	1.0		20151129	
  *----------------------------------------------------------------------------
 */
-void GetAirGroundStationFlag()
+void GetAirGroundStationFlag(void)
 {
 	unsigned int uiFlag = 0;
 	//uiFlag = (__raw_readl( IO_ADDRESS( 0x01c67020) ) & 0x20000000 );
-	uiFlag = gpio_direction_input( AIR_GROUND_GPIO );
-	if( 0 != uiFlag ) 
+
+	gpio_direction_input( AIR_GROUND_GPIO );
+	uiFlag = gpio_get_value( AIR_GROUND_GPIO );
+	if( uiFlag ) 
 	{
 		device_lena_air_id = LENA_AIR;
 		printk("EVM: LENA AIR device!\n");
@@ -757,21 +771,8 @@ void GetAirGroundStationFlag()
 
 static __init void dm365_evm_init(void)
 {
-	//davinci_cfg_reg(DM365_GPIO29);
 
-	//gpio_direction_input(29);
-#if 0
-	if((__raw_readl(IO_ADDRESS(0x01c67020))&0x20000000)!=0) 
-		{
-			device_lena_air_id = LENA_AIR;
-			printk("EVM: LENA air device!\n");
-		}
-	else 
-		{
-			device_lena_air_id = LENA_GROUND;
-			printk("EVM: LENA GROUND device!\n");
-		}	
-#endif
+
 	GPIORequsetInit();
 	GetAirGroundStationFlag();
 		
