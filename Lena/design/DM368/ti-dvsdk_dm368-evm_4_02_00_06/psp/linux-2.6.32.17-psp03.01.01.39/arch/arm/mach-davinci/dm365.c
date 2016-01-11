@@ -704,10 +704,6 @@ static struct resource dm365_spi4_resources[] = {
 		.end   = 0x01c237ff,
 		.flags = IORESOURCE_MEM,
 	},
-	{
-		.start = IRQ_DM365_SPIINT0_0,
-		.flags = IORESOURCE_IRQ,
-	},
 };
 static struct platform_device dm365_spi4_device = {
 	.name = "spi_davinci",
@@ -731,10 +727,6 @@ void __init dm365_init_spi4(unsigned chipselect_mask,
 	/* not all slaves will be wired up */
 	if (chipselect_mask & BIT(0))
 		davinci_cfg_reg(DM365_SPI4_SDENA0);
-
-	//register for SPI4_CS for GPIO
-	gpio_request( 37, "SPI4_CS" );
-	gpio_direction_output(37, 1);
 
 	spi_register_board_info(info, len);
 
@@ -1303,9 +1295,6 @@ static struct platform_device dm365_isif_dev = {
 	},
 };
 
-#define	LENA_AIR  0
-extern unsigned char device_lena_air_id;
-
 static int __init dm365_init_devices(void)
 {
 	if (!cpu_is_davinci_dm365())
@@ -1322,7 +1311,7 @@ static int __init dm365_init_devices(void)
 	platform_device_register(&dm365_vpss_device);
 	platform_device_register(&dm365_ipipeif_dev);
 	platform_device_register(&dm365_isif_dev);
-	if(device_lena_air_id == LENA_AIR) platform_device_register(&vpfe_capture_dev);
+	platform_device_register(&vpfe_capture_dev);
 
 	/* Register OSD device */
 	platform_device_register(&dm365_osd_dev);

@@ -396,44 +396,45 @@ int do_fpga_reset( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 U_BOOT_CMD(
 	resetfpga,	1,	0,	do_fpga_reset,
-	"memory write (fill)",
-	"[.b, .w, .l] address value [count]"
+	"reset FPGA",
+	"resetfpga"
 );
+#define COMMAND_DELAY (50000)
 int do_fpga_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	run_command("sf probe 0:0 42500000",0);
-	udelay(500000);
+	run_command("sf probe 0:0 40000000",0);
+	udelay(COMMAND_DELAY);
 	run_command("sf erase 0x1500000 0x6C0000",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("loady 0x84000000",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("sf write 0x84000000 0x1500000 0x6b2190",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("sf read 0x86000000 0x1500000 0x6b2190",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("cmp.b 0x86000000 0x84000000 0x6b2190",0);	
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 
 	printf("FPGA write into SPI FLASH OK!!\n");
 
 	return 0;
 }
 
+
 U_BOOT_CMD(
 	updatefpga,	1,	0,	do_fpga_update,
-	"update fpga version form pc by UART",
-	"no parameter"
+	"update fpga from PC",
+	"updatefpga"
 );
 
 int do_fpga_load( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-
-	run_command("sf probe 0:0 42500000",0);
-	udelay(500000);
+	run_command("sf probe 0:0 40000000",0);
+	udelay(COMMAND_DELAY);
 	run_command("sf read 0x82000000 0x1500000 0x6b2190",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("fpga load 0 0x82000000 0x6b2190",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 
 	printf("FPGA Load OK!!!\n");
 	return 0;
@@ -442,24 +443,24 @@ int do_fpga_load( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 U_BOOT_CMD(
 	loadfpga,	1,	0,	do_fpga_load,
-	"load fpga from flash",
-	"no parameter"
+	"loadfpga from FLASH",
+	"loadfpga"
 );
 
 int do_uboot_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	run_command("sf probe 0:0 42500000",0);
-	udelay(500000);
+	run_command("sf probe 0:0 40000000",0);
+	udelay(COMMAND_DELAY);
 	run_command("sf erase 0x80000 0x40000",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("loady 0x84000000",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("sf write 0x84000000 0x80000 0x40000",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("sf read 0x86000000 0x80000 0x40000",0);
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 	run_command("cmp.b 0x86000000 0x84000000 0x40000",0);	
-	udelay(500000);
+	udelay(COMMAND_DELAY);
 
 	printf("u-boot.bin write into SPI FLASH OK!!\n");
 
@@ -469,6 +470,10 @@ int do_uboot_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 U_BOOT_CMD(
 	updateuboot,	1,	0,	do_uboot_update,
-	"update u-boot from pc by UART",
-	"no parameter"
+	"update u-boot from PC",
+	"updateuboot"
 );
+
+
+
+

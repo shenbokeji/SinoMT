@@ -22,7 +22,7 @@
 #include <common.h>
 #include <uni_slld.h>
 #include <uni_slld_hsd.h>
-#include <kuboot_net.h>
+//#include <kuboot_net.h>
 #include <asm/arch/ErrCode.h>
 
 /*
@@ -141,13 +141,13 @@ int sf_read_common(struct spi_flash *flash, const u8 *cmd, size_t cmd_len, void 
 	struct spi_slave *spi = flash->spi;
 	int ret;
 
-	#ifdef CONFIG_ZX2114XX
-        g_ptspihostdevice->spi_host_driver.spi_claim_bus(spi);
-	#endif
+	
+    g_ptspihostdevice->spi_host_driver.spi_claim_bus(spi);
+
 	ret = sf_cmd_read(flash, cmd, cmd_len, data, data_len);
-	#ifdef CONFIG_ZX2114XX
-        g_ptspihostdevice->spi_host_driver.spi_release_bus(spi);
-	#endif
+
+    g_ptspihostdevice->spi_host_driver.spi_release_bus(spi);
+
 	return ret;
 }
 /**************************************************************************

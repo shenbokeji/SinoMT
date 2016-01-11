@@ -536,8 +536,15 @@ U_BOOT_CMD(
 #define EMIF_FPGA_RAM_ADDR (0xC0)
 #define EMIF_FPGA_SAMP_EN_ADDR (0x610)
 #define FPGA_ADDR_VALID(a) ( ( a > EMIF_FPGA_END_ADDR ) || ( a < EMIF_FPGA_START_ADDR ) )
-#define WRFPGA( b,addr ) ((*(volatile unsigned short *) ( ( addr << 1 )+ EMIF_BASE_ADDR ) ) = (b))
-#define RDFPGA( addr ) (*(volatile unsigned short *) ( ( addr << 1 ) + EMIF_BASE_ADDR ) )
+
+#define ___swab16(x) \
+	((unsigned short)( \
+		(((unsigned short)(x) & (unsigned short)0x00ffU) << 8) | \
+		(((unsigned short)(x) & (unsigned short)0xff00U) >> 8) ))
+
+#define WRFPGA( b,addr ) ((*(volatile unsigned short *) ( ( addr << 1 )+ EMIF_BASE_ADDR ) ) =___swab16(b))
+#define RDFPGA( addr ) ___swab16(*(volatile unsigned short *) ( ( addr << 1 ) + EMIF_BASE_ADDR ) )
+
 /*----------------------------------------------------------------------------
  * name		: do_wrfpga
  * function	: write FPGA register
@@ -790,7 +797,7 @@ int do_physta(cmd_tbl_t *cmdtp, int iFlag, int argc, char * const argv[])
 	{
 		iNum = (int)simple_strtoul( argv[1], NULL, 10 );
 	}		
-	for( kk = 1; kk < iNum; kk++ )
+	for( kk = 0; kk < iNum; kk++ )
 	{
 		printf( "\n***************************************************************************************\n");
 		for( ii = 0; ii < 2; ii++ )

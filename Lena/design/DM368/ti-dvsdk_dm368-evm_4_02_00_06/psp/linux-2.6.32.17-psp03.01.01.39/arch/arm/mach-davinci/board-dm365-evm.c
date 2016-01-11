@@ -122,9 +122,9 @@ static inline int have_adv7611(void)
 void __iomem *fpga;
 
 
-#define	LENA_AIR  0
-#define	LENA_GROUND  1
-#define	LENA_NULL  2
+#define	LENA_AIR 	 (1)
+#define	LENA_GROUND  	(0)
+#define	LENA_NULL  	(2)
 
 unsigned char device_lena_air_id=LENA_NULL;
 
@@ -357,65 +357,7 @@ static struct vpfe_subdev_info vpfe_sub_devs[] = {
 			I2C_BOARD_INFO("adv7611", 0x4C),
 		},
 	},
-/*
-	{
-		.module_name = "tvp5146",
-		.grp_id = VPFE_SUBDEV_TVP5146,
-		.num_inputs = ARRAY_SIZE(tvp5146_inputs),
-		.inputs = tvp5146_inputs,
-		.routes = tvp5146_routes,
-		.can_route = 1,
-		.ccdc_if_params = {
-			.if_type = VPFE_BT656,
-			.hdpol = VPFE_PINPOL_POSITIVE,
-			.vdpol = VPFE_PINPOL_POSITIVE,
-		},
-		.board_info = {
-			I2C_BOARD_INFO("tvp5146", 0x5d),
-			.platform_data = &tvp5146_pdata,
-		},
-	},
 
-	{
-		.module_name = "tvp7002",
-		.grp_id = VPFE_SUBDEV_TVP7002,
-		.num_inputs = ARRAY_SIZE(tvp7002_inputs),
-		.inputs = tvp7002_inputs,
-		.ccdc_if_params = {
-			.if_type = VPFE_BT1120,
-			.hdpol = VPFE_PINPOL_POSITIVE,
-			.vdpol = VPFE_PINPOL_POSITIVE,
-		},
-		.board_info = {
-			I2C_BOARD_INFO("tvp7002", 0x5c),
-			.platform_data = &tvp7002_pdata,
-		},
-	},
-	{
-		.module_name = "ths7353",
-		.grp_id = VPFE_SUBDEV_TVP7002,
-		.board_info = {
-			I2C_BOARD_INFO("ths7353", 0x2e),
-		},
-	},
-	{
-		.module_name = "mt9p031",
-		.is_camera = 1,
-		.grp_id = VPFE_SUBDEV_MT9P031,
-		.num_inputs = ARRAY_SIZE(mt9p031_inputs),
-		.inputs = mt9p031_inputs,
-		.ccdc_if_params = {
-			.if_type = VPFE_RAW_BAYER,
-			.hdpol = VPFE_PINPOL_POSITIVE,
-			.vdpol = VPFE_PINPOL_POSITIVE,
-		},
-		.board_info = {
-			I2C_BOARD_INFO("mt9p031", 0x5d),
-			/* this is for PCLK rising edge 
-			.platform_data = (void *)1,
-		},
-	}
-*/
 };
 
 /* Set the input mux for TVP7002/TVP5146/MTxxxx sensors */
@@ -688,7 +630,7 @@ static struct davinci_uart_config uart_config __initdata = {
 static void __init dm365_evm_map_io(void)
 {
 	/* setup input configuration for VPFE input devices */
-	if(device_lena_air_id == LENA_AIR)dm365_set_vpfe_config(&vpfe_cfg);
+	dm365_set_vpfe_config(&vpfe_cfg);
 	dm365_init();
 }
 

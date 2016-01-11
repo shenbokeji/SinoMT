@@ -206,7 +206,7 @@ int do_ubl_write ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	*p++=0x40000;
 	*p++=0x20;
 
-	run_command("sf probe 0:0 42500000",0);
+	run_command("sf probe 0:0 40000000",0);
 	udelay(500000);
 	run_command("sf erase 0x0 0x80000",0);
 	udelay(500000);

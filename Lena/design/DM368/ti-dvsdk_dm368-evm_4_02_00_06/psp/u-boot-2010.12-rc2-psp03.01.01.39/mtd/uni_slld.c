@@ -97,9 +97,9 @@ unsigned long  g_ulSpiFlashProbeDone = 0;
 /* spi flash调试全局变量*/
 unsigned long g_ulSpiFlashDebug = 0;
 
-#ifndef CFG_NO_FLASH
+//#ifndef CFG_NO_FLASH
 flash_info_t  flash_info[CFG_MAX_FLASH_BANKS]; /* info for FLASH chips */
-#endif
+//#endif
 
 /* spi flash结构体变量指针*/
 static struct spi_flash * g_ptspiflash = NULL;
@@ -217,13 +217,9 @@ unsigned long flash_init (void)
     struct spi_flash * ptspiflash = NULL;
     unsigned long ulsize = 0;
 
-#ifdef CONFIG_ZX2114XX
-    ptspiflash = spi_flash_probe(0, 0,48000000, SPI_MODE_3);
-#else
-    ptspiflash = spi_flash_probe(0, 0,48000000, SPI_MODE_3);
-#endif
 
-    
+    ptspiflash = spi_flash_probe(0, 0,42500000, SPI_MODE_3);
+
     if(NULL == ptspiflash)
     {
         error("\nspi_flash_probe failed!\n");
@@ -474,7 +470,7 @@ static int sf_wait_ready(struct spi_flash *flash, unsigned long timeout)
 			break;
 	} while (get_timer(timebase) < timeout);
 
-    sf_cmd(spi, 0x70, &status_flag, sizeof(status_flag),uldummy);
+    //sf_cmd(spi, 0x70, &status_flag, sizeof(status_flag),uldummy);
     // printf("status_flag:0x%x.\n",status);
 	if ((status & (1<<(ulwribitoffset))) == 0)
 		return  BSP_OK;
@@ -594,9 +590,7 @@ int sf_write(struct spi_flash *flash,u32 offset, size_t len, const void *buf)
 	byte_addr = offset % page_size;
 	cmd[0] = ptSpiFlash->ptSpiFlashInfo->tSpiFlashCmdSet.tpp.ucopcode;
 
-	#ifdef CONFIG_ZX2114XX
 	g_ptspihostdevice->spi_host_driver.spi_claim_bus(spi);
-	#endif
 
 	for (actual = 0; actual < len; actual += chunk_len) 
 	{
@@ -681,9 +675,9 @@ err2:
 
 err1:
 
-	#ifdef CONFIG_ZX2114XX
+
 	g_ptspihostdevice->spi_host_driver.spi_release_bus(spi);
-	#endif
+
 
 	return ret;
 }
@@ -737,9 +731,8 @@ int sf_erase(struct spi_flash *flash, u32 offset, size_t len)
 
 	cmd[0] = ptSpiFlash->ptSpiFlashInfo->tSpiFlashCmdSet.tse.ucopcode;
 
-	#ifdef CONFIG_ZX2114XX
 	g_ptspihostdevice->spi_host_driver.spi_claim_bus(spi);
-	#endif
+
 
 	len = len / sector_size;
 	for (actual = 0; actual < len; actual++) 
@@ -819,9 +812,9 @@ err2:
 
 err1:
 
-	#ifdef CONFIG_ZX2114XX
+	
 	g_ptspihostdevice->spi_host_driver.spi_release_bus(spi);
-	#endif
+
 
 	return ret;
 }
@@ -960,9 +953,9 @@ unsigned long  SpiFlashEnter_4B_Mode(struct spi_flash *flash)
 
     spi = flash->spi;
 	
-	#ifdef CONFIG_ZX2114XX
+
 	g_ptspihostdevice->spi_host_driver.spi_claim_bus(spi);
-	#endif 
+
 
     uccmd = ptSpiFlash->ptSpiFlashInfo->tSpiFlashCmdSet.twren.ucopcode;
 	uldummy = ptSpiFlash->ptSpiFlashInfo->tSpiFlashCmdSet.twren.ucdummycycle;
@@ -1008,9 +1001,9 @@ unsigned long  SpiFlashEnter_4B_Mode(struct spi_flash *flash)
 
 out:
 
-	#ifdef CONFIG_ZX2114XX
+
     g_ptspihostdevice->spi_host_driver.spi_release_bus(spi);
-	#endif
+
 
     return ret;
 }
@@ -1049,7 +1042,7 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,unsigned int
 	{
 	    if((s_bus == bus) && (s_cs == cs) && (s_max_hz == max_hz) && (s_spi_mode == spi_mode))
 	    {
-            printf("Spi Flash:%s,%s;Page Size:%dB;Size:%dMB.",
+            printf("Spi Flash:%s,%s;Page Size:%dB;Size:%dMB.\n",
 				ptSpiFlash->ptSpiFlashInfo->tSpiFlashDevPara.manufacturer_name,\
                 ptSpiFlash->ptSpiFlashInfo->tSpiFlashDevPara.name,\
                 ptSpiFlash->ptSpiFlashInfo->tSpiFlashDevPara.page_size,\
@@ -1067,7 +1060,7 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,unsigned int
                 return  NULL;
             }
             else
-            {
+            {               
                 ptspihostdevice->spi_host_driver.spi_free_slave(g_ptspiflash->spi);
                 free(ptspihostdevice);
                 ptspihostdevice = NULL;
