@@ -122,9 +122,9 @@ static inline int have_adv7611(void)
 void __iomem *fpga;
 
 
-#define	LENA_AIR 	 (1)
+#define	LENA_AIR 	 	(1)
 #define	LENA_GROUND  	(0)
-#define	LENA_NULL  	(2)
+#define	LENA_NULL  		(2)
 
 unsigned char device_lena_air_id=LENA_NULL;
 

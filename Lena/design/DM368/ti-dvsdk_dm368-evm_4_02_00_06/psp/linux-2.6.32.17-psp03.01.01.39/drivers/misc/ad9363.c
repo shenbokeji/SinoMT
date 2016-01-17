@@ -182,8 +182,8 @@ static int ad9363_ioctl(struct inode *inode, struct file *file,
 	return ret;
 }
 
-#define	LENA_AIR  	(0)
-#define	LENA_GROUND  	(1)
+#define	LENA_AIR  	(1)
+#define	LENA_GROUND  	(0)
 
 extern unsigned char device_lena_air_id;
 #if 0
@@ -234,7 +234,7 @@ static int __devinit ad9363_probe(struct spi_device *spi)
 	spi_ad9363 = spi;
 	printk(AD9363_DRIVER_NAME"\t misc initialized %s!\n", (0==ret)?"successed":"failed");	
 
-
+#if 0
 	if(device_lena_air_id == LENA_AIR)
 	{	
 		//ad9363_air_init(spi);
@@ -245,8 +245,8 @@ static int __devinit ad9363_probe(struct spi_device *spi)
 		//ad9363_ground_init(spi);
 		printk("LENA id is ground device!!!\n");
 	}
-	else printk("LENA air id ERROR!!!\n");
-
+	else printk("LENA id ERROR!!!\n");
+#endif
 	return 0;
 }
 
