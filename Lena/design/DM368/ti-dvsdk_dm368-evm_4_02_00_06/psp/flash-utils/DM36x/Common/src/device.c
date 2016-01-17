@@ -94,15 +94,15 @@ static const Uint16 DDR_RR = 78;
 #define PLL1_DIV8		0x6 	// POST DIV 680/7=  97 Mhz-> MMC0/SD0
 #define PLL1_DIV9		0x1B	// POST DIV 680/28 = 24.3Mhz-> CLKOUT 
 
-#define PLL2_MUL		0x63
-#define PLL2_PREDIV		0x7
-#define PLL2_POSTDIV		0x0	//PLL2 Output (0x63 * 2 * 24 / (0x7 + 1) = 594MHZ
+#define PLL2_MUL		0x9
+#define PLL2_PREDIV		0x0
+#define PLL2_POSTDIV	0x0 		// PLL2 Output (0x9 * 2 * 27 / (0x1 + 1) = 432MHZ
 
-#define PLL2_DIV1		0x18	// 594/25 23.6 MHZ USB
-#define PLL2_DIV2		0x1  	// 594/2 =297 Mhz -> ARM 
-#define PLL2_DIV3		0x1	// 297 MHZ 2 * ddr
-#define PLL2_DIV4		0x1c 	// POST DIV 594/29 = 20.48 -> VOICE
-#define PLL2_DIV5		0x07 	// POST DIV 594/8 = 74.25 ->VIDEO HD
+#define PLL2_DIV1		0x11	// POST DIV 432/18=24 Mhz  ->USB PHY
+#define PLL2_DIV2		0x0 	// POST DIV 432/1=432 Mhz  -> ARM926/HDVICP 
+#define PLL2_DIV3		0x1	// POST DIV 432/2=216 Mhz  -> DDRx2
+#define PLL2_DIV4		0x14	// POST DIV 432/21= 20.5714 Mhz->VOICE
+#define PLL2_DIV5		0x0f 	// POST DIV 432/16=27 Mhz  -> VENC
 
 #define PERIPHERAL_CLK_CTRL_VAL	0x243F0480
 
