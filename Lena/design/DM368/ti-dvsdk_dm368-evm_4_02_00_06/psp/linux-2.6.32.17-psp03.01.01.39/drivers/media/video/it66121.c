@@ -14,6 +14,8 @@
 
 #include <linux/delay.h>
 #include <media/v4l2-subdev.h>
+#include <media/davinci/videohd.h>
+
 
 
 #define IT66121_DRIVER_NAME  "it66121_reg"
@@ -1260,16 +1262,32 @@ static int it66121_device_init(void)
 	return 1;
 }
 
+static int it66121_s_std_output(struct v4l2_subdev *sd, v4l2_std_id norm)
+{
+	if (norm & (V4L2_STD_ALL & ~V4L2_STD_SECAM))
+		return 0;
+	else if (norm & (V4L2_STD_525P_60 | V4L2_STD_625P_50))
+		return 0;
+	else if (norm & (V4L2_STD_720P_60 | V4L2_STD_720P_50 |
+				V4L2_STD_1080I_60 | V4L2_STD_1080I_50))
+		return 0;
+	else if (norm & (V4L2_STD_1080P_60 | V4L2_STD_1080P_50))
+		return 0;
+	else
+		return -EINVAL;
+}
+
+
 static int it66121_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *chip)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 
-	return v4l2_chip_ident_i2c_client(client, chip, V4L2_IDENT_ADV7175, 0);
+	return v4l2_chip_ident_i2c_client(client, chip, V4L2_IDENT_IT66121, 0);
 }
 /* ----------------------------------------------------------------------- */
 
 static const struct v4l2_subdev_core_ops it66121_core_ops = {
-	//.s_std = it66121_s_std,
+	.s_std = it66121_s_std_output,
 };
 
 static const struct v4l2_subdev_video_ops it66121_video_ops = {
