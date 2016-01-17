@@ -68,5 +68,4 @@ typedef struct VideoEnv {
 
 /* Thread function prototype */
 extern Void *videoThrFxn(Void *arg);
-
 #endif /* _VIDEO_H */

@@ -47,7 +47,7 @@
 
 #include <ti/sdo/dmai/Buffer.h>
 #include <ti/sdo/dmai/Display.h>
-
+#include <fcntl.h>
 #include "demo.h"
 #include "ui.h"
 #include "../qtInterface/qtinterface.h"
@@ -225,7 +225,6 @@ UI_Handle UI_create(UI_Attrs *attrs)
 
     hUI->osd = attrs->osd;
     hUI->videoStd = attrs->videoStd;
-
     if (!attrs->osd) {
         aAttrs.videoStd = hUI->videoStd;
         /* Create display device driver instance */
@@ -238,10 +237,11 @@ UI_Handle UI_create(UI_Attrs *attrs)
             aAttrs.videoOutput = Display_Output_COMPOSITE;
         } 
         else {
+
             aAttrs.videoStd = VideoStd_576P;
             aAttrs.videoOutput = Display_Output_COMPONENT;
         }
-    
+
         hUI->hAttr = Display_create(NULL, &aAttrs);
 
         if (hUI->hAttr == NULL) {
@@ -252,6 +252,7 @@ UI_Handle UI_create(UI_Attrs *attrs)
 
         /* Clear the OSD if using keyboard interface */
         setOsdTransparency(hUI, 0);
+
     }
 
     /* Create the FIFOs if it does not exist */
@@ -263,11 +264,18 @@ UI_Handle UI_create(UI_Attrs *attrs)
         mknod(KB_CMD_FIFO_FILE, S_IFIFO|0666, 0);
         mknod(STATUS_FIFO_FILE, S_IFIFO|0666, 0);
 
-        hUI->fpCmd = fopen(CMD_FIFO_FILE, "r");
-        hUI->fpConfig = fopen(CONFIG_FIFO_FILE, "r");
-        hUI->fpKbCmd = fopen(KB_CMD_FIFO_FILE, "w");
-        hUI->fpStatus = fopen(STATUS_FIFO_FILE, "w");
-
+        //hUI->fpCmd = fopen(CMD_FIFO_FILE, "r");
+    hUI->fpCmd = (FILE*)open( CMD_FIFO_FILE, O_RDONLY | O_NONBLOCK, 0 );
+perror(CMD_FIFO_FILE"  fopen after\n");
+        //hUI->fpConfig = fopen(CONFIG_FIFO_FILE, "r");
+    hUI->fpCmd = (FILE*)open( CONFIG_FIFO_FILE, O_RDONLY | O_NONBLOCK, 0 );
+perror(CONFIG_FIFO_FILE"  fopen after\n");
+       // hUI->fpKbCmd = fopen(KB_CMD_FIFO_FILE, "w");
+    hUI->fpCmd = (FILE*)open( KB_CMD_FIFO_FILE, O_RDWR | O_NONBLOCK, 0 );
+perror(KB_CMD_FIFO_FILE"  fopen after\n");
+       // hUI->fpStatus = fopen(STATUS_FIFO_FILE, "w");
+    hUI->fpCmd = (FILE*)open( STATUS_FIFO_FILE, O_RDWR | O_NONBLOCK, 0 );
+perror(STATUS_FIFO_FILE"  fopen after\n");
         if ((hUI->fpCmd == NULL) || (hUI->fpConfig == NULL) || 
             (hUI->fpKbCmd == NULL) || (hUI->fpStatus == NULL)) {
             ERR("Failed to open pipes\n");

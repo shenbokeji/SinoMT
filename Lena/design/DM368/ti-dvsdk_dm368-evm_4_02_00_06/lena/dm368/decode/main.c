@@ -23,7 +23,7 @@ GlobalData gbl = GBL_DATA_INIT;
  * author	version		date		note
  * feller	1.0		20150728	create         
  ******************************************************************************/
-Int InitGroundVideoProcess( Args *args )
+int InitGroundVideoProcess( Args *args )
 {
 
     Uns                     initMask            = 0;
@@ -237,7 +237,14 @@ printf("****************Dmai_clear over****************\n");
     }
 
 cleanup:
-
+    if (args->osd) {
+        int rv;
+        if (hUI) {
+            /* Stop the UI */
+            UI_stop(hUI);
+        }
+        wait(&rv);      /* Wait for child process to end */
+    }
     /* Make sure the other threads aren't waiting for us */
     if (hRendezvousInit) Rendezvous_force(hRendezvousInit);
     if (hRendezvousLoader) Rendezvous_force(hRendezvousLoader);
@@ -309,8 +316,8 @@ cleanup:
     system("echo 3 > /proc/sys/vm/drop_caches");
     
     pthread_mutex_destroy(&gbl.mutex);
-
-    exit(status);
+    return status;
+    //exit(status);
 
 }
 
@@ -322,7 +329,7 @@ cleanup:
  * feller	1.0		20150731	create         
  ******************************************************************************/
 
-Int main(Int argc, Char *argv[])
+int main(int argc, char *argv[])
 {
     Args args   = DEFAULT_ARGS;
     Int  status = EXIT_SUCCESS;	
@@ -333,13 +340,12 @@ Int main(Int argc, Char *argv[])
 	
     //Get the Air or Ground Station flag
     uiFlag = GetAirGroundStationFlag();    
-
 	
     /* Parse the arguments given to the app and set the app environment */    
     parseArgs(argc, argv, &args);
     /* Validate arguments */
-    if (validateArgs(&args) == FAILURE) {
-        cleanup(EXIT_FAILURE);
+    if ( FAILURE == validateArgs(&args) ) {
+        return 0;
     }
 	
     printf("**********SinoMartin Ground_Station decoder started.**********\n");
@@ -356,14 +362,33 @@ Int main(Int argc, Char *argv[])
     //InitFPGA( uiFlag );
 
     //Initialize the air station video process,include capture/encode/write pthread
-    //status = InitGroundVideoProcess( &args );
+    status = InitGroundVideoProcess( &args );
 	while(1)
 	{
 		sleep(1);
 	}
-cleanup:    
+//cleanup:    
 	
     return 0;
 }
  
-
+ /*****************************************************************************
+ * filename	: playvideo
+ * function	: playvide test function
+ * author	version		date		note
+ * feller	1.0		20160116	create         
+ ******************************************************************************/
+int playvideo( const unsigned int uinum )
+{
+    Args args = DEFAULT_ARGS;
+    unsigned int ii;
+    printf( "***** begin play the video *****\n" );	
+    for( ii = 0; ii < uinum; ii++ )
+    {
+    	InitGroundVideoProcess( &args );
+	printf( "play the video %d time\n", uinum );
+    }
+    printf( "***** end play the video *****\n" );	  
+	
+    return 0;
+}

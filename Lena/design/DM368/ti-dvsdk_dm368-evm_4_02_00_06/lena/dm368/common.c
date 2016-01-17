@@ -80,7 +80,7 @@ int SetGPIO( const int iGPIOnumber, const char cvalue )
     int fid = -1;
     int iReturn = -1;
 
-    fid = open( DEVICE_GPIO, O_RDONLY, 0 );
+    fid = open( DEVICE_GPIO, O_RDWR, 0 );
     if( fid < 0 )
     {
 	perror( "ERROR:open failed "DEVICE_GPIO"!\n" );

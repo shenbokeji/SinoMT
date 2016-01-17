@@ -35,10 +35,7 @@
  ******************************************************************************/
  int wrgpio(  const int iGPIOnumber, const char cvalue  )
  {
-	char cTmp;
 	SetGPIO( iGPIOnumber, cvalue );
-	cTmp = GetGPIO( iGPIOnumber );
-	printf( "GPIO%d read back : %d\n", iGPIOnumber, (int)cTmp );
 	return LENA_OK;
  }
 /*****************************************************************************
@@ -751,6 +748,90 @@ int settxatt( const unsigned int ichan, const int iattvalue )
 	iReturn = attshow();
 	return iReturn;
 }
+
+ /*--------------------------------------------------------------------------
+
+ * name		: rdsysreg
+ * function	: read system register
+ * intput 	: uiStartAddr: start address ,iNum: read register number
+ * author	version		date		note
+ * feller	1.0		20160116
+ *----------------------------------------------------------------------------
+*/
+int rdsysreg( unsigned int uiStartAddr, const int iNum )
+{
+	int imapdev;
+	void *pMemAddr;
+	unsigned int uiRdValue; 
+	int ii;
+	volatile unsigned int *puiTmp; 
+	unsigned int uibool;
+	unsigned int uiOffsetAddr;
+	unsigned int uiMapAddr;
+
+	uibool = ( NULL == uiStartAddr ) || ( ( uiStartAddr & 3 )!= 0 )  || ( iNum > 64 );
+	if( uibool )
+	{
+		printf( "rdsysreg 0xstartaddr,0xoffsetaddr,number\n" );
+		printf( "** we only support read 32*4byte everytime **\n" );
+		printf( "** address must be multiple of 4           **\n" );
+		return LENA_FALSE;
+	}
+	uiOffsetAddr = uiStartAddr & 0XFFF;
+	uiMapAddr = uiStartAddr & 0XFFFFF000;
+	
+	imapdev = open( MEM_FILENAME, O_RDONLY | O_NDELAY );
+ 	if( imapdev <= 0 )
+	{
+		perror( MEM_FILENAME" ERROR:open failed !\n" );
+		return LENA_FALSE;
+	}
+
+	pMemAddr = mmap( NULL,
+                0x1000,
+                PROT_READ,
+                MAP_SHARED,
+                imapdev,
+                uiMapAddr);
+
+	if( MAP_FAILED == pMemAddr )
+	{
+		perror( MEM_FILENAME" mmap failed !\n" );
+		close(imapdev);
+		imapdev = NULL;
+		return LENA_FALSE;
+	}
+	for( ii = 0; ii < iNum; ii++ )
+	{
+		puiTmp = ( (unsigned int *)( pMemAddr + uiOffsetAddr ) + ii );
+		uiRdValue = *puiTmp;
+		printf( "addr = %#8X, value = %#8X\n", (unsigned int)( uiStartAddr + ii * 4 ), uiRdValue );
+	}
+	
+	munmap( pMemAddr, 0x1000 ); 
+	close(imapdev);
+	imapdev = NULL;
+	printf( "Read physical register over\n" );
+    return 0;
+}
+/*--------------------------------------------------------------------------
+
+
+ * name		: rdsys
+ * function	: read system register
+ * intput 	: 
+ * author	version		date		note
+ * feller	1.0		20160116
+ *----------------------------------------------------------------------------
+*/
+const unsigned int guiAddrLut[20] = { 0,0};
+int rdsys( const unsigned int uiFlag )
+
+{
+    
+    return 0;
+}
+
  /*--------------------------------------------------------------------------
  * name			: physta
  * function		: wireless phyical layer KPI static
