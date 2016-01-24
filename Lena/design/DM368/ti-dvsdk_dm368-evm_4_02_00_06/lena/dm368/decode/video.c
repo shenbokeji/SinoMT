@@ -410,7 +410,10 @@ Void *videoThrFxn(Void *arg)
     if (envp->videoStd == VideoStd_D1_PAL) {
         params->maxFrameRate = 25000;
     } 
-    else {
+    else if ( VideoStd_720P_60  == envp->videoStd )
+    {
+    	params->maxFrameRate = 60000;
+    }else{
         params->maxFrameRate = 30000;
     }
     

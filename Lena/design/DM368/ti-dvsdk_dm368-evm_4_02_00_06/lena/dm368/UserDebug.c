@@ -4,7 +4,7 @@
  *****************************************************************************
  * Copyright(C) 2015, SinoMartin Corp.
  *----------------------------------------------------------------------------
- * filename	: FPGA.c
+ * filename	: UserDebug.c
  * function	: initialize /write /read interface
  * author	version		date		note
  * feller	1.0		20150729	create         
@@ -12,6 +12,58 @@
 */
 #include "UserDebug.h"
 #include "common.h"
+/*****************************************************************************
+
+ * filename	: PrintfArray
+ * function	: print array value 
+ * input	: pcTmp:base address ,inum:byte number, iBase:number base
+ * author	version		date		note
+ * feller	1.0		20150928	create         
+ ******************************************************************************/
+
+ int PrintfArray( unsigned char * pucTmp, int inum )
+ {
+	int ii,jj;
+	int iLoop1,iLoop2;
+	int itmp = 0;
+
+	if( ( NULL == pucTmp ) || ( inum < 0 ) )
+	{
+		printf("ERROR:input parameter error\n pcTmp =%#X\tinum=%d\n", (unsigned int)pucTmp, inum );
+		return LENA_OK;
+	}
+
+	iLoop1 = inum & 0XF;
+	iLoop2 = inum >> 4;
+	printf( "\t" );	
+	for( jj = 0 ; jj < 16; jj++ )
+	{
+		printf( "%2X\t", jj );
+	}	
+	printf( "\n\t***********************************************************" );
+	printf( "***************************************************************\n" );	
+	for( ii = 0 ; ii < iLoop2; ii++ )
+	{
+		printf( "%#02X*\t", ii );			
+		for( jj = 0 ; jj < 16; jj++ )
+		{
+			printf( "%2X\t", pucTmp[itmp] );
+			itmp++;
+		}
+		printf( "\n" );		
+
+	}	
+	for( ii = 0 ; ii < iLoop1; ii++ )
+	{
+		printf( "%2X\t", pucTmp[itmp] );
+		itmp++;
+	}
+	printf( "\n\t***********************************************************" );
+	printf( "***************************************************************\n" );	
+	return LENA_OK;
+
+ }
+
  /*****************************************************************************
  * filename	: ver
  * function	: print version info
@@ -24,7 +76,7 @@
  	uiFlag = GetAirGroundStationFlag();
 
 	printf( DSP_TIME"%s", uiFlag ? AIR_VERSION : GROUND_VERSION );
-	return 0;
+	return LENA_OK;
  }
 /*****************************************************************************
 
@@ -64,6 +116,9 @@ int  reset( void )
 	system("reboot");
 	return LENA_OK;
 }
+
+
+
  /*----------------------------------------------------------------------------
  * name		: wrfpga
  * function	: write FPGA register
@@ -74,6 +129,8 @@ int  reset( void )
  * feller	1.0		20151016      
  *----------------------------------------------------------------------------
 */
+
+
 int wrfpga(  const UInt32 uiAddr, const UInt16 usValue, const UInt uiFlag ) 
 {
     Int iReturn;
@@ -160,7 +217,7 @@ int resetfpga(void)
 	close(fid);
 	fid = NULL;
 	//ResetFPGA();
-	return 0;
+	return LENA_OK;
 }
 
  /*--------------------------------------------------------------------------
@@ -185,8 +242,43 @@ int initfpga( const int iAirorGround )
 	{
 		iReturn = SetAD9363Reg( 0x3f4, 0x00 );
 	}
+	return LENA_OK;
+}
+
+/*----------------------------------------------------------------------------
+ * name		: rdfpgaram
+ * function	: read FPGA RAM
+ * input 	: uiAddr:start address ; uiNum:read data number
+ * author	version		date		note
+ * feller	1.0		20160124    
+ *----------------------------------------------------------------------------
+*/
+
+int rdfpgaram( const unsigned int uiAddr, const unsigned int uiNum, const unsigned int uiflag )
+{
+	unsigned int uiAddrTmp = 0;
+	unsigned short usRdValue;
+	unsigned int uiReturn;
+	FILE * fid;
+	int iLoop;
+
+	fid = fopen( FPGA_RAM_DATA, "w" );
+	for( iLoop = 0; iLoop < uiNum; iLoop++ )
+	{
+		uiReturn = GetFpgaReg( uiAddr, &usRdValue );
+		if( 0 != uiflag )
+		{
+			printf( "addr = %#X value = %#X\n", uiAddr + uiAddrTmp, usRdValue );
+			uiAddrTmp += 2;//only for print
+		}
+		fprintf( fid, "%X\n", usRdValue );
+	}
+	fclose(fid);
+	//system( "lsz /data.dat" );
 	return 0;
 }
+
+
 /*----------------------------------------------------------------------------
  * name		: sendfile
  * function	: send local file to another side 
@@ -297,7 +389,7 @@ int sendfile( const int number, size_t ilen )
 	close(fidfpga);
 	fidfpga = NULL;
 	printf( "send over \n" );
-	return 0;
+	return LENA_OK;
 } 
 
 
@@ -403,7 +495,7 @@ int sf( int number, int iflag )
 	close(fidfpga);
 	fidfpga = NULL;
 	
-	return 0;
+	return LENA_OK;
 } 
 /*----------------------------------------------------------------------------
  * name		: receivefile
@@ -494,7 +586,7 @@ int receivefile( const int ilen )
 	close(receivedev);
 	receivedev = NULL;
 	printf( "receive over\n" );
-	return 0;
+	return LENA_OK;
 } 
 void rf( int ilen )
 {
@@ -624,7 +716,7 @@ int init9363( const int iAirorGround )
 	}
 	
 	iReturn = SetIT66121Reg( uiAddr, ucValue );
-	if( 0 != uiFlag ) 
+	if( 0 != iReturn ) 
 	{
 	    	iReturn = GetIT66121Reg( uiAddr, &ucRdValue );
 		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, ucRdValue );	
@@ -670,7 +762,53 @@ int init9363( const int iAirorGround )
   	}
 	return LENA_OK;
  }
-
+ /*--------------------------------------------------------------------------
+ * name		: getedid
+ * function	: get the device edid
+ * input 	: idevice :0:help info ,1:it66121, 2:adv7611,others ,no use
+ * author	version		date		note
+ * feller	1.0		20160123
+ *----------------------------------------------------------------------------
+*/
+#define EDID_MAX_NUMBER (256)
+int getedid( int idevice )
+{
+	unsigned char cArray[EDID_MAX_NUMBER] = {0};
+	int ii,jj;
+	int itmp = 0x20;
+	int iReturn;
+	if( 0 == idevice )
+	{
+		printf( "1:IT66121, 2:adv7611,others ,no use\n" );
+		return LENA_OK;		
+	}
+	switch( idevice )
+	{
+		case 1://read monitor EDID info from IT66121
+			for( ii = 0; ii < 8; ii++ )//256byte EDID info for HDMI,FIFO depth 32byte
+			{
+				iReturn = SetIT66121Reg( 0X12, itmp * ii );//set the register offset address
+				iReturn = SetIT66121Reg( 0X15, 0XF );//abort read EDID
+				iReturn = SetIT66121Reg( 0X15, 0X9 );//clear the EDID fifo
+				iReturn = SetIT66121Reg( 0X15, 0X3 );//start read EDID	
+				usleep(500);//this is must delay
+				for( jj = 0; jj < itmp; jj++ )
+				{
+					iReturn = GetIT66121Reg( 0X17, &cArray[ ii * 32 + jj ] );
+				}
+			}
+			printf( "**********the EDID information read from IT66121********** \n" );
+			iReturn = SetIT66121Reg( 0x12, 0 );//set the register offset address
+			break;
+		case 2:
+			break;
+		default:
+			printf( "getedid para,\n1:it66121, 2:adv7611,others ,no use\n" );
+			return LENA_OK;	
+	}
+	PrintfArray( &cArray[0], EDID_MAX_NUMBER );
+	return LENA_OK;		
+}
 
 
  /*--------------------------------------------------------------------------

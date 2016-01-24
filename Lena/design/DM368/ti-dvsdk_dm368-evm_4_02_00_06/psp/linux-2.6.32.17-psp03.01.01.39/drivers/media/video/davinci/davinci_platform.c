@@ -538,22 +538,6 @@ static void enableDigitalOutput(int bEnable)
 		if (cpu_is_davinci_dm644x())
 			__raw_writel(0, IO_ADDRESS(DM644X_VPBE_REG_BASE + VPBE_PCR));
 
-		if (cpu_is_davinci_dm368()) {
-			enable_lcd();
-
-			/* Select EXTCLK as video clock source */
-			__raw_writel(0x1a, IO_ADDRESS(SYS_VPSS_CLKCTL));
-
-			/* Set PINMUX for GPIO82 */			
-			davinci_cfg_reg(DM365_GPIO82);
-			
-			gpio_request(82, "lcd_oe");
-			
-			/* Set GPIO82 low */
-			gpio_direction_output(82, 0);
-			gpio_set_value(82, 0);
-		}
-
 		dispc_reg_out(VENC_LCDOUT, 0);
 		dispc_reg_out(VENC_HSPLS, 0);
 		dispc_reg_out(VENC_HSTART, 0);
@@ -1031,7 +1015,12 @@ static void davinci_enc_set_720p(struct vid_enc_mode_info *mode_info)
 	 */
 	if (cpu_is_davinci_dm355()) {
 		dispc_reg_out(VENC_VMOD, (VENC_VMOD_VENC | VENC_VMOD_VMD));
-	} else {
+	} else if (cpu_is_davinci_dm368())
+	{
+		dispc_reg_out( VENC_VMOD, 
+			(VENC_VMOD_VENC | VENC_VMOD_ITLC | VENC_VMOD_TVTYP | VENC_VMOD_HDMD) );
+	}	
+	else{
 		dispc_reg_out(VENC_VMOD,
 			      (VENC_VMOD_VENC | VENC_VMOD_VMD |
 			       VENC_VMOD_HDMD));

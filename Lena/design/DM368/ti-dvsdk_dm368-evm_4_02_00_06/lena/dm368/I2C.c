@@ -33,14 +33,14 @@
 
 	if( fid < 0 )
 	{
-		 perror( "ERROR:open failed "DEVICE_IT66121"!\n" );
+		perror( DEVICE_IT66121"ERROR:open failed\n" );
 		return LENA_FALSE;
 	}
 	 
 	iRdByteNum = read( fid, &tRegTmp, BYTE_EIGHT ); //8 byte for addr and value
 	if( BYTE_EIGHT != iRdByteNum )
 	{
-		printf( "ERROR:Read Byte is not %d "DEVICE_IT66121"! \n", BYTE_EIGHT );
+		printf( DEVICE_IT66121"ERROR:Read Byte is not %d\n", BYTE_EIGHT );
 		iReturn = LENA_FALSE;
 		*pucRdValue = (unsigned char)ERROR_STRING;
 	}
@@ -74,13 +74,13 @@
 	 fid = open( DEVICE_IT66121, O_RDWR, 0 );
 	 if( fid < 0 )
 	 {
-		 perror( "ERROR:open failed "DEVICE_IT66121"!\n" );
+		 perror( DEVICE_IT66121"ERROR:open failed\n" );
 		 return LENA_FALSE;
 	 }
 	 iWrByteNum = write( fid, &tRegTmp, BYTE_EIGHT );
 	 if( BYTE_EIGHT != iWrByteNum )
 	 {
-		 printf( "ERROR:Write Byte is not %d "DEVICE_IT66121"!\n", BYTE_EIGHT );
+		 printf( DEVICE_IT66121"ERROR:Write Byte is not %d\n", BYTE_EIGHT );
 		 iReturn =  LENA_FALSE;
 	 } 
 	 close( fid );
@@ -91,9 +91,9 @@
 
 
  /*----------------------------------------------------------------------------
-  * name		 : GetADV7611Reg
-  * function	 : Get the ADV7611 register value 
-  * input		 : uiAddr:register address; pucRdValue:output value pointer
+  * name	: GetADV7611Reg
+  * function	: Get the ADV7611 register value 
+  * input	: uiAddr:register address; pucRdValue:output value pointer
   * author	 version	 date		 note
   * feller	 1.0	 20151229
   *----------------------------------------------------------------------------
@@ -111,14 +111,14 @@
 
 	 if( fid < 0 )
 	 {
-		  perror( "ERROR:open failed "DEVICE_IT66121"!\n" );
+		 perror( DEVICE_ADV7611"ERROR:open failed\n" );
 		 return LENA_FALSE;
 	 }
 	 
 	 iRdByteNum = read( fid, &tRegTmp, BYTE_EIGHT ); //8 byte for addr and value
 	 if( BYTE_EIGHT != iRdByteNum )
 	 {
-		 printf( "ERROR:Read Byte is not %d "DEVICE_ADV7611"! \n", BYTE_EIGHT );
+		 printf( DEVICE_ADV7611"ERROR:Read Byte is not %d\n", BYTE_EIGHT );
 		 iReturn = LENA_FALSE;
 		*pucRdValue = (unsigned char)ERROR_STRING;
 	 }
@@ -132,9 +132,9 @@
 	 return iReturn;
  }
   /*----------------------------------------------------------------------------
-  * name		 : SetADV7611Reg
+  * name	 : SetADV7611Reg
   * function	 : set the ADV7611 reg 
-  * input		 : uiAddr :register address ; ucValue: set register value 
+  * input	 : uiAddr :register address ; ucValue: set register value 
   * author	 version	 date		 note
   * feller	 1.0	 20151229
   *----------------------------------------------------------------------------
@@ -152,13 +152,13 @@
 	 fid = open( DEVICE_ADV7611, O_RDWR, 0 );
 	 if( fid < 0 )
 	 {
-		 perror( "ERROR:open failed "DEVICE_IT66121"!\n" );
+		 perror( DEVICE_ADV7611"ERROR:open failed \n" );
 		 return LENA_FALSE;
 	 }
 	 iWrByteNum = write( fid, &tRegTmp, BYTE_EIGHT );
 	 if( BYTE_EIGHT != iWrByteNum )
 	 {
-		 printf( "ERROR:Write Byte is not %d "DEVICE_ADV7611"!\n", BYTE_EIGHT );
+		 printf( DEVICE_ADV7611"ERROR:Write Byte is not %d\n", BYTE_EIGHT );
 		 iReturn =  LENA_FALSE;
 	 } 
 	 close( fid );

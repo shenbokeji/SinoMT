@@ -9,6 +9,8 @@
 #include <mach/gpio.h>
 #include <media/v4l2-device.h>
 #include <media/v4l2-chip-ident.h>
+#include <mach/hardware.h>
+
 //#include <media/v4l2-i2c-drv.h>
 #include <linux/miscdevice.h>  
 
@@ -21,6 +23,8 @@
 #define IT66121_DRIVER_NAME  "it66121_reg"
 #define IT66121_DEVICE_MINOR   226
 
+#define VIDSTD_TEST  4
+
 
 MODULE_DESCRIPTION("ITW Devices IT66121 video HDMI encoder driver");
 MODULE_AUTHOR("Dave Perks");
@@ -28,16 +32,34 @@ MODULE_LICENSE("GPL");
 
 #include "it66121.h"
 
+
+typedef enum _SYS_STATUS {
+    ER_SUCCESS = 0,
+    ER_FAIL,
+    ER_RESERVED
+} SYS_STATUS ;
+
+// DDC Address
+/////////////////////////////////////////
+#define DDC_HDCP_ADDRESS 0x74
+#define DDC_EDID_ADDRESS 0xA0
+#define DDC_FIFO_MAXREQ 0x20
+
+
+
 static int debug;
 module_param(debug, int, 0);
 MODULE_PARM_DESC(debug, "Debug level (0-1)");
 
-static unsigned char buf[2]={};
+//static unsigned char buf[2]={};
 
 #define TX0ADR		0x9A
 //#define TX0DEV  	0x00
 #define TX0CECADR   0x9C
 #define RXADR   	0x90
+
+#define SUPPORT_HDCP
+
 
 
 static HDMITXDEV InstanceData =
@@ -271,7 +293,7 @@ static struct v4l2_subdev *it66121_sd;
 
 #define I2C_RETRY_COUNT                 (5)
 
-unsigned char it66121_read(unsigned char address)
+int it66121_read(unsigned char address)
 {
 	{
 		int err, retry = 0;
@@ -333,15 +355,16 @@ int HDMITX_SetI2C_Byte(BYTE Reg,BYTE Mask,BYTE Value)
 
 void it66121_reset(void)
 {
-	gpio_request(24, NULL);
-	gpio_direction_output(24, 1);
-
-	// Reset it66121
-	gpio_request(17, NULL);
-	gpio_direction_output(17, 1);
-
+	//apply 5V 
+	__raw_writel(0x00FC0001,IO_ADDRESS(0x01c40000));
+	//gpio_request(103, "IT66121_POWER_GPIO");
+	//gpio_direction_output(103, 1);
+	__raw_writel(0xFFFFFF7F,IO_ADDRESS(0x01c67088));
+	__raw_writel(0x80,IO_ADDRESS(0x01c6708C));
+	return;
 
 }
+static int it66121_device_init(void);
 
 static ssize_t it66121_open(struct inode * indoe, struct file * file)
 {
@@ -353,17 +376,6 @@ static ssize_t it66121_close(struct inode * indoe, struct file * file)
 	return 0;
 }
 
-static void it66121_write_table(unsigned char addr, unsigned char num, unsigned char * value)
-{
-	unsigned char i;
-	unsigned char j=0;
-	unsigned char k=1;
-
-	for ( i = 0; i < num; i++) {
-		it66121_write(*(value + j), *(value + k));
-		j += 2; k += 2;
-	}
-}
 
 typedef struct IT66121RegStruct {
     unsigned int uiAddr;	//I2C reg, address  
@@ -376,18 +388,18 @@ static tIT66121Reg it66121_reg={0};
 //static unsigned int rw_buf=0;
 ssize_t it66121_readreg(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
-
-		copy_from_user(&it66121_reg, buf, 8);
-		it66121_reg.uiValue = it66121_read((unsigned char)it66121_reg.uiAddr);
-		copy_to_user(buf, &it66121_reg, 8); 
-		return 8;
+	int iRet;
+	iRet = copy_from_user( &it66121_reg, buf, 8 );
+	it66121_reg.uiValue = it66121_read((unsigned char)it66121_reg.uiAddr);
+	iRet = copy_to_user( (void*)buf, &it66121_reg, 8 ); 
+	return 8;
 }
 
 ssize_t it66121_writereg(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
-
-    copy_from_user(&it66121_reg, buf, 8);
-	it66121_write((unsigned char)it66121_reg.uiAddr,(unsigned char)it66121_reg.uiValue);
+    int iRet;
+    iRet = copy_from_user(&it66121_reg, buf, 8);
+    it66121_write((unsigned char)it66121_reg.uiAddr,(unsigned char)it66121_reg.uiValue);
      
     return 8;
 
@@ -489,15 +501,15 @@ void HDMITX_InitTxDev(HDMITXDEV *pInstance)
 }
 
 #if 1
-void DumpHDMITXReg()
+void DumpHDMITXReg(void)
 {
     int i,j ;
-    BYTE ucData ;
+    BYTE ucData = 0;
 
     printk("       ");
     for(j = 0 ; j < 16 ; j++)
     {
-        printk(" %02X",(int)j);
+        printk( "%#X",(int)j);
         if((j == 3)||(j==7)||(j==11))
         {
             printk("  ");
@@ -509,18 +521,18 @@ void DumpHDMITXReg()
 
     for(i = 0 ; i < 0x100 ; i+=16)
     {
-        printk("[%3X]  ",i);
+        printk("[%#X]  ",i);
         for(j = 0 ; j < 16 ; j++)
         {
             if( (i+j)!= 0x17)
             {
                 ucData = it66121_read((BYTE)((i+j)&0xFF));
-                printk(" %02X",(int)ucData);
             }
             else
             {
-                printk(" XX",(int)ucData); // for DDC FIFO
+
             }
+            printk( "%#X",(int)ucData); // for DDC FIFO
             if((j == 3)||(j==7)||(j==11))
             {
                 printk(" -");
@@ -561,7 +573,7 @@ void DumpHDMITXReg()
 
 
 
-void InitHDMITX()
+void InitHDMITX(void)
 {
 	printk("Init HDMITX in\n");
 
@@ -669,13 +681,64 @@ BOOL setHDMITX_VideoSignalType(BYTE inputSignalType)
 // Function Body.
 //////////////////////////////////////////////////////////////////////
 
-void HDMITX_DisableVideoOutput()
+void HDMITX_DisableVideoOutput(void)
 {
     BYTE uc = it66121_read(REG_TX_SW_RST) | B_HDMITX_VID_RST ;
     it66121_write(REG_TX_SW_RST,uc);
     it66121_write(REG_TX_AFE_DRV_CTRL,B_TX_AFE_DRV_RST|B_TX_AFE_DRV_PWD);
     HDMITX_SetI2C_Byte(0x62, 0x90, 0x00);
     HDMITX_SetI2C_Byte(0x64, 0x89, 0x00);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_SetupAFE
+// Parameter: VIDEOPCLKLEVEL level
+//            PCLK_LOW - for 13.5MHz (for mode less than 1080p)
+//            PCLK MEDIUM - for 25MHz~74MHz
+//            PCLK HIGH - PCLK > 80Hz (for 1080p mode or above)
+// Return: N/A
+// Remark: set reg62~reg65 depended on HighFreqMode
+//         reg61 have to be programmed at last and after video stable input.
+// Side-Effect:
+//////////////////////////////////////////////////////////////////////
+
+static void hdmitx_SetupAFE(VIDEOPCLKLEVEL level)
+{
+
+    it66121_write(REG_TX_AFE_DRV_CTRL,B_TX_AFE_DRV_RST);/* 0x10 */
+    switch(level)
+    {
+        case PCLK_HIGH:
+            HDMITX_SetI2C_Byte(0x62, 0x90, 0x80);
+            HDMITX_SetI2C_Byte(0x64, 0x89, 0x80);
+            HDMITX_SetI2C_Byte(0x68, 0x10, 0x80);
+            printk("hdmitx_SetupAFE()===================HIGHT\n");
+            break ;
+        default:
+            HDMITX_SetI2C_Byte(0x62, 0x90, 0x10);
+            HDMITX_SetI2C_Byte(0x64, 0x89, 0x09);
+            HDMITX_SetI2C_Byte(0x68, 0x10, 0x10);
+            printk("hdmitx_SetupAFE()===================LOW\n");
+            break ;
+    }
+    HDMITX_SetI2C_Byte(REG_TX_SW_RST,B_TX_REF_RST_HDMITX|B_HDMITX_VID_RST,0);
+    it66121_write(REG_TX_AFE_DRV_CTRL,0);
+    mdelay(1);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_FireAFE
+// Parameter: N/A
+// Return: N/A
+// Remark: write reg61 with 0x04
+//         When program reg61 with 0x04,then audio and video circuit work.
+// Side-Effect: N/A
+//////////////////////////////////////////////////////////////////////
+
+static void hdmitx_FireAFE(void)
+{
+    Switch_HDMITX_Bank(0);
+    it66121_write(REG_TX_AFE_DRV_CTRL,0);
 }
 
 BOOL HDMITX_EnableVideoOutput(VIDEOPCLKLEVEL level,BYTE inputColorMode,BYTE outputColorMode,BYTE bHDMI)
@@ -718,10 +781,10 @@ BOOL HDMITX_EnableVideoOutput(VIDEOPCLKLEVEL level,BYTE inputColorMode,BYTE outp
     it66121_write(REG_TX_CLK_CTRL1, uc);
 #endif
 
-    //hdmitx_SetupAFE(level); // pass if High Freq request
+    hdmitx_SetupAFE(level); // pass if High Freq request
     it66121_write(REG_TX_SW_RST,          B_HDMITX_AUD_RST|B_TX_AREF_RST|B_TX_HDCP_RST_HDMITX);
 
-   // hdmitx_FireAFE();
+    hdmitx_FireAFE();
 
 	return TRUE ;
 }
@@ -774,7 +837,7 @@ static void ConfigAVIInfoFrame(BYTE VIC, BYTE pixelrep, BYTE aspec, BYTE Colorim
 
 int hdmitx_SetVSIInfoFrame(VendorSpecific_InfoFrame *pVSIInfoFrame)
 {
-    int i ;
+    
     unsigned char ucData=0 ;
 
     if(!pVSIInfoFrame)
@@ -898,7 +961,7 @@ BOOL HDMITX_EnableAVIInfoFrame(BYTE bEnable,BYTE *pAVIInfoFrame)
 }
 
 #undef OUTPUT_3D_MODE
-#define SUPPORT_SYNCEMBEDDED
+#undef SUPPORT_SYNCEMBEDDED
 
 #ifdef SUPPORT_SYNCEMBEDDED
 
@@ -1137,15 +1200,886 @@ BOOL setHDMITX_SyncEmbeddedByVIC(BYTE VIC,BYTE bInputType)
 BYTE AudioDelayCnt=0;
 BYTE LastRefaudfreqnum=0;
 
-void HDMITX_DisableAudioOutput()
+void HDMITX_DisableAudioOutput(void)
 {
-    //BYTE uc = (HDMITX_ReadI2C_Byte(REG_TX_SW_RST) | (B_HDMITX_AUD_RST | B_TX_AREF_RST));
+    //BYTE uc = (it66121_read(REG_TX_SW_RST) | (B_HDMITX_AUD_RST | B_TX_AREF_RST));
     //it66121_write(REG_TX_SW_RST,uc);
     AudioDelayCnt=250;
     LastRefaudfreqnum=0;
     HDMITX_SetI2C_Byte(REG_TX_SW_RST, (B_HDMITX_AUD_RST | B_TX_AREF_RST), (B_HDMITX_AUD_RST | B_TX_AREF_RST) );
     HDMITX_SetI2C_Byte(0x0F, 0x10, 0x10 );
 }
+
+int HDMITX_ReadI2C_ByteN(BYTE RegAddr,BYTE *pData,int N)
+{
+    int flag = 0;
+    unsigned char i;
+
+    //flag =i2c_read_byte(TX0ADR,RegAddr,N,pData,TX0DEV);
+
+	for(i=0;i<N;i++)
+    {
+        flag = it66121_read(RegAddr+i);
+		if (flag >= 0) *pData = flag;
+		else break;
+    }
+
+    return flag;
+}
+
+
+#ifdef SUPPORT_HDCP
+
+#define REG_TX_HDCP_DESIRE 0x20
+    #define B_TX_ENABLE_HDPC11 (1<<1)
+    #define B_TX_CPDESIRE  (1<<0)
+
+#define REG_TX_AUTHFIRE    0x21
+#define REG_TX_LISTCTRL    0x22
+    #define B_TX_LISTFAIL  (1<<1)
+    #define B_TX_LISTDONE  (1<<0)
+
+#define REG_TX_AKSV    0x23
+#define REG_TX_AKSV0   0x23
+#define REG_TX_AKSV1   0x24
+#define REG_TX_AKSV2   0x25
+#define REG_TX_AKSV3   0x26
+#define REG_TX_AKSV4   0x27
+
+#define REG_TX_AN  0x28
+#define REG_TX_AN_GEN  0x30
+#define REG_TX_ARI     0x38
+#define REG_TX_ARI0    0x38
+#define REG_TX_ARI1    0x39
+#define REG_TX_APJ     0x3A
+
+#define REG_TX_BKSV    0x3B
+#define REG_TX_BRI     0x40
+#define REG_TX_BRI0    0x40
+#define REG_TX_BRI1    0x41
+#define REG_TX_BPJ     0x42
+#define REG_TX_BCAP    0x43
+    #define B_TX_CAP_HDMI_REPEATER (1<<6)
+    #define B_TX_CAP_KSV_FIFO_RDY  (1<<5)
+    #define B_TX_CAP_HDMI_FAST_MODE    (1<<4)
+    #define B_CAP_HDCP_1p1  (1<<1)
+    #define B_TX_CAP_FAST_REAUTH   (1<<0)
+#define REG_TX_BSTAT   0x44
+#define REG_TX_BSTAT0   0x44
+#define REG_TX_BSTAT1   0x45
+    #define B_TX_CAP_HDMI_MODE (1<<12)
+    #define B_TX_CAP_DVI_MODE (0<<12)
+    #define B_TX_MAX_CASCADE_EXCEEDED  (1<<11)
+    #define M_TX_REPEATER_DEPTH    (0x7<<8)
+    #define O_TX_REPEATER_DEPTH    8
+    #define B_TX_DOWNSTREAM_OVER   (1<<7)
+    #define M_TX_DOWNSTREAM_COUNT  0x7F
+
+#define REG_TX_AUTH_STAT 0x46
+#define B_TX_AUTH_DONE (1<<7)
+
+#define SUPPORT_SHA
+
+#define HDMITX_OrReg_Byte(reg,ormask) HDMITX_SetI2C_Byte(reg,(ormask),(ormask))
+#define HDMITX_AndReg_Byte(reg,andmask) it66121_write(reg,(it66121_read(reg) & (andmask)))
+
+
+#ifdef SUPPORT_SHA
+BYTE SHABuff[64] ;
+BYTE V[20] ;
+BYTE KSVList[32] ;
+BYTE Vr[20] ;
+BYTE M0[8] ;
+#endif
+
+void hdmitx_AbortDDC(void);
+void hdmitx_ClearDDCFIFO(void);
+SYS_STATUS hdmitx_hdcp_Authenticate_Repeater(void);
+
+
+BOOL getHDMITX_AuthenticationDone(void)
+{
+    //HDCP_DEBUG_PRINTF((" getHDMITX_AuthenticationDone() = %s\n",hdmiTxDev[0].bAuthenticated?"TRUE":"FALSE" ));
+    return hdmiTxDev[0].bAuthenticated;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Authentication
+//////////////////////////////////////////////////////////////////////
+void hdmitx_hdcp_ClearAuthInterrupt(void)
+{
+    // BYTE uc ;
+    // uc = it66121_read(REG_TX_INT_MASK2) & (~(B_TX_KSVLISTCHK_MASK|B_TX_AUTH_DONE_MASK|B_TX_AUTH_FAIL_MASK));
+    HDMITX_SetI2C_Byte(REG_TX_INT_MASK2, B_TX_KSVLISTCHK_MASK|B_TX_AUTH_DONE_MASK|B_TX_AUTH_FAIL_MASK, 0);
+    it66121_write(REG_TX_INT_CLR0,B_TX_CLR_AUTH_FAIL|B_TX_CLR_AUTH_DONE|B_TX_CLR_KSVLISTCHK);
+    it66121_write(REG_TX_INT_CLR1,0);
+    it66121_write(REG_TX_SYS_STATUS,B_TX_INTACTDONE);
+}
+
+void hdmitx_hdcp_ResetAuth(void)
+{
+    it66121_write(REG_TX_LISTCTRL,0);
+    it66121_write(REG_TX_HDCP_DESIRE,0);
+    HDMITX_OrReg_Byte(REG_TX_SW_RST,B_TX_HDCP_RST_HDMITX);
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+    hdmitx_hdcp_ClearAuthInterrupt();
+    hdmitx_AbortDDC();
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_Auth_Fire()
+// Parameter: N/A
+// Return: N/A
+// Remark: write anything to reg21 to enable HDCP authentication by HW
+// Side-Effect: N/A
+//////////////////////////////////////////////////////////////////////
+
+void hdmitx_hdcp_Auth_Fire(void)
+{
+    // HDCP_DEBUG_PRINTF(("hdmitx_hdcp_Auth_Fire():\n"));
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHDCP); // MASTERHDCP,no need command but fire.
+    it66121_write(REG_TX_AUTHFIRE,1);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_StartAnCipher
+// Parameter: N/A
+// Return: N/A
+// Remark: Start the Cipher to free run for random number. When stop,An is
+//         ready in Reg30.
+// Side-Effect: N/A
+//////////////////////////////////////////////////////////////////////
+
+void hdmitx_hdcp_StartAnCipher(void)
+{
+    it66121_write(REG_TX_AN_GENERATE,B_TX_START_CIPHER_GEN);
+    mdelay(1); // delay 1 ms
+}
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_StopAnCipher
+// Parameter: N/A
+// Return: N/A
+// Remark: Stop the Cipher,and An is ready in Reg30.
+// Side-Effect: N/A
+//////////////////////////////////////////////////////////////////////
+
+void hdmitx_hdcp_StopAnCipher(void)
+{
+    it66121_write(REG_TX_AN_GENERATE,B_TX_STOP_CIPHER_GEN);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_GenerateAn
+// Parameter: N/A
+// Return: N/A
+// Remark: start An ciper random run at first,then stop it. Software can get
+//         an in reg30~reg38,the write to reg28~2F
+// Side-Effect:
+//////////////////////////////////////////////////////////////////////
+
+void hdmitx_hdcp_GenerateAn(void)
+{
+    BYTE Data[8];
+    BYTE i=0;
+#if 1
+    hdmitx_hdcp_StartAnCipher();
+    // it66121_write(REG_TX_AN_GENERATE,B_TX_START_CIPHER_GEN);
+    // mdelay(1); // delay 1 ms
+    // it66121_write(REG_TX_AN_GENERATE,B_TX_STOP_CIPHER_GEN);
+
+    hdmitx_hdcp_StopAnCipher();
+
+    Switch_HDMITX_Bank(0);
+    // new An is ready in reg30
+    HDMITX_ReadI2C_ByteN(REG_TX_AN_GEN,Data,8);
+#else
+    Data[0] = 0 ;Data[1] = 0 ;Data[2] = 0 ;Data[3] = 0 ;
+    Data[4] = 0 ;Data[5] = 0 ;Data[6] = 0 ;Data[7] = 0 ;
+#endif
+    for(i=0;i<8;i++)
+    {
+        it66121_write(REG_TX_AN+i,Data[i]);
+    }
+    //it66121_writeN(REG_TX_AN,Data,8);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_GetBCaps
+// Parameter: pBCaps - pointer of byte to get BCaps.
+//            pBStatus - pointer of two bytes to get BStatus
+// Return: ER_SUCCESS if successfully got BCaps and BStatus.
+// Remark: get B status and capability from HDCP reciever via DDC bus.
+// Side-Effect:
+//////////////////////////////////////////////////////////////////////
+
+SYS_STATUS hdmitx_hdcp_GetBCaps(unsigned char *pBCaps ,unsigned short *pBStatus)
+{
+    BYTE ucdata ;
+    BYTE TimeOut ;
+
+    Switch_HDMITX_Bank(0);
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+    it66121_write(REG_TX_DDC_HEADER,DDC_HDCP_ADDRESS);
+    it66121_write(REG_TX_DDC_REQOFF,0x40); // BCaps offset
+    it66121_write(REG_TX_DDC_REQCOUNT,3);
+    it66121_write(REG_TX_DDC_CMD,CMD_DDC_SEQ_BURSTREAD);
+
+    for(TimeOut = 200 ; TimeOut > 0 ; TimeOut --)
+    {
+        mdelay(1);
+
+        ucdata = it66121_read(REG_TX_DDC_STATUS);
+
+        if(ucdata & B_TX_DDC_DONE)
+        {
+            //HDCP_DEBUG_PRINTF(("hdmitx_hdcp_GetBCaps(): DDC Done.\n"));
+            break ;
+        }
+        if(ucdata & B_TX_DDC_ERROR)
+        {
+//            HDCP_DEBUG_PRINTF(("hdmitx_hdcp_GetBCaps(): DDC fail by reg16=%02X.\n",ucdata));
+            return ER_FAIL ;
+        }
+    }
+    if(TimeOut == 0)
+    {
+        return ER_FAIL ;
+    }
+#if 1
+    ucdata = it66121_read(REG_TX_BSTAT+1);
+
+    *pBStatus = (unsigned short)ucdata ;
+    *pBStatus <<= 8 ;
+    ucdata = it66121_read(REG_TX_BSTAT);
+    *pBStatus |= ((unsigned short)ucdata&0xFF);
+    *pBCaps = it66121_read(REG_TX_BCAP);
+#else
+    *pBCaps = it66121_read(0x17);
+    *pBStatus = it66121_read(0x17) & 0xFF ;
+    *pBStatus |= (int)(it66121_read(0x17)&0xFF)<<8;
+    HDCP_DEBUG_PRINTF(("hdmitx_hdcp_GetBCaps(): ucdata = %02X\n",(int)it66121_read(0x16)));
+#endif
+    return ER_SUCCESS ;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_GetBKSV
+// Parameter: pBKSV - pointer of 5 bytes buffer for getting BKSV
+// Return: ER_SUCCESS if successfuly got BKSV from Rx.
+// Remark: Get BKSV from HDCP reciever.
+// Side-Effect: N/A
+//////////////////////////////////////////////////////////////////////
+
+SYS_STATUS hdmitx_hdcp_GetBKSV(BYTE *pBKSV)
+{
+    BYTE ucdata ;
+    BYTE TimeOut ;
+
+    Switch_HDMITX_Bank(0);
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+    it66121_write(REG_TX_DDC_HEADER,DDC_HDCP_ADDRESS);
+    it66121_write(REG_TX_DDC_REQOFF,0x00); // BKSV offset
+    it66121_write(REG_TX_DDC_REQCOUNT,5);
+    it66121_write(REG_TX_DDC_CMD,CMD_DDC_SEQ_BURSTREAD);
+
+    for(TimeOut = 200 ; TimeOut > 0 ; TimeOut --)
+    {
+        mdelay(1);
+
+        ucdata = it66121_read(REG_TX_DDC_STATUS);
+        if(ucdata & B_TX_DDC_DONE)
+        {
+            printk("hdmitx_hdcp_GetBCaps(): DDC Done.\n");
+            break ;
+        }
+        if(ucdata & B_TX_DDC_ERROR)
+        {
+            printk("hdmitx_hdcp_GetBCaps(): DDC No ack or arbilose,%x,maybe cable did not connected. Fail.\n",ucdata);
+            return ER_FAIL ;
+        }
+    }
+    if(TimeOut == 0)
+    {
+        return ER_FAIL ;
+    }
+    HDMITX_ReadI2C_ByteN(REG_TX_BKSV,pBKSV,5);
+
+    return ER_SUCCESS ;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function:hdmitx_hdcp_Authenticate
+// Parameter: N/A
+// Return: ER_SUCCESS if Authenticated without error.
+// Remark: do Authentication with Rx
+// Side-Effect:
+//  1. hdmiTxDev[0].bAuthenticated global variable will be TRUE when authenticated.
+//  2. Auth_done interrupt and AUTH_FAIL interrupt will be enabled.
+//////////////////////////////////////////////////////////////////////
+static BYTE countbit(BYTE b)
+{
+    BYTE i,count ;
+    for( i = 0, count = 0 ; i < 8 ; i++ )
+    {
+        if( b & (1<<i) )
+        {
+            count++ ;
+        }
+    }
+    return count ;
+}
+
+void hdmitx_hdcp_Reset(void)
+{
+    BYTE uc ;
+    uc = it66121_read(REG_TX_SW_RST) | B_TX_HDCP_RST_HDMITX ;
+    it66121_write(REG_TX_SW_RST,uc);
+    it66121_write(REG_TX_HDCP_DESIRE,0);
+    it66121_write(REG_TX_LISTCTRL,0);
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERHOST);
+    hdmitx_ClearDDCFIFO();
+    hdmitx_AbortDDC();
+}
+
+
+SYS_STATUS hdmitx_hdcp_Authenticate(void)
+{
+    BYTE ucdata ;
+    BYTE BCaps ;
+    unsigned short BStatus ;
+    unsigned short TimeOut ;
+
+    BYTE BKSV[5] ;
+
+    hdmiTxDev[0].bAuthenticated = FALSE ;
+    if(0==(B_TXVIDSTABLE&it66121_read(REG_TX_SYS_STATUS)))
+    {
+        return ER_FAIL;
+    }
+    // Authenticate should be called after AFE setup up.
+
+    printk("hdmitx_hdcp_Authenticate():\n");
+    hdmitx_hdcp_Reset();
+
+    Switch_HDMITX_Bank(0);
+
+    for( TimeOut = 0 ; TimeOut < 80 ; TimeOut++ )
+    {
+        mdelay(15);
+
+        if(hdmitx_hdcp_GetBCaps(&BCaps,&BStatus) != ER_SUCCESS)
+        {
+            printk("hdmitx_hdcp_GetBCaps fail.\n");
+            return ER_FAIL ;
+        }
+        // HDCP_DEBUG_PRINTF(("(%d)Reg16 = %02X\n",idx++,(int)it66121_read(0x16)));
+
+        if(B_TX_HDMI_MODE == (it66121_read(REG_TX_HDMI_MODE) & B_TX_HDMI_MODE ))
+        {
+            if((BStatus & B_TX_CAP_HDMI_MODE)==B_TX_CAP_HDMI_MODE)
+            {
+                break;
+            }
+        }
+        else
+        {
+            if((BStatus & B_TX_CAP_HDMI_MODE)!=B_TX_CAP_HDMI_MODE)
+            {
+                break;
+            }
+        }
+    }
+    /*
+    if((BStatus & M_TX_DOWNSTREAM_COUNT)> 6)
+    {
+        HDCP_DEBUG_PRINTF(("Down Stream Count %d is over maximum supported number 6,fail.\n",(int)(BStatus & M_TX_DOWNSTREAM_COUNT)));
+        return ER_FAIL ;
+    }
+    */
+	printk("BCAPS = %02X BSTATUS = %04X\n", (int)BCaps, BStatus);
+    hdmitx_hdcp_GetBKSV(BKSV);
+    printk("BKSV %02X %02X %02X %02X %02X\n",(int)BKSV[0],(int)BKSV[1],(int)BKSV[2],(int)BKSV[3],(int)BKSV[4]);
+
+    for(TimeOut = 0, ucdata = 0 ; TimeOut < 5 ; TimeOut ++)
+    {
+        ucdata += countbit(BKSV[TimeOut]);
+    }
+    if( ucdata != 20 )
+    {
+        printk("countbit error\n");
+        return ER_FAIL ;
+
+    }
+    Switch_HDMITX_Bank(0); // switch bank action should start on direct register writting of each function.
+
+    HDMITX_AndReg_Byte(REG_TX_SW_RST,~(B_TX_HDCP_RST_HDMITX));
+
+    it66121_write(REG_TX_HDCP_DESIRE,B_TX_CPDESIRE);
+    hdmitx_hdcp_ClearAuthInterrupt();
+
+    hdmitx_hdcp_GenerateAn();
+    it66121_write(REG_TX_LISTCTRL,0);
+    hdmiTxDev[0].bAuthenticated = FALSE ;
+
+    hdmitx_ClearDDCFIFO();
+
+    if((BCaps & B_TX_CAP_HDMI_REPEATER) == 0)
+    {
+        hdmitx_hdcp_Auth_Fire();
+        // wait for status ;
+
+        for(TimeOut = 250 ; TimeOut > 0 ; TimeOut --)
+        {
+            mdelay(5); // delay 1ms
+            ucdata = it66121_read(REG_TX_AUTH_STAT);
+            // HDCP_DEBUG_PRINTF(("reg46 = %02x reg16 = %02x\n",(int)ucdata,(int)it66121_read(0x16)));
+
+            if(ucdata & B_TX_AUTH_DONE)
+            {
+                hdmiTxDev[0].bAuthenticated = TRUE ;
+                break ;
+            }
+            ucdata = it66121_read(REG_TX_INT_STAT2);
+            if(ucdata & B_TX_INT_AUTH_FAIL)
+            {
+
+                it66121_write(REG_TX_INT_CLR0,B_TX_CLR_AUTH_FAIL);
+                it66121_write(REG_TX_INT_CLR1,0);
+                it66121_write(REG_TX_SYS_STATUS,B_TX_INTACTDONE);
+                it66121_write(REG_TX_SYS_STATUS,0);
+
+                printk("hdmitx_hdcp_Authenticate()-receiver: Authenticate fail\n");
+                hdmiTxDev[0].bAuthenticated = FALSE ;
+                return ER_FAIL ;
+            }
+        }
+        if(TimeOut == 0)
+        {
+             printk("hdmitx_hdcp_Authenticate()-receiver: Time out. return fail\n");
+             hdmiTxDev[0].bAuthenticated = FALSE ;
+             return ER_FAIL ;
+        }
+        return ER_SUCCESS ;
+    }
+    return hdmitx_hdcp_Authenticate_Repeater();
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_VerifyIntegration
+// Parameter: N/A
+// Return: ER_SUCCESS if success,if AUTH_FAIL interrupt status,return fail.
+// Remark: no used now.
+// Side-Effect:
+//////////////////////////////////////////////////////////////////////
+
+SYS_STATUS hdmitx_hdcp_VerifyIntegration(void)
+{
+    // if any interrupt issued a Auth fail,returned the Verify Integration fail.
+
+    if(it66121_read(REG_TX_INT_STAT1) & B_TX_INT_AUTH_FAIL)
+    {
+        hdmitx_hdcp_ClearAuthInterrupt();
+        hdmiTxDev[0].bAuthenticated = FALSE ;
+        return ER_FAIL ;
+    }
+    if(hdmiTxDev[0].bAuthenticated == TRUE)
+    {
+        return ER_SUCCESS ;
+    }
+    return ER_FAIL ;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_Authenticate_Repeater
+// Parameter: BCaps and BStatus
+// Return: ER_SUCCESS if success,if AUTH_FAIL interrupt status,return fail.
+// Remark:
+// Side-Effect: as Authentication
+//////////////////////////////////////////////////////////////////////
+
+void hdmitx_hdcp_CancelRepeaterAuthenticate(void)
+{
+    printk("hdmitx_hdcp_CancelRepeaterAuthenticate");
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+    hdmitx_AbortDDC();
+    it66121_write(REG_TX_LISTCTRL,B_TX_LISTFAIL|B_TX_LISTDONE);
+    hdmitx_hdcp_ClearAuthInterrupt();
+}
+
+void hdmitx_hdcp_ResumeRepeaterAuthenticate(void)
+{
+    it66121_write(REG_TX_LISTCTRL,B_TX_LISTDONE);
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERHDCP);
+}
+
+#ifdef SUPPORT_SHA
+
+SYS_STATUS hdmitx_hdcp_CheckSHA(BYTE pM0[],unsigned short BStatus,BYTE pKSVList[],int cDownStream,BYTE Vr[])
+{
+    int i,n ;
+
+    for(i = 0 ; i < cDownStream*5 ; i++)
+    {
+        SHABuff[i] = pKSVList[i] ;
+    }
+    SHABuff[i++] = BStatus & 0xFF ;
+    SHABuff[i++] = (BStatus>>8) & 0xFF ;
+    for(n = 0 ; n < 8 ; n++,i++)
+    {
+        SHABuff[i] = pM0[n] ;
+    }
+    n = i ;
+    // SHABuff[i++] = 0x80 ; // end mask
+    for(; i < 64 ; i++)
+    {
+        SHABuff[i] = 0 ;
+    }
+  
+    for(i = 0 ; i < 20 ; i++)
+    {
+        if(V[i] != Vr[i])
+        {
+            printk("V[] =");
+            for(i = 0 ; i < 20 ; i++)
+            {
+                printk(" %02X",(int)V[i]);
+            }
+            printk(("\nVr[] ="));
+            for(i = 0 ; i < 20 ; i++)
+            {
+                printk(" %02X",(int)Vr[i]);
+            }
+            return ER_FAIL ;
+        }
+    }
+    return ER_SUCCESS ;
+}
+
+#endif // SUPPORT_SHA
+
+SYS_STATUS hdmitx_hdcp_GetKSVList(BYTE *pKSVList,BYTE cDownStream)
+{
+    BYTE TimeOut = 100 ;
+    BYTE ucdata ;
+
+    if( cDownStream == 0 )
+    {
+        return ER_SUCCESS ;
+    }
+    if( /* cDownStream == 0 || */ pKSVList == NULL)
+    {
+        return ER_FAIL ;
+    }
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERHOST);
+    it66121_write(REG_TX_DDC_HEADER,0x74);
+    it66121_write(REG_TX_DDC_REQOFF,0x43);
+    it66121_write(REG_TX_DDC_REQCOUNT,cDownStream * 5);
+    it66121_write(REG_TX_DDC_CMD,CMD_DDC_SEQ_BURSTREAD);
+
+    for(TimeOut = 200 ; TimeOut > 0 ; TimeOut --)
+    {
+
+        ucdata = it66121_read(REG_TX_DDC_STATUS);
+        if(ucdata & B_TX_DDC_DONE)
+        {
+            printk("hdmitx_hdcp_GetKSVList(): DDC Done.\n");
+            break ;
+        }
+        if(ucdata & B_TX_DDC_ERROR)
+        {
+            printk("hdmitx_hdcp_GetKSVList(): DDC Fail by REG_TX_DDC_STATUS = %x.\n",ucdata);
+            return ER_FAIL ;
+        }
+        mdelay(5);
+    }
+    if(TimeOut == 0)
+    {
+        return ER_FAIL ;
+    }
+    printk("hdmitx_hdcp_GetKSVList(): KSV");
+    for(TimeOut = 0 ; TimeOut < cDownStream * 5 ; TimeOut++)
+    {
+        pKSVList[TimeOut] = it66121_read(REG_TX_DDC_READFIFO);
+        printk(" %02X",(int)pKSVList[TimeOut]);
+    }
+    printk(("\n"));
+    return ER_SUCCESS ;
+}
+
+SYS_STATUS hdmitx_hdcp_GetVr(BYTE *pVr)
+{
+    BYTE TimeOut  ;
+    BYTE ucdata ;
+
+    if(pVr == NULL)
+    {
+        return ER_FAIL ;
+    }
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERHOST);
+    it66121_write(REG_TX_DDC_HEADER,0x74);
+    it66121_write(REG_TX_DDC_REQOFF,0x20);
+    it66121_write(REG_TX_DDC_REQCOUNT,20);
+    it66121_write(REG_TX_DDC_CMD,CMD_DDC_SEQ_BURSTREAD);
+
+    for(TimeOut = 200 ; TimeOut > 0 ; TimeOut --)
+    {
+        ucdata = it66121_read(REG_TX_DDC_STATUS);
+        if(ucdata & B_TX_DDC_DONE)
+        {
+            printk("hdmitx_hdcp_GetVr(): DDC Done.\n");
+            break ;
+        }
+        if(ucdata & B_TX_DDC_ERROR)
+        {
+            printk("hdmitx_hdcp_GetVr(): DDC fail by REG_TX_DDC_STATUS = %x.\n",(int)ucdata);
+            return ER_FAIL ;
+        }
+        mdelay(5);
+    }
+    if(TimeOut == 0)
+    {
+        printk("hdmitx_hdcp_GetVr(): DDC fail by timeout.\n");
+        return ER_FAIL ;
+    }
+    Switch_HDMITX_Bank(0);
+
+    for(TimeOut = 0 ; TimeOut < 5 ; TimeOut++)
+    {
+        it66121_write(REG_TX_SHA_SEL ,TimeOut);
+        pVr[TimeOut*4]  = (ULONG)it66121_read(REG_TX_SHA_RD_BYTE1);
+        pVr[TimeOut*4+1] = (ULONG)it66121_read(REG_TX_SHA_RD_BYTE2);
+        pVr[TimeOut*4+2] = (ULONG)it66121_read(REG_TX_SHA_RD_BYTE3);
+        pVr[TimeOut*4+3] = (ULONG)it66121_read(REG_TX_SHA_RD_BYTE4);
+//        HDCP_DEBUG_PRINTF(("V' = %02X %02X %02X %02X\n",(int)pVr[TimeOut*4],(int)pVr[TimeOut*4+1],(int)pVr[TimeOut*4+2],(int)pVr[TimeOut*4+3]));
+    }
+    return ER_SUCCESS ;
+}
+
+SYS_STATUS hdmitx_hdcp_GetM0(BYTE *pM0)
+{
+    int i ;
+
+    if(!pM0)
+    {
+        return ER_FAIL ;
+    }
+    it66121_write(REG_TX_SHA_SEL,5); // read m0[31:0] from reg51~reg54
+    pM0[0] = it66121_read(REG_TX_SHA_RD_BYTE1);
+    pM0[1] = it66121_read(REG_TX_SHA_RD_BYTE2);
+    pM0[2] = it66121_read(REG_TX_SHA_RD_BYTE3);
+    pM0[3] = it66121_read(REG_TX_SHA_RD_BYTE4);
+    it66121_write(REG_TX_SHA_SEL,0); // read m0[39:32] from reg55
+    pM0[4] = it66121_read(REG_TX_AKSV_RD_BYTE5);
+    it66121_write(REG_TX_SHA_SEL,1); // read m0[47:40] from reg55
+    pM0[5] = it66121_read(REG_TX_AKSV_RD_BYTE5);
+    it66121_write(REG_TX_SHA_SEL,2); // read m0[55:48] from reg55
+    pM0[6] = it66121_read(REG_TX_AKSV_RD_BYTE5);
+    it66121_write(REG_TX_SHA_SEL,3); // read m0[63:56] from reg55
+    pM0[7] = it66121_read(REG_TX_AKSV_RD_BYTE5);
+
+    printk("M[] =");
+    for(i = 0 ; i < 8 ; i++)
+    {
+        printk("0x%02x,",(int)pM0[i]);
+    }
+    printk("\n");
+    return ER_SUCCESS ;
+}
+
+void hdmitx_GenerateDDCSCLK(void);
+
+SYS_STATUS hdmitx_hdcp_Authenticate_Repeater(void)
+{
+    BYTE uc ,ii;
+    // BYTE revoked ;
+    // int i ;
+    BYTE cDownStream ;
+
+    BYTE BCaps;
+    unsigned short BStatus ;
+    unsigned short TimeOut ;
+
+    printk("Authentication for repeater\n");
+ 
+
+    hdmitx_hdcp_GetBCaps(&BCaps,&BStatus);
+    mdelay(2);
+    if((B_TX_INT_HPD_PLUG|B_TX_INT_RX_SENSE)&it66121_read(REG_TX_INT_STAT1))
+    {
+        printk("HPD Before Fire Auth\n");
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+    hdmitx_hdcp_Auth_Fire();
+    //mdelay(550); // emily add for test
+    for(ii=0;ii<55;ii++)    //mdelay(550); // emily add for test
+    {
+        if((B_TX_INT_HPD_PLUG|B_TX_INT_RX_SENSE)&it66121_read(REG_TX_INT_STAT1))
+        {
+            goto hdmitx_hdcp_Repeater_Fail ;
+        }
+        mdelay(10);
+    }
+    for(TimeOut = /*250*6*/10 ; TimeOut > 0 ; TimeOut --)
+    {
+        printk("TimeOut = %d wait part 1\n",TimeOut);
+        if((B_TX_INT_HPD_PLUG|B_TX_INT_RX_SENSE)&it66121_read(REG_TX_INT_STAT1))
+        {
+            printk("HPD at wait part 1\n");
+            goto hdmitx_hdcp_Repeater_Fail ;
+        }
+        uc = it66121_read(REG_TX_INT_STAT1);
+        if(uc & B_TX_INT_DDC_BUS_HANG)
+        {
+            printk("DDC Bus hang\n");
+            goto hdmitx_hdcp_Repeater_Fail ;
+        }
+        uc = it66121_read(REG_TX_INT_STAT2);
+
+        if(uc & B_TX_INT_AUTH_FAIL)
+        {
+            /*
+            it66121_write(REG_TX_INT_CLR0,B_TX_CLR_AUTH_FAIL);
+            it66121_write(REG_TX_INT_CLR1,0);
+            it66121_write(REG_TX_SYS_STATUS,B_TX_INTACTDONE);
+            it66121_write(REG_TX_SYS_STATUS,0);
+            */
+            printk("hdmitx_hdcp_Authenticate_Repeater(): B_TX_INT_AUTH_FAIL.\n");
+            goto hdmitx_hdcp_Repeater_Fail ;
+        }
+        // emily add for test
+        // test =(it66121_read(0x7)&0x4)>>2 ;
+        if(uc & B_TX_INT_KSVLIST_CHK)
+        {
+            it66121_write(REG_TX_INT_CLR0,B_TX_CLR_KSVLISTCHK);
+            it66121_write(REG_TX_INT_CLR1,0);
+            it66121_write(REG_TX_SYS_STATUS,B_TX_INTACTDONE);
+            it66121_write(REG_TX_SYS_STATUS,0);
+            printk("B_TX_INT_KSVLIST_CHK\n");
+            break ;
+        }
+        mdelay(5);
+    }
+    if(TimeOut == 0)
+    {
+        printk("Time out for wait KSV List checking interrupt\n");
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+    ///////////////////////////////////////
+    // clear KSVList check interrupt.
+    ///////////////////////////////////////
+
+    for(TimeOut = 500 ; TimeOut > 0 ; TimeOut --)
+    {
+        printk("TimeOut=%d at wait FIFO ready\n",TimeOut);
+        if((B_TX_INT_HPD_PLUG|B_TX_INT_RX_SENSE)&it66121_read(REG_TX_INT_STAT1))
+        {
+            printk("HPD at wait FIFO ready\n");
+            goto hdmitx_hdcp_Repeater_Fail ;
+        }
+        if(hdmitx_hdcp_GetBCaps(&BCaps,&BStatus) == ER_FAIL)
+        {
+            printk("Get BCaps fail\n");
+            goto hdmitx_hdcp_Repeater_Fail ;
+        }
+        if(BCaps & B_TX_CAP_KSV_FIFO_RDY)
+        {
+             printk("FIFO Ready\n");
+             break ;
+        }
+        mdelay(5);
+
+    }
+    if(TimeOut == 0)
+    {
+        printk("Get KSV FIFO ready TimeOut\n");
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+    printk("Wait timeout = %d\n",TimeOut);
+
+    hdmitx_ClearDDCFIFO();
+    hdmitx_GenerateDDCSCLK();
+    cDownStream =  (BStatus & M_TX_DOWNSTREAM_COUNT);
+
+    if(/*cDownStream == 0 ||*/ cDownStream > 6 || BStatus & (B_TX_MAX_CASCADE_EXCEEDED|B_TX_DOWNSTREAM_OVER))
+    {
+        printk("Invalid Down stream count,fail\n");
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+#ifdef SUPPORT_SHA
+    if(hdmitx_hdcp_GetKSVList(KSVList,cDownStream) == ER_FAIL)
+    {
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+
+    if(hdmitx_hdcp_GetVr(Vr) == ER_FAIL)
+    {
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+    if(hdmitx_hdcp_GetM0(M0) == ER_FAIL)
+    {
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+    // do check SHA
+    if(hdmitx_hdcp_CheckSHA(M0,BStatus,KSVList,cDownStream,Vr) == ER_FAIL)
+    {
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+    if((B_TX_INT_HPD_PLUG|B_TX_INT_RX_SENSE)&it66121_read(REG_TX_INT_STAT1))
+    {
+        printk("HPD at Final\n");
+        goto hdmitx_hdcp_Repeater_Fail ;
+    }
+#endif // SUPPORT_SHA
+
+    hdmitx_hdcp_ResumeRepeaterAuthenticate();
+    hdmiTxDev[0].bAuthenticated = TRUE ;
+    return ER_SUCCESS ;
+
+hdmitx_hdcp_Repeater_Fail:
+    hdmitx_hdcp_CancelRepeaterAuthenticate();
+    return ER_FAIL ;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_hdcp_ResumeAuthentication
+// Parameter: N/A
+// Return: N/A
+// Remark: called by interrupt handler to restart Authentication and Encryption.
+// Side-Effect: as Authentication and Encryption.
+//////////////////////////////////////////////////////////////////////
+
+void hdmitx_hdcp_ResumeAuthentication(void)
+{
+    setHDMITX_AVMute(TRUE);
+    if(hdmitx_hdcp_Authenticate() == ER_SUCCESS)
+    {
+    }
+    setHDMITX_AVMute(FALSE);
+}
+
+#endif // SUPPORT_HDCP
+
+BOOL HDMITX_EnableHDCP(BYTE bEnable)
+{
+#ifdef SUPPORT_HDCP
+    if(bEnable)
+    {
+        if(ER_FAIL == hdmitx_hdcp_Authenticate())
+        {
+            //printf("ER_FAIL == hdmitx_hdcp_Authenticate\n");
+            hdmitx_hdcp_ResetAuth();
+			return FALSE ;
+        }
+    }
+    else
+    {
+        hdmiTxDev[0].bAuthenticated=FALSE;
+        hdmitx_hdcp_ResetAuth();
+    }
+#endif
+    return TRUE ;
+}
+
 
 
 //int it66121_config_video(struct hdmi_video *vpara)
@@ -1157,7 +2091,7 @@ int it66121_config_video(void)
 	char bHDMIMode, pixelrep, bInputColorMode, bOutputColorMode, aspec, Colorimetry;
 	
 	//vmode = (struct fb_videomode*)hdmi_vic_to_videomode(vpara->vic);
-	vmode = (struct fb_videomode*)hdmi_vic_to_videomode(34);
+	vmode = (struct fb_videomode*)hdmi_vic_to_videomode(VIDSTD_TEST);
 	if(vmode == NULL)
 		return HDMI_ERROR_FALSE;
 	
@@ -1187,7 +2121,7 @@ int it66121_config_video(void)
 	bOutputColorMode = F_MODE_YUV422 ;
 
     HDMITX_DisableAudioOutput();
-	//HDMITX_EnableHDCP(FALSE);
+	HDMITX_EnableHDCP(FALSE);
 
     if( tmdsclk > 80000000L )
     {
@@ -1206,7 +2140,7 @@ int it66121_config_video(void)
     #ifdef SUPPORT_SYNCEMBEDDED
 	if(InstanceData.bInputVideoSignalType & T_MODE_SYNCEMB)
 	{
-	    setHDMITX_SyncEmbeddedByVIC(34,InstanceData.bInputVideoSignalType);
+	    setHDMITX_SyncEmbeddedByVIC(VIDSTD_TEST,InstanceData.bInputVideoSignalType);
 	}
     #endif
 
@@ -1218,7 +2152,7 @@ int it66121_config_video(void)
         #ifdef OUTPUT_3D_MODE
         ConfigfHdmiVendorSpecificInfoFrame(OUTPUT_3D_MODE);
         #endif
-        ConfigAVIInfoFrame(34, pixelrep, aspec, Colorimetry, bOutputColorMode);
+        ConfigAVIInfoFrame(VIDSTD_TEST, pixelrep, aspec, Colorimetry, bOutputColorMode);
     }
 	else
 	{
@@ -1226,13 +2160,901 @@ int it66121_config_video(void)
         HDMITX_EnableVSInfoFrame(FALSE,NULL);
 	}
 
-    setHDMITX_AVMute(FALSE);
-	HDMITX_PowerOn();
+    setHDMITX_AVMute(0);
+	//HDMITX_PowerOn();
     DumpHDMITXReg() ;
 	
 	return HDMI_ERROR_SUCESS;
 }
 
+#ifndef __EDID_H__
+#define __EDID_H__
+
+#define EDID_LENGTH				0x80
+#define EDID_HEADER				0x00
+#define EDID_HEADER_END				0x07
+
+#define ID_MANUFACTURER_NAME			0x08
+#define ID_MANUFACTURER_NAME_END		0x09
+#define ID_MODEL				0x0a
+
+#define ID_SERIAL_NUMBER			0x0c
+
+#define MANUFACTURE_WEEK			0x10
+#define MANUFACTURE_YEAR			0x11
+
+#define EDID_STRUCT_VERSION			0x12
+#define EDID_STRUCT_REVISION			0x13
+
+#define EDID_STRUCT_DISPLAY                     0x14
+
+#define DPMS_FLAGS				0x18
+#define ESTABLISHED_TIMING_1			0x23
+#define ESTABLISHED_TIMING_2			0x24
+#define MANUFACTURERS_TIMINGS			0x25
+
+/* standard timings supported */
+#define STD_TIMING                              8
+#define STD_TIMING_DESCRIPTION_SIZE             2
+#define STD_TIMING_DESCRIPTIONS_START           0x26
+
+#define DETAILED_TIMING_DESCRIPTIONS_START	0x36
+#define DETAILED_TIMING_DESCRIPTION_SIZE	18
+#define NO_DETAILED_TIMING_DESCRIPTIONS		4
+
+#define DETAILED_TIMING_DESCRIPTION_1		0x36
+#define DETAILED_TIMING_DESCRIPTION_2		0x48
+#define DETAILED_TIMING_DESCRIPTION_3		0x5a
+#define DETAILED_TIMING_DESCRIPTION_4		0x6c
+
+#define DESCRIPTOR_DATA				5
+
+#define UPPER_NIBBLE( x ) \
+        (((128|64|32|16) & (x)) >> 4)
+
+#define LOWER_NIBBLE( x ) \
+        ((1|2|4|8) & (x))
+
+#define COMBINE_HI_8LO( hi, lo ) \
+        ( (((unsigned)hi) << 8) | (unsigned)lo )
+
+#define COMBINE_HI_4LO( hi, lo ) \
+        ( (((unsigned)hi) << 4) | (unsigned)lo )
+
+#define PIXEL_CLOCK_LO     (unsigned)block[ 0 ]
+#define PIXEL_CLOCK_HI     (unsigned)block[ 1 ]
+#define PIXEL_CLOCK	   (COMBINE_HI_8LO( PIXEL_CLOCK_HI,PIXEL_CLOCK_LO )*10000)
+#define H_ACTIVE_LO        (unsigned)block[ 2 ]
+#define H_BLANKING_LO      (unsigned)block[ 3 ]
+#define H_ACTIVE_HI        UPPER_NIBBLE( (unsigned)block[ 4 ] )
+#define H_ACTIVE           COMBINE_HI_8LO( H_ACTIVE_HI, H_ACTIVE_LO )
+#define H_BLANKING_HI      LOWER_NIBBLE( (unsigned)block[ 4 ] )
+#define H_BLANKING         COMBINE_HI_8LO( H_BLANKING_HI, H_BLANKING_LO )
+
+#define V_ACTIVE_LO        (unsigned)block[ 5 ]
+#define V_BLANKING_LO      (unsigned)block[ 6 ]
+#define V_ACTIVE_HI        UPPER_NIBBLE( (unsigned)block[ 7 ] )
+#define V_ACTIVE           COMBINE_HI_8LO( V_ACTIVE_HI, V_ACTIVE_LO )
+#define V_BLANKING_HI      LOWER_NIBBLE( (unsigned)block[ 7 ] )
+#define V_BLANKING         COMBINE_HI_8LO( V_BLANKING_HI, V_BLANKING_LO )
+
+#define H_SYNC_OFFSET_LO   (unsigned)block[ 8 ]
+#define H_SYNC_WIDTH_LO    (unsigned)block[ 9 ]
+
+#define V_SYNC_OFFSET_LO   UPPER_NIBBLE( (unsigned)block[ 10 ] )
+#define V_SYNC_WIDTH_LO    LOWER_NIBBLE( (unsigned)block[ 10 ] )
+
+#define V_SYNC_WIDTH_HI    ((unsigned)block[ 11 ] & (1|2))
+#define V_SYNC_OFFSET_HI   (((unsigned)block[ 11 ] & (4|8)) >> 2)
+
+#define H_SYNC_WIDTH_HI    (((unsigned)block[ 11 ] & (16|32)) >> 4)
+#define H_SYNC_OFFSET_HI   (((unsigned)block[ 11 ] & (64|128)) >> 6)
+
+#define V_SYNC_WIDTH       COMBINE_HI_4LO( V_SYNC_WIDTH_HI, V_SYNC_WIDTH_LO )
+#define V_SYNC_OFFSET      COMBINE_HI_4LO( V_SYNC_OFFSET_HI, V_SYNC_OFFSET_LO )
+
+#define H_SYNC_WIDTH       COMBINE_HI_8LO( H_SYNC_WIDTH_HI, H_SYNC_WIDTH_LO )
+#define H_SYNC_OFFSET      COMBINE_HI_8LO( H_SYNC_OFFSET_HI, H_SYNC_OFFSET_LO )
+
+#define H_SIZE_LO          (unsigned)block[ 12 ]
+#define V_SIZE_LO          (unsigned)block[ 13 ]
+
+#define H_SIZE_HI          UPPER_NIBBLE( (unsigned)block[ 14 ] )
+#define V_SIZE_HI          LOWER_NIBBLE( (unsigned)block[ 14 ] )
+
+#define H_SIZE             COMBINE_HI_8LO( H_SIZE_HI, H_SIZE_LO )
+#define V_SIZE             COMBINE_HI_8LO( V_SIZE_HI, V_SIZE_LO )
+
+#define H_BORDER           (unsigned)block[ 15 ]
+#define V_BORDER           (unsigned)block[ 16 ]
+
+#define FLAGS              (unsigned)block[ 17 ]
+
+#define INTERLACED         (FLAGS&128)
+#define SYNC_TYPE          (FLAGS&3<<3)	/* bits 4,3 */
+#define SYNC_SEPARATE      (3<<3)
+#define HSYNC_POSITIVE     (FLAGS & 4)
+#define VSYNC_POSITIVE     (FLAGS & 2)
+
+#define V_MIN_RATE              block[ 5 ]
+#define V_MAX_RATE              block[ 6 ]
+#define H_MIN_RATE              block[ 7 ]
+#define H_MAX_RATE              block[ 8 ]
+#define MAX_PIXEL_CLOCK         (((int)block[ 9 ]) * 10)
+#define GTF_SUPPORT		block[10]
+
+#define DPMS_ACTIVE_OFF		(1 << 5)
+#define DPMS_SUSPEND		(1 << 6)
+#define DPMS_STANDBY		(1 << 7)
+
+
+
+#define hdmi_edid_error(fmt, ...) \
+        printk(KERN_ERR pr_fmt(fmt), ##__VA_ARGS__)
+
+#if 0
+#define hdmi_edid_debug(fmt, ...) \
+        printk(KERN_INFO pr_fmt(fmt), ##__VA_ARGS__)
+#else
+#define hdmi_edid_debug(fmt, ...)	
+#endif
+
+/* HDMI EDID Block Size */
+#define HDMI_EDID_BLOCK_SIZE	128
+
+
+typedef enum HDMI_EDID_ERRORCODE
+{
+	E_HDMI_EDID_SUCCESS = 0,
+	E_HDMI_EDID_PARAM,
+	E_HDMI_EDID_HEAD,
+	E_HDMI_EDID_CHECKSUM,
+	E_HDMI_EDID_VERSION,
+	E_HDMI_EDID_UNKOWNDATA,
+	E_HDMI_EDID_NOMEMORY
+}HDMI_EDID_ErrorCode;
+
+// HDMI EDID Information
+struct hdmi_edid {
+	unsigned char sink_hdmi;			//HDMI display device flag
+	unsigned char ycbcr444;				//Display device support YCbCr444
+	unsigned char ycbcr422;				//Display device support YCbCr422
+	unsigned char deepcolor;			//bit3:DC_48bit; bit2:DC_36bit; bit1:DC_30bit; bit0:DC_Y444;
+	unsigned int  cecaddress;			//CEC physical address
+	unsigned int  maxtmdsclock;			//Max supported tmds clock
+	unsigned char fields_present;		//bit7£ºlatency£»bit6£ºi_lantency£»bit5£ºhdmi_video
+	unsigned char video_latency;
+	unsigned char audio_latency;
+	unsigned char interlaced_video_latency;
+	unsigned char interlaced_audio_latency;
+	
+	struct fb_monspecs	*specs;			//Device spec
+	struct list_head modelist;			//Device supported display mode list
+	struct hdmi_audio *audio;			//Device supported audio info
+	int	audio_num;						//Device supported audio type number
+};
+
+static struct hdmi_edid  it66121_edid;
+static struct hdmi_edid *pedid;
+
+
+static int hdmi_edid_checksum(unsigned char *buf)
+{
+	int i;
+	int checksum = 0;
+	
+	for(i = 0; i < HDMI_EDID_BLOCK_SIZE; i++)
+		checksum += buf[i];	
+	
+	checksum &= 0xff;
+	
+	if(checksum == 0)
+		return E_HDMI_EDID_SUCCESS;
+	else
+		return E_HDMI_EDID_CHECKSUM;
+}
+
+/*
+	@Des	Parse Detail Timing Descriptor.
+	@Param	buf	:	pointer to DTD data.
+	@Param	pvic:	VIC of DTD descripted.
+ */
+static int hdmi_edid_parse_dtd(unsigned char *block, struct fb_videomode *mode)
+{
+	mode->xres = H_ACTIVE;
+	mode->yres = V_ACTIVE;
+	mode->pixclock = PIXEL_CLOCK;
+//	mode->pixclock /= 1000;
+//	mode->pixclock = KHZ2PICOS(mode->pixclock);
+	mode->right_margin = H_SYNC_OFFSET;
+	mode->left_margin = (H_ACTIVE + H_BLANKING) -
+		(H_ACTIVE + H_SYNC_OFFSET + H_SYNC_WIDTH);
+	mode->upper_margin = V_BLANKING - V_SYNC_OFFSET -
+		V_SYNC_WIDTH;
+	mode->lower_margin = V_SYNC_OFFSET;
+	mode->hsync_len = H_SYNC_WIDTH;
+	mode->vsync_len = V_SYNC_WIDTH;
+	if (HSYNC_POSITIVE)
+		mode->sync |= FB_SYNC_HOR_HIGH_ACT;
+	if (VSYNC_POSITIVE)
+		mode->sync |= FB_SYNC_VERT_HIGH_ACT;
+	mode->refresh = PIXEL_CLOCK/((H_ACTIVE + H_BLANKING) *
+				     (V_ACTIVE + V_BLANKING));
+	if (INTERLACED) {
+		mode->yres *= 2;
+		mode->upper_margin *= 2;
+		mode->lower_margin *= 2;
+		mode->vsync_len *= 2;
+		mode->vmode |= FB_VMODE_INTERLACED;
+	}
+	mode->flag = FB_MODE_IS_DETAILED;
+
+	hdmi_edid_debug("<<<<<<<<Detailed Time>>>>>>>>>\n");
+	hdmi_edid_debug("%d KHz Refresh %d Hz",  PIXEL_CLOCK/1000, mode->refresh);
+	hdmi_edid_debug("%d %d %d %d ", H_ACTIVE, H_ACTIVE + H_SYNC_OFFSET,
+	       H_ACTIVE + H_SYNC_OFFSET + H_SYNC_WIDTH, H_ACTIVE + H_BLANKING);
+	hdmi_edid_debug("%d %d %d %d ", V_ACTIVE, V_ACTIVE + V_SYNC_OFFSET,
+	       V_ACTIVE + V_SYNC_OFFSET + V_SYNC_WIDTH, V_ACTIVE + V_BLANKING);
+	hdmi_edid_debug("%sHSync %sVSync\n\n", (HSYNC_POSITIVE) ? "+" : "-",
+	       (VSYNC_POSITIVE) ? "+" : "-");
+	return E_HDMI_EDID_SUCCESS;
+}
+
+int hdmi_edid_parse_base(unsigned char *buf, int *extend_num, struct hdmi_edid *pedid)
+{
+	int rc, i;
+	
+	if(buf == NULL || extend_num == NULL)
+		return E_HDMI_EDID_PARAM;
+		
+	#if 1	
+	for(i = 0; i < HDMI_EDID_BLOCK_SIZE; i++)
+	{
+		printk("%02x ", buf[i]&0xff);
+		if((i+1) % 16 == 0)
+			printk("\n");
+	}
+	#endif
+	
+	// Check first 8 byte to ensure it is an edid base block.
+	if( buf[0] != 0x00 ||
+	    buf[1] != 0xFF ||
+	    buf[2] != 0xFF ||
+	    buf[3] != 0xFF ||
+	    buf[4] != 0xFF ||
+	    buf[5] != 0xFF ||
+	    buf[6] != 0xFF ||
+	    buf[7] != 0x00)
+    {
+        hdmi_edid_error("[EDID] check header error\n");
+        return E_HDMI_EDID_HEAD;
+    }
+    
+    *extend_num = buf[0x7e];
+    #ifdef DEBUG
+    hdmi_edid_debug("[EDID] extend block num is %d\n", buf[0x7e]);
+    #endif
+    
+    // Checksum
+    rc = hdmi_edid_checksum(buf);
+    if( rc != E_HDMI_EDID_SUCCESS)
+    {
+    	hdmi_edid_error("[EDID] base block checksum error\n");
+    	return E_HDMI_EDID_CHECKSUM;
+    }
+
+	pedid->specs = kzalloc(sizeof(struct fb_monspecs), GFP_KERNEL);
+	if(pedid->specs == NULL)
+		return E_HDMI_EDID_NOMEMORY;
+		
+	fb_edid_to_monspecs(buf, pedid->specs);
+	
+    return E_HDMI_EDID_SUCCESS;
+}
+
+/* HDMI mode list*/
+struct display_modelist {
+	struct list_head 	list;
+	struct fb_videomode	mode;
+	unsigned int 		vic;
+	unsigned int		format_3d;
+	unsigned int		detail_3d;
+};
+
+/**
+ * hdmi_videomode_to_vic: transverse video mode to vic
+ * @vmode: videomode to transverse
+ * 
+ */
+int hdmi_videomode_to_vic(struct fb_videomode *vmode)
+{
+	struct fb_videomode *mode;
+	unsigned char vic = 0;
+	int i = 0;
+	
+	for(i = 0; i < ARRAY_SIZE(hdmi_mode); i++)
+	{
+		mode = (struct fb_videomode*) &(hdmi_mode[i].mode);
+		if(	vmode->vmode == mode->vmode &&
+			vmode->refresh == mode->refresh &&
+			vmode->xres == mode->xres && 
+			vmode->left_margin == mode->left_margin &&
+			vmode->right_margin == mode->right_margin &&
+			vmode->upper_margin == mode->upper_margin &&
+			vmode->lower_margin == mode->lower_margin && 
+			vmode->hsync_len == mode->hsync_len && 
+			vmode->vsync_len == mode->vsync_len)
+		{
+			if( (vmode->vmode == FB_VMODE_NONINTERLACED && vmode->yres == mode->yres) || 
+				(vmode->vmode == FB_VMODE_INTERLACED && vmode->yres == mode->yres/2))
+			{								
+				vic = hdmi_mode[i].vic;
+				break;
+			}
+		}
+	}
+	return vic;
+}
+
+int hdmi_add_vic(int vic, struct list_head *head)
+{
+	struct list_head *pos;
+	struct display_modelist *modelist;
+	int found = 0, v;
+
+//	DBG("%s vic %d", __FUNCTION__, vic);
+	if(vic == 0)
+		return -1;
+		
+	list_for_each(pos, head) {
+		modelist = list_entry(pos, struct display_modelist, list);
+		v = modelist->vic;
+		if (v == vic) {
+			found = 1;
+			break;
+		}
+	}
+	if (!found) {
+		modelist = kmalloc(sizeof(struct display_modelist),
+						  GFP_KERNEL);
+
+		if (!modelist)
+			return -ENOMEM;
+		memset(modelist, 0, sizeof(struct display_modelist));
+		modelist->vic = vic;
+		list_add_tail(&modelist->list, head);
+	}
+	return 0;
+}
+
+// Parse CEA Short Video Descriptor
+static int hdmi_edid_get_cea_svd(unsigned char *buf, struct hdmi_edid *pedid)
+{
+	int count, i, vic;
+	
+	count = buf[0] & 0x1F;
+	for(i = 0; i < count; i++)
+	{
+		hdmi_edid_debug("[EDID-CEA] %02x VID %d native %d\n", buf[1 + i], buf[1 + i] & 0x7f, buf[1 + i] >> 7);
+		vic = buf[1 + i] & 0x7f;
+		hdmi_add_vic(vic, &pedid->modelist);
+	}
+	
+//	struct list_head *pos;
+//	struct display_modelist *modelist;
+//
+//	list_for_each(pos, &pedid->modelist) {
+//		modelist = list_entry(pos, struct display_modelist, list);
+//		printk("%s vic %d\n", __FUNCTION__, modelist->vic);
+//	}	
+	return 0;
+}
+#if 0
+// Parse CEA Short Audio Descriptor
+static int hdmi_edid_parse_cea_sad(unsigned char *buf, struct hdmi_edid *pedid)
+{
+	int i, count;
+	
+	count = buf[0] & 0x1F;
+	pedid->audio = kmalloc((count/3)*sizeof(struct hdmi_audio), GFP_KERNEL);
+	if(pedid->audio == NULL)
+		return E_HDMI_EDID_NOMEMORY;
+
+	pedid->audio_num = count/3;
+	for(i = 0; i < pedid->audio_num; i++)
+	{
+		pedid->audio[i].type = (buf[1 + i*3] >> 3) & 0x0F;
+		pedid->audio[i].channel = (buf[1 + i*3] & 0x07) + 1;
+		pedid->audio[i].rate = buf[1 + i*3 + 1];
+		if(pedid->audio[i].type == HDMI_AUDIO_LPCM)//LPCM 
+		{
+			pedid->audio[i].word_length = buf[1 + i*3 + 2];
+		}
+//		printk("[EDID-CEA] type %d channel %d rate %d word length %d\n", 
+//			pedid->audio[i].type, pedid->audio[i].channel, pedid->audio[i].rate, pedid->audio[i].word_length);
+	}
+	return E_HDMI_EDID_SUCCESS;
+}
+
+static int hdmi_edid_parse_3dinfo(unsigned char *hdmi_edid_parse_3dinfobuf, struct list_head *head)
+{
+	int i, j, len = 0, format_3d, vic_mask;
+	unsigned char offset = 2, vic_2d, structure_3d;
+	struct list_head *pos;
+	struct display_modelist *modelist;
+	
+	if(buf[1] & 0xF0) {
+		len = (buf[1] & 0xF0) >> 4;
+		for(i = 0; i < len; i++) {
+			hdmi_add_vic( (buf[offset++] | HDMI_VIDEO_EXT), head);
+		}
+	}
+	
+	if(buf[0] & 0x80) {
+		//3d supported
+		len += (buf[0] & 0x0F) + 2;
+		if( ( (buf[0] & 0x60) == 0x40) || ( (buf[0] & 0x60) == 0x20) ) {
+			format_3d = buf[offset++] << 8;
+			format_3d |= buf[offset++];
+		}
+		if( (buf[0] & 0x60) == 0x40)
+			vic_mask = 0xFFFF;
+		else {
+			vic_mask  = buf[offset++] << 8;
+			vic_mask |= buf[offset++];
+		}
+
+		for(i = 0; i < 16; i++)
+		{
+			if(vic_mask & (1 << i)) {
+				j = 0;
+				for (pos = (head)->next; pos != (head); pos = pos->next) {
+					j++;
+					if(j == i) {
+						modelist = list_entry(pos, struct display_modelist, list);
+						modelist->format_3d = format_3d;
+						break;
+					}
+				}
+			}
+		}
+		while(offset < len)
+		{
+			vic_2d = (buf[offset] & 0xF0) >> 4;
+			structure_3d = (buf[offset++] & 0x0F);
+			j = 0;
+			for (pos = (head)->next; pos != (head); pos = pos->next) {
+				j++;
+				if(j == vic_2d) {
+					modelist = list_entry(pos, struct display_modelist, list);
+					modelist->format_3d = format_3d;
+					if(structure_3d & 0x80)
+					modelist->detail_3d = (buf[offset++] & 0xF0) >> 4;
+					break;
+				}
+			}
+		}
+	}
+	
+	return 0;
+}
+#endif
+
+// Parse CEA 861 Serial Extension.
+static int hdmi_edid_parse_extensions_cea(unsigned char *buf, struct hdmi_edid *pedid)
+{
+	unsigned int ddc_offset, native_dtd_num, cur_offset = 4, buf_offset;
+//	unsigned int underscan_support, baseaudio_support;
+	unsigned int tag, IEEEOUI = 0, count;
+	
+	if(buf == NULL)
+		return E_HDMI_EDID_PARAM;
+		
+	// Check ces extension version
+	if(buf[1] != 3)
+	{
+		hdmi_edid_error("[EDID-CEA] error version.\n");
+		return E_HDMI_EDID_VERSION;
+	}
+	
+	ddc_offset = buf[2];
+//	underscan_support = (buf[3] >> 7) & 0x01;
+//	baseaudio_support = (buf[3] >> 6) & 0x01;
+	pedid->ycbcr444 = (buf[3] >> 5) & 0x01;
+	pedid->ycbcr422 = (buf[3] >> 4) & 0x01;
+	native_dtd_num = buf[3] & 0x0F;
+//	hdmi_edid_debug("[EDID-CEA] ddc_offset %d underscan_support %d baseaudio_support %d yuv_support %d native_dtd_num %d\n", ddc_offset, underscan_support, baseaudio_support, yuv_support, native_dtd_num);
+	// Parse data block
+	while(cur_offset < ddc_offset)
+	{
+		tag = buf[cur_offset] >> 5;
+		count = buf[cur_offset] & 0x1F;
+		switch(tag)
+		{
+			case 0x02:	// Video Data Block
+				hdmi_edid_debug("[EDID-CEA] It is a Video Data Block.\n");
+				hdmi_edid_get_cea_svd(buf + cur_offset, pedid);
+				break;
+			case 0x01:	// Audio Data Block
+				hdmi_edid_debug("[EDID-CEA] It is a Audio Data Block.\n");
+				//hdmi_edid_parse_cea_sad(buf + cur_offset, pedid);
+				break;
+			case 0x04:	// Speaker Allocation Data Block
+				hdmi_edid_debug("[EDID-CEA] It is a Speaker Allocatio Data Block.\n");
+				break;
+			case 0x03:	// Vendor Specific Data Block
+				hdmi_edid_debug("[EDID-CEA] It is a Vendor Specific Data Block.\n");
+
+				IEEEOUI = buf[cur_offset + 3];
+				IEEEOUI <<= 8;
+				IEEEOUI += buf[cur_offset + 2];
+				IEEEOUI <<= 8;
+				IEEEOUI += buf[cur_offset + 1];
+				hdmi_edid_debug("[EDID-CEA] IEEEOUI is 0x%08x.\n", IEEEOUI);
+				if(IEEEOUI == 0x0c03)
+					pedid->sink_hdmi = 1;
+				pedid->cecaddress = buf[cur_offset + 5];
+				pedid->cecaddress |= buf[cur_offset + 4] << 8;
+				hdmi_edid_debug("[EDID-CEA] CEC Physical addres is 0x%08x.\n", pedid->cecaddress);
+				if(count > 6)
+					pedid->deepcolor = (buf[cur_offset + 6] >> 3) & 0x0F;					
+				if(count > 7) {
+					pedid->maxtmdsclock = buf[cur_offset + 7] * 5000000;
+					hdmi_edid_debug("[EDID-CEA] maxtmdsclock is %d.\n", pedid->maxtmdsclock);
+				}
+				if(count > 8) {
+					pedid->fields_present = buf[cur_offset + 8];
+					hdmi_edid_debug("[EDID-CEA] fields_present is 0x%02x.\n", pedid->fields_present);
+				}
+				buf_offset = cur_offset + 9;		
+				if(pedid->fields_present & 0x80)
+				{
+					pedid->video_latency = buf[buf_offset++];
+					pedid->audio_latency = buf[buf_offset++];
+				}
+				if(pedid->fields_present & 0x40)
+				{
+					pedid->interlaced_video_latency = buf[buf_offset++];
+					pedid->interlaced_audio_latency = buf[buf_offset++];
+				}
+				if(pedid->fields_present & 0x20) {
+					//hdmi_edid_parse_3dinfo(buf + buf_offset, &pedid->modelist);
+				}
+				break;		
+			case 0x05:	// VESA DTC Data Block
+				hdmi_edid_debug("[EDID-CEA] It is a VESA DTC Data Block.\n");
+				break;
+			case 0x07:	// Use Extended Tag
+				hdmi_edid_debug("[EDID-CEA] It is a Use Extended Tag Data Block.\n");
+				break;
+			default:
+				hdmi_edid_error("[EDID-CEA] unkowned data block tag.\n");
+				break;
+		}
+		cur_offset += (buf[cur_offset] & 0x1F) + 1;
+	}
+#if 1	
+{
+	// Parse DTD
+	struct fb_videomode *vmode = kmalloc(sizeof(struct fb_videomode), GFP_KERNEL);
+	if(vmode == NULL)
+		return E_HDMI_EDID_SUCCESS; 
+	while(ddc_offset < HDMI_EDID_BLOCK_SIZE - 2)	//buf[126] = 0 and buf[127] = checksum
+	{
+		if(!buf[ddc_offset] && !buf[ddc_offset + 1])
+			break;
+		memset(vmode, 0, sizeof(struct fb_videomode));
+		hdmi_edid_parse_dtd(buf + ddc_offset, vmode);		
+		hdmi_add_vic(hdmi_videomode_to_vic(vmode), &pedid->modelist);
+		ddc_offset += 18;
+	}
+	kfree(vmode);
+}
+#endif
+	return E_HDMI_EDID_SUCCESS;
+}
+
+int hdmi_edid_parse_extensions(unsigned char *buf, struct hdmi_edid *pedid)
+{
+	int rc;
+	
+	if(buf == NULL || pedid == NULL)
+		return E_HDMI_EDID_PARAM;
+		
+	// Checksum
+    rc = hdmi_edid_checksum(buf);
+    if( rc != E_HDMI_EDID_SUCCESS)
+    {
+    	hdmi_edid_error("[EDID] extensions block checksum error\n");
+    	return E_HDMI_EDID_CHECKSUM;
+    }
+    
+    switch(buf[0])
+    {
+    	case 0xF0:
+    		hdmi_edid_debug("[EDID-EXTEND] It is a extensions block map.\n");
+    		break;
+    	case 0x02:
+    		hdmi_edid_debug("[EDID-EXTEND] It is a  CEA 861 Series Extension.\n");
+    		hdmi_edid_parse_extensions_cea(buf, pedid);
+    		break;
+    	case 0x10:
+    		hdmi_edid_debug("[EDID-EXTEND] It is a Video Timing Block Extension.\n");
+    		break;
+    	case 0x40:
+    		hdmi_edid_debug("[EDID-EXTEND] It is a Display Information Extension.\n");
+    		break;
+    	case 0x50:
+    		hdmi_edid_debug("[EDID-EXTEND] It is a Localized String Extension.\n");
+    		break;
+    	case 0x60:
+    		hdmi_edid_debug("[EDID-EXTEND] It is a Digital Packet Video Link Extension.\n");
+    		break;
+    	default:
+    		hdmi_edid_error("[EDID-EXTEND] Unkowned extension.\n");
+    		return E_HDMI_EDID_UNKOWNDATA;
+    }
+    
+    return E_HDMI_EDID_SUCCESS;
+}
+
+
+
+#endif /* __EDID_H__ */
+
+
+#if 1
+
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_ClearDDCFIFO
+// Parameter: N/A
+// Return: N/A
+// Remark: clear the DDC FIFO.
+// Side-Effect: DDC master will set to be HOST.
+//////////////////////////////////////////////////////////////////////
+
+void hdmitx_ClearDDCFIFO()
+{
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+    it66121_write(REG_TX_DDC_CMD,CMD_FIFO_CLR);
+}
+
+void hdmitx_GenerateDDCSCLK()
+{
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+    it66121_write(REG_TX_DDC_CMD,CMD_GEN_SCLCLK);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Function: hdmitx_AbortDDC
+// Parameter: N/A
+// Return: N/A
+// Remark: Force abort DDC and reset DDC bus.
+// Side-Effect:
+//////////////////////////////////////////////////////////////////////
+#define REG_TX_HDCP_DESIRE 0x20
+    #define B_TX_ENABLE_HDPC11 (1<<1)
+    #define B_TX_CPDESIRE  (1<<0)
+
+
+void hdmitx_AbortDDC()
+{
+    BYTE CPDesire,SWReset,DDCMaster ;
+    BYTE uc, timeout, i ;
+    // save the SW reset,DDC master,and CP Desire setting.
+    SWReset = it66121_read(REG_TX_SW_RST);
+    CPDesire = it66121_read(REG_TX_HDCP_DESIRE);
+    DDCMaster = it66121_read(REG_TX_DDC_MASTER_CTRL);
+
+    it66121_write(REG_TX_HDCP_DESIRE,CPDesire&(~B_TX_CPDESIRE)); // @emily change order
+    it66121_write(REG_TX_SW_RST,SWReset|B_TX_HDCP_RST_HDMITX);         // @emily change order
+    it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+
+    // 2009/01/15 modified by Jau-Chih.Tseng@ite.com.tw
+    // do abort DDC twice.
+    for( i = 0 ; i < 2 ; i++ )
+    {
+        it66121_write(REG_TX_DDC_CMD,CMD_DDC_ABORT);
+
+        for( timeout = 0 ; timeout < 200 ; timeout++ )
+        {
+            uc = it66121_read(REG_TX_DDC_STATUS);
+            if (uc&B_TX_DDC_DONE)
+            {
+                break ; // success
+            }
+            if( uc & (B_TX_DDC_NOACK|B_TX_DDC_WAITBUS|B_TX_DDC_ARBILOSE) )
+            {
+//                HDMITX_DEBUG_PRINTF(("hdmitx_AbortDDC Fail by reg16=%02X\n",(int)uc));
+                break ;
+            }
+            mdelay(1); // delay 1 ms to stable.
+        }
+    }
+    //~Jau-Chih.Tseng@ite.com.tw
+
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+// Function: getHDMITX_EDIDBytes
+// Parameter: pData - the pointer of buffer to receive EDID ucdata.
+//            bSegment - the segment of EDID readback.
+//            offset - the offset of EDID ucdata in the segment. in byte.
+//            count - the read back bytes count,cannot exceed 32
+// Return: ER_SUCCESS if successfully getting EDID. ER_FAIL otherwise.
+// Remark: function for read EDID ucdata from reciever.
+// Side-Effect: DDC master will set to be HOST. DDC FIFO will be used and dirty.
+//////////////////////////////////////////////////////////////////////
+
+SYS_STATUS getHDMITX_EDIDBytes(BYTE *pData,BYTE bSegment,BYTE offset,short Count)
+{
+    short RemainedCount,ReqCount ;
+    BYTE bCurrOffset ;
+    short TimeOut ;
+    BYTE *pBuff = pData ;
+    BYTE ucdata ;
+
+    // printk(("getHDMITX_EDIDBytes(%08lX,%d,%d,%d)\n",(ULONG)pData,(int)bSegment,(int)offset,(int)Count));
+    if(!pData)
+    {
+//        printk(("getHDMITX_EDIDBytes(): Invallid pData pointer %08lX\n",(ULONG)pData));
+        return ER_FAIL ;
+    }
+    if(it66121_read(REG_TX_INT_STAT1) & B_TX_INT_DDC_BUS_HANG)
+    {
+        printk("Called hdmitx_AboutDDC()\n");
+        hdmitx_AbortDDC();
+
+    }
+    // HDMITX_OrReg_Byte(REG_TX_INT_CTRL,(1<<1));
+
+    hdmitx_ClearDDCFIFO();
+
+    RemainedCount = Count ;
+    bCurrOffset = offset ;
+
+    Switch_HDMITX_Bank(0);
+
+    while(RemainedCount > 0)
+    {
+
+        ReqCount = (RemainedCount > DDC_FIFO_MAXREQ)?DDC_FIFO_MAXREQ:RemainedCount ;
+        printk("getHDMITX_EDIDBytes(): ReqCount = %d,bCurrOffset = %d\n",(int)ReqCount,(int)bCurrOffset);
+
+        it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+        it66121_write(REG_TX_DDC_CMD,CMD_FIFO_CLR);
+
+        for(TimeOut = 0 ; TimeOut < 200 ; TimeOut++)
+        {
+            ucdata = it66121_read(REG_TX_DDC_STATUS);
+
+            if(ucdata&B_TX_DDC_DONE)
+            {
+                break ;
+            }
+            if((ucdata & B_TX_DDC_ERROR)||(it66121_read(REG_TX_INT_STAT1) & B_TX_INT_DDC_BUS_HANG))
+            {
+                printk("Called hdmitx_AboutDDC()\n");
+                hdmitx_AbortDDC();
+                return ER_FAIL ;
+            }
+        }
+        it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
+        it66121_write(REG_TX_DDC_HEADER,DDC_EDID_ADDRESS); // for EDID ucdata get
+        it66121_write(REG_TX_DDC_REQOFF,bCurrOffset);
+        it66121_write(REG_TX_DDC_REQCOUNT,(BYTE)ReqCount);
+        it66121_write(REG_TX_DDC_EDIDSEG,bSegment);
+        it66121_write(REG_TX_DDC_CMD,CMD_EDID_READ);
+
+        bCurrOffset += ReqCount ;
+        RemainedCount -= ReqCount ;
+
+        for(TimeOut = 250 ; TimeOut > 0 ; TimeOut --)
+        {
+            mdelay(1);
+            ucdata = it66121_read(REG_TX_DDC_STATUS);
+            if(ucdata & B_TX_DDC_DONE)
+            {
+                break ;
+            }
+            if(ucdata & B_TX_DDC_ERROR)
+            {
+                printk("getHDMITX_EDIDBytes(): DDC_STATUS = %02X,fail.\n",(int)ucdata);
+                // HDMITX_AndReg_Byte(REG_TX_INT_CTRL,~(1<<1));
+                return ER_FAIL ;
+            }
+        }
+        if(TimeOut == 0)
+        {
+            printk("getHDMITX_EDIDBytes(): DDC TimeOut. \n");
+            // HDMITX_AndReg_Byte(REG_TX_INT_CTRL,~(1<<1));
+            return ER_FAIL ;
+        }
+        do
+        {
+            *(pBuff++) = it66121_read(REG_TX_DDC_READFIFO);
+            ReqCount -- ;
+        }while(ReqCount > 0);
+
+    }
+    // HDMITX_AndReg_Byte(REG_TX_INT_CTRL,~(1<<1));
+    return ER_SUCCESS ;
+}
+
+
+int it66121_read_edid(int block, unsigned char *buff)
+{
+    if(getHDMITX_EDIDBytes(buff,block/2,(block%2)*128,128) == ER_FAIL)
+    {
+        return FALSE ;
+    }
+    return TRUE ;
+
+}
+
+
+static void hdmi_wq_parse_edid(void)
+{
+	//struct hdmi_edid *pedid;
+	unsigned char *buff = NULL;
+	int rc = HDMI_ERROR_SUCESS, extendblock = 0, i;
+	
+	//if(hdmi == NULL) return;
+		
+	printk("%s", __FUNCTION__);
+	
+	//pedid = &(hdmi->edid);
+	pedid = &(it66121_edid);
+	//fb_destroy_modelist(&pedid->modelist);
+	memset(pedid, 0, sizeof(struct hdmi_edid));
+	INIT_LIST_HEAD(&pedid->modelist);
+	
+	buff = kmalloc(HDMI_EDID_BLOCK_SIZE, GFP_KERNEL);
+	if(buff == NULL) {		
+		printk("hdmi_wq_parse_edid can not allocate memory for edid buff.\n");
+		rc = HDMI_ERROR_FALSE;
+		goto out;
+	}
+	
+	// Read base block edid.
+	memset(buff, 0 , HDMI_EDID_BLOCK_SIZE);
+	rc = it66121_read_edid(0, buff);
+	if(rc) {
+		printk( "[HDMI] read edid base block error\n");
+		goto out;
+	}
+	
+	rc = hdmi_edid_parse_base(buff, &extendblock, pedid);
+	if(rc) {
+		printk("[HDMI] parse edid base block error\n");
+		goto out;
+	}
+	
+	for(i = 1; i < extendblock + 1; i++) {
+		memset(buff, 0 , HDMI_EDID_BLOCK_SIZE);
+		rc = it66121_read_edid(i, buff);
+		if(rc) {
+			printk("[HDMI] read edid block %d error\n", i);	
+			goto out;
+		}
+
+		rc = hdmi_edid_parse_extensions(buff, pedid);
+		if(rc) {
+			printk("[HDMI] parse edid block %d error\n",i);
+			continue;
+		}
+	}
+out:
+	if(buff)
+		kfree(buff);
+	//rc = hdmi_ouputmode_select(hdmi, rc);
+}
+
+#endif
 
 static int it66121_device_init(void)
 {
@@ -1253,7 +3075,9 @@ static int it66121_device_init(void)
 	{
 		HDMITX_InitTxDev(&InstanceData);
 		InitHDMITX();
-		hdmitx_SetInputMode(F_MODE_YUV422,T_MODE_CCIR656);
+		
+		HDMITX_PowerOn();
+		hdmi_wq_parse_edid();
 		it66121_config_video();
 		return 0;
 	}
@@ -1264,6 +3088,8 @@ static int it66121_device_init(void)
 
 static int it66121_s_std_output(struct v4l2_subdev *sd, v4l2_std_id norm)
 {
+
+	it66121_device_init();
 	if (norm & (V4L2_STD_ALL & ~V4L2_STD_SECAM))
 		return 0;
 	else if (norm & (V4L2_STD_525P_60 | V4L2_STD_625P_50))
@@ -1277,13 +3103,6 @@ static int it66121_s_std_output(struct v4l2_subdev *sd, v4l2_std_id norm)
 		return -EINVAL;
 }
 
-
-static int it66121_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *chip)
-{
-	struct i2c_client *client = v4l2_get_subdevdata(sd);
-
-	return v4l2_chip_ident_i2c_client(client, chip, V4L2_IDENT_IT66121, 0);
-}
 /* ----------------------------------------------------------------------- */
 
 static const struct v4l2_subdev_core_ops it66121_core_ops = {
@@ -1304,7 +3123,7 @@ static const struct v4l2_subdev_ops it66121_ops = {
 
 static const struct file_operations it66121_fops = {
 	.owner		= THIS_MODULE,
-	.read           = it66121_readreg,
+	.read           = (void*)it66121_readreg,
 	.write           = it66121_writereg,
 	.ioctl		= it66121_ioctl,
 	.open		= it66121_open,
@@ -1369,7 +3188,7 @@ static struct i2c_driver it66121_driver = {
 		.owner	= THIS_MODULE,
 		.name	= "it66121",
 	},	
-	.command = it66121_ioctl,
+	.command = (void*)it66121_ioctl,
 	.probe = it66121_probe,
 	.remove = it66121_remove,
 	.id_table = it66121_id,
