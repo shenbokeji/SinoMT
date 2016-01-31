@@ -68,12 +68,13 @@ typedef struct fpga_data{
 #define FPGA_ADDR_INVALID(a) ( ( a > EMIF_FPGA_END_ADDR ) || ( a < EMIF_FPGA_START_ADDR ) )
 
 #define SEND_PHY_ADDR (0x86000000)
-#define RECEIVE_PHY_ADDR (0x87000000)
+#define RECEIVE_PHY_ADDR (0x8E000000)
 #define MEM_FILENAME "/dev/mem"
 #define SEND_VIDEO_FILE_384 "/video384.264"
 #define SEND_VIDEO_FILE_720P "/video720p.264"
+#define SEND_VIDEO_FILE_1080P "/1080p.264"
 #define SEND_VIDEO_FILE "/sendvideo.264"
-#define RECE_VIDEO_FILE "/recevideo.264"
+#define RECE_VIDEO_FILE "/1080p.264"
 #define FPGA_RAM_DATA "/data.dat"
 #define TRANS_ODD2EVEN(i) ( ( i + 1 ) & 0XFFFFFFFE ) 
 #define FPGA_DMA_RECV	(0U)

@@ -268,13 +268,13 @@ UI_Handle UI_create(UI_Attrs *attrs)
     hUI->fpCmd = (FILE*)open( CMD_FIFO_FILE, O_RDONLY | O_NONBLOCK, 0 );
 perror(CMD_FIFO_FILE"  fopen after\n");
         //hUI->fpConfig = fopen(CONFIG_FIFO_FILE, "r");
-    hUI->fpCmd = (FILE*)open( CONFIG_FIFO_FILE, O_RDONLY | O_NONBLOCK, 0 );
+    hUI->fpConfig = (FILE*)open( CONFIG_FIFO_FILE, O_RDONLY | O_NONBLOCK, 0 );
 perror(CONFIG_FIFO_FILE"  fopen after\n");
        // hUI->fpKbCmd = fopen(KB_CMD_FIFO_FILE, "w");
-    hUI->fpCmd = (FILE*)open( KB_CMD_FIFO_FILE, O_RDWR | O_NONBLOCK, 0 );
+    hUI->fpKbCmd = (FILE*)open( KB_CMD_FIFO_FILE, O_RDWR | O_NONBLOCK, 0 );
 perror(KB_CMD_FIFO_FILE"  fopen after\n");
        // hUI->fpStatus = fopen(STATUS_FIFO_FILE, "w");
-    hUI->fpCmd = (FILE*)open( STATUS_FIFO_FILE, O_RDWR | O_NONBLOCK, 0 );
+    hUI->fpStatus = (FILE*)open( STATUS_FIFO_FILE, O_RDWR | O_NONBLOCK, 0 );
 perror(STATUS_FIFO_FILE"  fopen after\n");
         if ((hUI->fpCmd == NULL) || (hUI->fpConfig == NULL) || 
             (hUI->fpKbCmd == NULL) || (hUI->fpStatus == NULL)) {

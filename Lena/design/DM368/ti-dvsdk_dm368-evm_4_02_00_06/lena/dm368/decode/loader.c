@@ -39,6 +39,7 @@
 #include <xdc/std.h>
 
 #include <ti/sdo/dmai/Loader.h>
+#include <unistd.h>
 
 #include "loader.h"
 #include "../demo.h"
@@ -58,7 +59,7 @@ Void *loaderThrFxn(Void *arg)
     if (envp->hLoader == NULL) {
         cleanup(THREAD_FAILURE);
     }
-
+	sleep(2);
     while (1) {
         /* Load a new frame from the file system */
         ret = Loader_readData(envp->hLoader);

@@ -61,7 +61,7 @@ int GetAirGroundStationFlag()
     //read the GPIO29 ,get the air ground station flag
 
     uiAirorGround = read( fid, NULL, AIR_GROUND_GPIO ); 
-    printf( "uiAirorGround = %d\n", uiAirorGround );
+    printf( "uiAirorGround = %d\n", uiAirorGround >> AIR_GROUND_GPIO );
     close( fid );
     fid = NULL;
     g_AirGround = uiAirorGround;
@@ -135,38 +135,4 @@ void ResetFPGA(void)
 	SetGPIO( FPGA_RESET_GPIO, 1 ); 
 	return ;
 }
- #if 0
- /*--------------------------------------------------------------------------
- * name			: InitMmapAddress
- * function		:  initialize the mmap address 
- * output 		:
- * author	version		date		note
- * feller	1.0		20150807	
- *----------------------------------------------------------------------------
-*/
-Int InitMmapAddress( void  )
- {
-
-    Int32 fd = -1;
  
-    fd = open( DEV_MEM_MMAP, O_RDWR | O_CREAT );	 
-    if( fd < 0)
-    {
-        exit( 1 );
-    }
-
-    g_uiRegBaseAddr=( UInt32 )mmap( 
-	 	( void * )EMIF_BASE_ADDRESS, 
-	 	LINUX_PAGE_SIZE,
-	 	PROT_READ | PROT_WRITE,
-	 	MAP_SHARED,
-	 	fd,  
-	 	0);
-    if( MAP_FAILED == ( void* )g_uiRegBaseAddr )
-    {
-        close( fd );
-        exit( 0 );
-    }
-    return 0 ;
- }
-#endif

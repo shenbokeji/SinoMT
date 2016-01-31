@@ -408,7 +408,7 @@ int sf( int number, int iflag )
 	const char *cvideofile;
 
 
-	cvideofile =  ( 0 == iflag ) ? SEND_VIDEO_FILE_384 : SEND_VIDEO_FILE_720P;
+	cvideofile =  ( 0 == iflag ) ? SEND_VIDEO_FILE_384 : SEND_VIDEO_FILE_1080P;
 
 	printf( "send video file : %s\n", cvideofile );
 
@@ -477,6 +477,14 @@ int sf( int number, int iflag )
 
 	tFPGADataTmp.source_addr = (unsigned int)SEND_PHY_ADDR;
 	tFPGADataTmp.byte_size = uimaplen;
+	if(1)
+	{
+		tFPGADataTmp.tb_size = 2728;
+	}
+	else
+	{
+		tFPGADataTmp.tb_size = 16992;
+	}
 	printf( "send start\n" );
 	for( uiLoop = 0; uiLoop < number; uiLoop++ )
 	{
@@ -552,7 +560,15 @@ int receivefile( const int ilen )
 	tFPGADataTmp.dst_addr = (unsigned int)RECEIVE_PHY_ADDR;
 
 	tFPGADataTmp.byte_size = uirdlen;
-	printf( "receive start\n" );
+	if(1)
+	{
+		tFPGADataTmp.tb_size = 2728;//TB3 SIZE
+	}
+	else
+	{
+		tFPGADataTmp.tb_size = 16992;//TB1 SIZE
+	}	
+
 	{
 		uiRet = ioctl( fidfpga, FPGA_DMA_RECV, &tFPGADataTmp );
 		if( uiRet < 0 )
@@ -594,6 +610,14 @@ void rf( int ilen )
 	receivefile( ilen );
 	return;
 }
+ void rf2( void )
+{
+    int ilen = 6193066;
+    printf( "receive file length %d", ilen );
+    receivefile( ilen );
+    return;
+}
+
  /*----------------------------------------------------------------------------
   * name	 : wr9363
   * function : config AD9363 by spi4
@@ -694,8 +718,7 @@ int init9363( const int iAirorGround )
 
  /*----------------------------------------------------------------------------
   * name	 : wr66121
-  * function : config AD9363 by spi4
-
+  * function 	: config IT66121 by I2C
   * input	 : 
   * author	 version	 date		 note
   * feller	 1.0	 20151007	   
@@ -703,7 +726,7 @@ int init9363( const int iAirorGround )
 
  */
  
- int wr66121( const unsigned int uiAddr, const unsigned char ucValue, const UInt uiFlag  )
+ int wr66121( const unsigned int uiAddr, const unsigned char ucValue )
  {
     	Int iReturn;
 	unsigned char  ucRdValue;
@@ -762,6 +785,59 @@ int init9363( const int iAirorGround )
   	}
 	return LENA_OK;
  }
+
+
+ /*----------------------------------------------------------------------------
+  * name	: wr7611
+  * function 	: config ADV7611 by I2C
+  * input	 : 
+  * author	 version	 date		 note
+  * feller	 1.0	 	20160124	   
+  *----------------------------------------------------------------------------
+ */
+ 
+ int wr7611( const unsigned int uiAddr, const unsigned char ucValue, const UInt uiFlag  )
+ {
+    	Int iReturn;
+	unsigned char  ucRdValue;
+	
+	
+	iReturn = SetADV7611Reg( uiAddr, ucValue );
+	if( 0 != iReturn ) 
+	{
+	    	iReturn = GetADV7611Reg( uiAddr, &ucRdValue );
+		printf( "addr = %#X value =%#X\n", (unsigned int)uiAddr, ucRdValue );	
+	}
+	return LENA_OK;	 
+ }
+
+ /*----------------------------------------------------------------------------
+  * name	: rd7611
+  * function 	: read ADV7611 by I2C
+  * input	 : 
+  * author	 version	 date		 note
+  * feller	 1.0		 20160124	   
+  *----------------------------------------------------------------------------
+ */
+ 
+ int rd7611( const unsigned int uiAddr, const unsigned int uiRdNum )
+ {
+  	int ii;
+  	unsigned int uiAddrTmp;
+  	int iReturn;
+  	unsigned char ucRdValue = 0;
+	
+  
+  	uiAddrTmp = uiAddr;
+  	for ( ii = 0; ii < uiRdNum; ii++ )
+  	{
+	  	iReturn = GetADV7611Reg( uiAddrTmp, &ucRdValue );
+	  	printf( "addr = %#X value =%#X\n", (unsigned int)uiAddrTmp, ucRdValue );   
+		uiAddrTmp++;
+  	}
+	return LENA_OK;
+ }
+
  /*--------------------------------------------------------------------------
  * name		: getedid
  * function	: get the device edid

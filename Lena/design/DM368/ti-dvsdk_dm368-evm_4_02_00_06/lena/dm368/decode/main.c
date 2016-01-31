@@ -66,22 +66,23 @@ int InitGroundVideoProcess( Args *args )
     Dmai_clear(ctrlEnv);
     args->videoDecoder = &engine->videoDecoders[1];//h.264 decoder
     printf( "args->videoDecoder->codecName = %s\n", args->videoDecoder->codecName );
-//sleep(1);
-printf("****************Dmai_clear over****************\n");
+
 
     /* Initialize Codec Engine runtime */
     CERuntime_init();
-	printf("****************CERuntime_init over****************\n");
 
     /* Initialize Davinci Multimedia Application Interface */
     Dmai_init();
-	printf("****************Dmai_init over****************\n");
     initMask |= LOGSINITIALIZED;
 
     /* Create the user interface */
     uiAttrs.osd = args->osd;
     uiAttrs.videoStd = args->videoStd;
-    
+
+    hUI = UI_create(&uiAttrs);
+    if (hUI == NULL) {
+        cleanup(EXIT_FAILURE);
+    }
     /* Create the Pause objects */
     hPauseProcess = Pause_create(&pAttrs);
     hPausePrime = Pause_create(&pAttrs);
@@ -360,7 +361,7 @@ int main(int argc, char *argv[])
     //Initialize FPGA configuration and release reset 
     //InitFPGAReg();
     //InitFPGA( uiFlag );
-
+   
     //Initialize the air station video process,include capture/encode/write pthread
     status = InitGroundVideoProcess( &args );
 	while(1)
@@ -380,15 +381,22 @@ int main(int argc, char *argv[])
  ******************************************************************************/
 int playvideo( const unsigned int uinum )
 {
-    Args args = DEFAULT_ARGS;
-    unsigned int ii;
-    printf( "***** begin play the video *****\n" );	
-    for( ii = 0; ii < uinum; ii++ )
-    {
-    	InitGroundVideoProcess( &args );
-	printf( "play the video %d time\n", uinum );
-    }
-    printf( "***** end play the video *****\n" );	  
-	
+	Args args	 = DEFAULT_ARGS;
+	Int  status = EXIT_SUCCESS; 
+	Int iReturn;
+	unsigned int uiFlag = 0XFFFFFFFF;	 
+
+	printf("**********SinoMartin Ground_Station decoder started.**********\n");
+		 
+	 
+	/* Set the priority of this whole process to max (requires root) */
+	setpriority(PRIO_PROCESS, 0, -20);
+		 
+	//Initialize the air station video process,include capture/encode/write pthread
+	//status = InitGroundVideoProcess( &args );
+	while( 0 == g_flag )
+	{
+		sleep(1);
+	}
     return 0;
 }

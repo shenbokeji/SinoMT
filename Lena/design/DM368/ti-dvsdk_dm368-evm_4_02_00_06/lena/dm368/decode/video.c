@@ -469,7 +469,7 @@ Void *videoThrFxn(Void *arg)
 
     /* Use asynchronous mode since we have a separate loader thread */
     lAttrs.async = TRUE;
-
+//	lAttrs.async = FALSE;
     /* Create the file loader for reading encoded data */
     hLoader = Loader_create(envp->videoFile, &lAttrs);
 

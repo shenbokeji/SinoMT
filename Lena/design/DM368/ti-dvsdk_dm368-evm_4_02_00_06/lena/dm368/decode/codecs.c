@@ -73,10 +73,10 @@ static IAUDDEC1_Params AAC_PARAMS = {
 #include <ti/sdo/codecs/h264dec/ih264vdec.h>
 static IH264VDEC_Params H264_PARAMS = {
     { sizeof(IH264VDEC_Params),
-      576,
       720,
-      30000,
-      6000000,
+      1280,
+      60000,
+      10000000,
       XDM_BYTE,
       XDM_YUV_420P,
     },

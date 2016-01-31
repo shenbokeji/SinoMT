@@ -56,7 +56,7 @@
 #include "../demo.h"
 
 /* Display loop delay in us */
-#define DISPLAYLOOPLATENCY 33332
+#define DISPLAYLOOPLATENCY (33332)
 
 /* Buffering for the display driver */
 #define NUM_DISPLAY_BUFS        4 
@@ -189,7 +189,7 @@ Void *displayThrFxn(Void *arg)
                 ERR("Failed to get timer delta\n");
                 cleanup(THREAD_FAILURE);
             }
-            waitTime = DISPLAYLOOPLATENCY - time;
+            waitTime = ( DISPLAYLOOPLATENCY >> 0 ) - time;
             if(waitTime > 0) {
                 usleep(waitTime);
             }
