@@ -173,13 +173,14 @@ int emif_send(struct fpga_data *transfer)
 {
 	ulong	addr,count,write_count;
 	volatile unsigned short *frame_header_p=NULL;
-
+	unsigned int tb_payplod;
 	unsigned int len;
 
-
+	
 	printk("..");
-	count = 0x4260-0x10;
+	count = transfer->tb_size-0x10;
 	len = transfer->byte_size;
+	tb_payplod = count/2;
 
 	fpga_buf = ioremap(transfer->source_addr,len);
 	if(fpga_buf==NULL) 
@@ -197,11 +198,11 @@ int emif_send(struct fpga_data *transfer)
 		while((__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) ==0);
 
 		frame_header_p = (volatile unsigned short *)addr;
-		for(write_count=0;write_count<0x2128;write_count++,frame_header_p++)
+		for(write_count=0;write_count<tb_payplod;write_count++,frame_header_p++)
 				__raw_writew(*frame_header_p, ( 4 + fpga ));
 
 		frame_header[1]=0;
-		frame_header[2]=0x42504250;
+		frame_header[2]=(count<<16)|count;
 		frame_header[3]	= crc32_le(~0, (unsigned char const *)frame_header, 0xC);
 		
 		frame_header_p = (volatile unsigned short *)frame_header;
@@ -253,7 +254,9 @@ int emif_recv(struct fpga_data *transfer)
 		unsigned int len;
 		unsigned int iSearchFrameHeader = 0 ; // search frame header time out counter
 		unsigned int iRet = 0;
-		count = 0x4260-0x10;
+		unsigned int tb_payplod;
+		count = transfer->tb_size-0x10;
+		tb_payplod = count/2;
 
 		len = transfer->byte_size;
 
@@ -271,7 +274,7 @@ int emif_recv(struct fpga_data *transfer)
 			while((__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) ==0);
 
 			frame_header_p = (volatile unsigned short *)addr;
-			for(write_count=0;write_count<0x2128;write_count++,frame_header_p++)
+			for(write_count=0;write_count<tb_payplod;write_count++,frame_header_p++)
 					*frame_header_p = __raw_readw((0x20 + fpga ));
 
 			frame_header_p = (volatile unsigned short *)frame_header;

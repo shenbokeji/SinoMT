@@ -669,6 +669,7 @@ static struct spi_board_info dm365_evm_spi4_info[] __initconst = {
 #define SPI4_CS_GPIO (37) 
 #define AIR_GROUND_GPIO (29) 
 #define FPGA_RESET_GPIO	(9)
+#define IT66121_POWERON	(103)
 /*--------------------------------------------------------------------------
   * function : GPIO_init
   * output	 : GPIO init
@@ -682,7 +683,8 @@ void GPIORequsetInit(void)
 	gpio_request( SPI4_CS_GPIO, "SPI4_CS_GPIO" );
   	gpio_request( AIR_GROUND_GPIO, "AIR_GROUND_GPIO" );
 	gpio_request( FPGA_RESET_GPIO, "FPGA_RESET_GPIO" );
-  return;
+	gpio_request( IT66121_POWERON, "IT66121_POWERON" );
+  	return;
 }
  /*--------------------------------------------------------------------------
  * function	: GetAirGroundStationFlag
@@ -694,7 +696,7 @@ void GPIORequsetInit(void)
 void GetAirGroundStationFlag(void)
 {
 	unsigned int uiFlag = 0;
-	//uiFlag = (__raw_readl( IO_ADDRESS( 0x01c67020) ) & 0x20000000 );
+
 
 	gpio_direction_input( AIR_GROUND_GPIO );
 	uiFlag = gpio_get_value( AIR_GROUND_GPIO );
@@ -705,6 +707,9 @@ void GetAirGroundStationFlag(void)
 	}
 	else 
 	{
+		davinci_cfg_reg( DM365_VOUT_LCDOE );//config the gio82 to LCD_OE
+		davinci_cfg_reg( DM365_GPIO103 );//config the gio103 
+		gpio_direction_output( IT66121_POWERON, 1 );//supply the 5v for it66121
 		device_lena_air_id = LENA_GROUND;
 		printk("EVM: LENA GROUND device!\n");
 	}

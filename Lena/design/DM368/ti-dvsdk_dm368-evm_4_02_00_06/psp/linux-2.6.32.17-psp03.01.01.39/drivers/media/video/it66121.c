@@ -509,7 +509,7 @@ void DumpHDMITXReg(void)
     printk("       ");
     for(j = 0 ; j < 16 ; j++)
     {
-        printk( "%#X",(int)j);
+        printk( "%X",(int)j);
         if((j == 3)||(j==7)||(j==11))
         {
             printk("  ");
@@ -521,7 +521,7 @@ void DumpHDMITXReg(void)
 
     for(i = 0 ; i < 0x100 ; i+=16)
     {
-        printk("[%#X]  ",i);
+        printk("[%X]  ",i);
         for(j = 0 ; j < 16 ; j++)
         {
             if( (i+j)!= 0x17)
@@ -532,7 +532,7 @@ void DumpHDMITXReg(void)
             {
 
             }
-            printk( "%#X",(int)ucData); // for DDC FIFO
+            printk( "%X",(int)ucData); // for DDC FIFO
             if((j == 3)||(j==7)||(j==11))
             {
                 printk(" -");
@@ -921,23 +921,7 @@ int hdmitx_SetAVIInfoFrame(AVI_InfoFrame *pAVIInfoFrame)
     {
         checksum -= pAVIInfoFrame->pktbyte.AVI_DB[i] ;
     }
-    /*
-    printk(("SetAVIInfo(): "));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB1)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB2)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB3)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB4)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB5)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB6)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB7)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB8)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB9)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB10)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB11)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB12)));
-    printk(("%02X ",(int)it66121_read(REG_TX_AVIINFO_DB13)));
-    printk(("\n"));
-    */
+
     checksum -= AVI_INFOFRAME_VER+AVI_INFOFRAME_TYPE+AVI_INFOFRAME_LEN ;
     it66121_write(REG_TX_AVIINFO_SUM,checksum);
 
