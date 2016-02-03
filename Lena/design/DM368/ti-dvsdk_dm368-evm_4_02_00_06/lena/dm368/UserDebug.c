@@ -98,9 +98,9 @@
  ******************************************************************************/
  int rdgpio( const int iGPIOnumber )
  {
-	char cTmp;
-	cTmp = GetGPIO( iGPIOnumber );
-	printf( "GPIO%d : %d\n", iGPIOnumber, (int)cTmp );
+	unsigned  iTmp;
+	iTmp = GetGPIO( iGPIOnumber );
+	printf( "GPIO%d : %d\n", iGPIOnumber, (int)iTmp );
 	return LENA_OK;
  }
 /*----------------------------------------------------------------------------
@@ -916,7 +916,7 @@ int attshow( void )
  /*--------------------------------------------------------------------------
  * name		: settxatt
  * function	: set tx attenuation
- * intput 	: chan:channel num; 0:channel 0 ,1:channel 1; 2 :both channel. other invalid
+ * intput 	: chan:channel num; 0:channel 0 ,1:channel 1; 2 :both channel
 		value :attenuation value,0.25dB step, 0 is 0 dB
  * author	version		date		note
  * feller	1.0		20151223
@@ -950,14 +950,22 @@ int settxatt( const unsigned int ichan, const int iattvalue )
 	iReturn = SetAD9363Reg( 0X014, 0X03 );
 
 	itmp = (int)( iattvalue * 4 / 100 );// LSB FOR 0.25dB, debug command,excute speed is ignore, so we use "/"
+	if( ichan < 2 )
+	{
+		uiAddrTmp[0] = ( 0 == ichan ) ? 0x73 : 0x75;
+		uiAddrTmp[1] = ( 0 == ichan ) ? 0x74 : 0x76;
 
+		iReturn = SetAD9363Reg( uiAddrTmp[0], (unsigned char)( itmp & 0XFF ) );
+		iReturn = SetAD9363Reg( uiAddrTmp[1], (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
 
-	uiAddrTmp[0] = ( 0 == ichan ) ? 0x73 : 0x75;
-	uiAddrTmp[1] = ( 0 == ichan ) ? 0x74 : 0x76;
-
-	iReturn = SetAD9363Reg( uiAddrTmp[0], (unsigned char)( itmp & 0XFF ) );
-	iReturn = SetAD9363Reg( uiAddrTmp[1], (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
-
+	}
+	else
+	{
+		iReturn = SetAD9363Reg( 0x73, (unsigned char)( itmp & 0XFF ) );
+		iReturn = SetAD9363Reg( 0x74, (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
+		iReturn = SetAD9363Reg( 0x75, (unsigned char)( itmp & 0XFF ) );
+		iReturn = SetAD9363Reg( 0x76, (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
+	}
 	iReturn = SetAD9363Reg( 0X014, 0X23 );
 	iReturn = attshow();
 	return iReturn;

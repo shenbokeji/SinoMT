@@ -394,7 +394,7 @@ int playvideo( const unsigned int uinum )
 		 
 	//Initialize the air station video process,include capture/encode/write pthread
 	//status = InitGroundVideoProcess( &args );
-	while( 0 == g_flag )
+	while( 0 )
 	{
 		sleep(1);
 	}

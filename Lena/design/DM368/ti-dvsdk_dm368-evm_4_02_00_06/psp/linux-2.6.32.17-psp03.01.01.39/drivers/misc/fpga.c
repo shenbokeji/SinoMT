@@ -1,7 +1,15 @@
 /*
- * Character-device access to raw MTD devices.
- *
- */
+ * This source file is FPGA drirver
+
+ *****************************************************************************
+ * Copyright(C) 2015, SinoMartin Corp.
+ *----------------------------------------------------------------------------
+ * filename	: davinci_gpio.c
+ * function	: gpio drirver
+ * author	version		date		note
+ * feller	1.0		20151229	create         
+ *----------------------------------------------------------------------------
+*/
 
 #include <linux/device.h>
 #include <linux/fs.h>
@@ -106,10 +114,7 @@ static void __iomem *fpga_buf=NULL;
 
 #define IO_WRITE(addr, val) (*(volatile unsigned short *)(addr) = (val))
 #define IO_READ(addr) (*(volatile unsigned short *)(addr))
-#if 0
-#define WRFPGA( addr,b ) ((*(volatile unsigned short *) ( ( addr << 1 )+ fpga ) ) = (b))
-#define RDFPGA( addr ) (*(volatile unsigned short *) ( ( addr << 1 ) + fpga ) )
-#endif
+
 
 #define ___swab16(x) \
 	((unsigned short)( \
@@ -140,21 +145,18 @@ typedef struct {
 static unsigned int frame_header[4]={0};
 static unsigned int frame_num=0;
 
+ /*----------------------------------------------------------------------------
+  * name	 : EDMA_config
+  * function	 : EDMA config 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static inline void EDMA_config(unsigned char channel_num, EDMA_Config *config) 
 {
   unsigned int base;
 
   base = channel_num*EDMA_ENTRY_SIZE+EDMA_PRAM_START;
-  
- // base[_EDMA_OPT_OFFSET] = 0x00000000;
- // base[_EDMA_SRC_OFFSET] = config->src;
- // base[_EDMA_ABCNT_OFFSET] = (config->acnt)|((config->bcnt)<<16);
- // base[_EDMA_DST_OFFSET] = config->dst;
- // base[_EDMA_BIDX_OFFSET] = (config->srcbidx)|((config->dstbidx)<<16);
- /// base[_EDMA_BCNTLINK_OFFSET] = (config->link)|((config->bcntrld)<<16);
- // base[_EDMA_CIDX_OFFSET] = (config->srccidx)|((config->dstcidx)<<16);
- // base[_EDMA_CCNT_OFFSET] = config->ccnt;
- // base[_EDMA_OPT_OFFSET] = config->opt;
 
   __raw_writel(0x00000000, IO_ADDRESS(base+_EDMA_OPT_OFFSET));
   __raw_writel(config->src, IO_ADDRESS(base+_EDMA_SRC_OFFSET));
@@ -166,9 +168,16 @@ static inline void EDMA_config(unsigned char channel_num, EDMA_Config *config)
   __raw_writel(config->ccnt, IO_ADDRESS(base+_EDMA_CCNT_OFFSET));
   __raw_writel(config->opt, IO_ADDRESS(base+_EDMA_OPT_OFFSET));
 
-//printk("edma config %x\n",__raw_readl(IO_ADDRESS(base+_EDMA_OPT_OFFSET)));
+	return;
 
 }
+ /*----------------------------------------------------------------------------
+  * name	 : emif_send
+  * function	 : emif_send 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 int emif_send(struct fpga_data *transfer)
 {
 	ulong	addr,count,write_count;
@@ -246,6 +255,13 @@ int emif_send(struct fpga_data *transfer)
 
 }
 #define FRAME_HEADER_TIMEOUT (6000)
+ /*----------------------------------------------------------------------------
+  * name	 : emif_recv
+  * function	 : emif_recv 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 int emif_recv(struct fpga_data *transfer)
 {
 		ulong	addr,count,write_count;
@@ -338,68 +354,18 @@ int emif_recv(struct fpga_data *transfer)
 		return iRet;
 	
 }
-
-
-#if 0
-int dma_cpy (struct fpga_data *transfer)
-{
-	ulong	addr, dest, count;
-	int	size;
-	EDMA_Config image_transfer;
-
-	size = transfer->tb_size;
-
-	addr = transfer->source_addr;
-
-	dest =  transfer->dst_addr;
-
-	count = transfer->byte_size;
-
-	//hEdma=_EDMA_MK_HANDLE(10*_EDMA_ENTRY_SIZE,EDMA_RSV6,_EDMA_TYPE_C);
-	
-	{
-		image_transfer.opt=0x0010A00C;
-		image_transfer.src=addr;
-		image_transfer.acnt=size;
-		image_transfer.bcnt=count/size;
-		image_transfer.dst=dest;
-		image_transfer.srcbidx=size;
-		image_transfer.dstbidx=size;
-		image_transfer.link=0xffff;
-		image_transfer.bcntrld=0x0;
-		image_transfer.srccidx=0x0;
-		image_transfer.dstcidx=0x0;
-		image_transfer.ccnt=0x01;
-
-	}			
-		
-	EDMA_config(10, &image_transfer);
-
-	//EDMA_enableChannel(10);                        //EESR
-	IO_WRITE(EDMACC_EESR_ADDR, 1<<10);
-	//EDMA_setChannel(10);                              //ESR
-	IO_WRITE(EDMACC_ESR_ADDR, 1<<10);
-
-	while((IO_READ(EDMACC_IPR_ADDR)&(1<<10)) ==0);
-	IO_WRITE(EDMACC_ICR_ADDR, 1<<10);	
-
-	return 0;
-
-}
-
 #endif
 
-#endif
-//static unsigned short fpga_rd_buffer[4][2048];
-//static unsigned short fpga_tx_buffer[4][2048];
-
+ /*----------------------------------------------------------------------------
+  * name	 : fpga_open 
+  * function	 : fpga open interface
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 
 static int fpga_open(struct inode *inode, struct file *file)
 {
-	//*(unsigned int *)0x01c67008 = 0x1;
-	//*(unsigned int *)0x01c67010 |= 0x8;
-	//*(unsigned int *)0x01c67024 = 0x8;
-	//*(unsigned int *)0x01c67030 = 0x8;
 
 	__raw_writel(0x1, IO_ADDRESS(0x01c67008));
 	__raw_writel(__raw_readl(IO_ADDRESS(0x01c67010))|0x8, IO_ADDRESS(0x01c67010));
@@ -415,7 +381,13 @@ static int fpga_open(struct inode *inode, struct file *file)
 	return 0;
 } /* fpga_open */
 
-/*====================================================================*/
+ /*----------------------------------------------------------------------------
+  * name	 : fpga_close 
+  * function	 : fpga close interface
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 
 static int fpga_close(struct inode *inode, struct file *file)
 {
@@ -423,8 +395,13 @@ static int fpga_close(struct inode *inode, struct file *file)
 } /* fpga_close */
 
 
-
-//static unsigned int rw_buf=0;
+ /*----------------------------------------------------------------------------
+  * name	 : fpga_read 
+  * function	 : fpga read interface
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 ssize_t fpga_read(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
 	unsigned long ulRet;
@@ -434,7 +411,13 @@ ssize_t fpga_read(struct file *file, const char __user *buf, size_t count, loff_
 	
 	return count;
 }
-
+ /*----------------------------------------------------------------------------
+  * name	 : fpga_write 
+  * function	 : fpga write interface
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 
 ssize_t fpga_write(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
@@ -445,15 +428,17 @@ ssize_t fpga_write(struct file *file, const char __user *buf, size_t count, loff
 }
 
 
-//#define GET_INFO	0U
-//#define SET_INFO	1U
-#define DMA_SEND	1U
-#define DMA_RECV	0U
+#define DMA_SEND	(1U)
+#define DMA_RECV	(0U)
+#define FPGA_CMD_SIZE	(2U)
 
-#define FPGA_CMD_SIZE	2U
-
-
-
+ /*----------------------------------------------------------------------------
+  * name	 : fpga_ioctl 
+  * function	 : fpga io control interface
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static int fpga_ioctl(struct inode *inode, struct file *file,
 		     u_int cmd, u_long arg)
 {
@@ -509,7 +494,13 @@ static struct miscdevice fpga_dev = {
 	.name = FPGA_DRIVER_NAME,  
 	.fops = &fpga_fops,  
 };
-
+ /*----------------------------------------------------------------------------
+  * name	 : fpga_init 
+  * function	 : fpga_init
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static int __init fpga_init(void)
 {
 	int ret;
@@ -519,7 +510,13 @@ static int __init fpga_init(void)
 	return ret;
 
 }
-
+ /*----------------------------------------------------------------------------
+  * name	 : fpga_cleanup_module 
+  * function	 : fpga_cleanup_module
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static void __exit fpga_cleanup_module(void)
 {
 	misc_deregister(&fpga_dev);

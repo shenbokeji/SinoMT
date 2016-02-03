@@ -1,8 +1,15 @@
 /*
- * Character-device access to raw MTD devices.
- *
- */
+ * This source file is AD9363 drirver
 
+ *****************************************************************************
+ * Copyright(C) 2015, SinoMartin Corp.
+ *----------------------------------------------------------------------------
+ * filename	: ad9363.c
+ * function	: AD9363 drirver
+ * author	version		date		note
+ * feller	1.0		20151229	create         
+ *----------------------------------------------------------------------------
+*/
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/device.h>
@@ -15,10 +22,10 @@
 #include <linux/miscdevice.h>  
 #include <linux/io.h>
 #include <linux/fs.h>
-
+extern unsigned char device_lena_air_id;
 #define DEVICE_AD9363 "/dev/misc/ad9363"
 #define AD9363_DRIVER_NAME  "ad9363"
-#define AD9363_DEVICE_MINOR   224
+#define AD9363_DEVICE_MINOR   (224)
 
 #define MAX_MBYTE_SPI (1)
 #define AD9363_READ	(0x0000)
@@ -26,7 +33,13 @@
 
 static struct spi_device *spi_ad9363=NULL;
 
-
+ /*----------------------------------------------------------------------------
+  * name	 : ad9363_spi_readm
+  * function	 : ad9363 spi read interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static int ad9363_spi_readm(struct spi_device *spi, unsigned short reg, 
 			   unsigned char *rbuf, unsigned short num) 
 
@@ -67,7 +80,13 @@ static int ad9363_spi_readm(struct spi_device *spi, unsigned short reg,
 
 	return 0; 
 } 
-
+ /*----------------------------------------------------------------------------
+  * name	 : ad9363_spi_read 
+  * function	 : ad9363 spi read interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 
 int ad9363_spi_read(struct spi_device *spi, unsigned short reg) 
 
@@ -86,7 +105,13 @@ int ad9363_spi_read(struct spi_device *spi, unsigned short reg)
 	return buf; 
 
 } 
-
+ /*----------------------------------------------------------------------------
+  * name	 : ad9363_spi_write
+  * function	 : ad9363 spi write interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 int ad9363_spi_write(struct spi_device *spi, unsigned short reg, unsigned char val) 
 
 { 
@@ -112,7 +137,13 @@ int ad9363_spi_write(struct spi_device *spi, unsigned short reg, unsigned char v
 
 	return 0; 
 } 
-
+ /*----------------------------------------------------------------------------
+  * name	 : ad9363_read
+  * function	 : ad9363 read interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 typedef struct AD9363RegStruct {
     unsigned int uiAddr;	//SPI bus, address  
     unsigned int uiValue;	//SPI bus,data
@@ -120,7 +151,6 @@ typedef struct AD9363RegStruct {
 
 static tAD9363Reg ad9363_reg={0};
 
-//static unsigned int rw_buf=0;
 ssize_t ad9363_read(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
 	unsigned long ulRet;
@@ -133,7 +163,13 @@ ssize_t ad9363_read(struct file *file, const char __user *buf, size_t count, lof
 	return 8;
 }
 
-
+ /*----------------------------------------------------------------------------
+  * name	 : ad9363_write
+  * function	 : ad9363 write interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 ssize_t ad9363_write(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
 	unsigned long ulRet;
@@ -143,30 +179,41 @@ ssize_t ad9363_write(struct file *file, const char __user *buf, size_t count, lo
     	return 8;
 
 }
-
+ /*----------------------------------------------------------------------------
+  * name	 : ad9363_open
+  * function	 : ad9363 open interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static int ad9363_open(struct inode *inode, struct file *file)
 {
-	//int iRet;
-	//printk(AD9363_DRIVER_NAME"\topen the file \n" );
-	
 	return 0;
 } /* fpga_open */
 
-/*====================================================================*/
-
+/*----------------------------------------------------------------------------
+  * name	 : ad9363_close
+  * function	 : ad9363 close interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static int ad9363_close(struct inode *inode, struct file *file)
 {
-	//printk(AD9363_DRIVER_NAME"\tclose the file \n" );
 	return 0;
 } /* fpga_close */
 
 
 #define GET_INFO	0U
 #define SET_INFO	1U
-
 #define AD9363_CMD_SIZE	2U
-
-
+/*----------------------------------------------------------------------------
+  * name	 : ad9363_ioctl
+  * function	 : ad9363 ioctl interface 
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 
 static int ad9363_ioctl(struct inode *inode, struct file *file,
 		     u_int cmd, u_long arg)
@@ -182,34 +229,11 @@ static int ad9363_ioctl(struct inode *inode, struct file *file,
 	return ret;
 }
 
-#define	LENA_AIR  	(1)
-#define	LENA_GROUND  	(0)
-
-extern unsigned char device_lena_air_id;
-#if 0
-static int __init ad9363_air_init(struct spi_device *spi)
-{
-
-	ad9363_spi_write(spi, 0x00, 0x00);
-	ad9363_spi_write(spi, 0x00, 0x81);
-	ad9363_spi_write(spi, 0x00, 0x00);
-	return 0;
-
-}
-static int __init ad9363_ground_init(struct spi_device *spi)
-{
-
-	ad9363_spi_write(spi, 0x00, 0x00);
-	ad9363_spi_write(spi, 0x00, 0x81);
-	ad9363_spi_write(spi, 0x00, 0x00);
 
 
-	return 0;
-}
-#endif
 static const struct file_operations ad9363_fops = {
 	.owner		= THIS_MODULE,
-	.read           = ad9363_read,
+	.read           = (void*)ad9363_read,
 	.write          = ad9363_write,
 	.ioctl		= ad9363_ioctl,
 	.open		= ad9363_open,
@@ -223,7 +247,13 @@ static struct miscdevice ad9363_dev = {
 	.fops = &ad9363_fops,  
 };
 
-
+/*----------------------------------------------------------------------------
+  * name	 : __devinit ad9363_probe
+  * function	 : ad9363 device probe function
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 
 static int __devinit ad9363_probe(struct spi_device *spi)
 {
@@ -234,27 +264,18 @@ static int __devinit ad9363_probe(struct spi_device *spi)
 	spi_ad9363 = spi;
 	printk(AD9363_DRIVER_NAME"\t misc initialized %s!\n", (0==ret)?"successed":"failed");	
 
-#if 0
-	if(device_lena_air_id == LENA_AIR)
-	{	
-		//ad9363_air_init(spi);
-		printk("LENA id is air device!!!\n");
-	}
-	else if(device_lena_air_id == LENA_GROUND)
-	{
-		//ad9363_ground_init(spi);
-		printk("LENA id is ground device!!!\n");
-	}
-	else printk("LENA id ERROR!!!\n");
-#endif
 	return 0;
 }
 
-
+/*----------------------------------------------------------------------------
+  * name	 : __devinit ad9363_remove
+  * function	 : ad9363 device remove function
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static int __devexit ad9363_remove(struct spi_device *spi)
 {
-	//struct m25p	*flash = dev_get_drvdata(&spi->dev);
-	int		status;
 	spi_ad9363 = NULL;
 	misc_deregister(&ad9363_dev);
 
@@ -266,7 +287,6 @@ static int __devexit ad9363_remove(struct spi_device *spi)
 static struct spi_driver ad9363_driver = {
 	.driver = {
 		.name	= AD9363_DRIVER_NAME,
-		//.bus	= &spi_bus_type,
 		.owner	= THIS_MODULE,
 	},
 	.probe	= ad9363_probe,
@@ -277,7 +297,13 @@ static struct spi_driver ad9363_driver = {
 	 * And also when they're otherwise idle...
 	 */
 };
-
+/*----------------------------------------------------------------------------
+  * name	 : __init ad9363_init
+  * function	 : ad9363 device init function
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static int __init ad9363_init(void)
 {
 	int ret;
@@ -288,7 +314,13 @@ static int __init ad9363_init(void)
 	return ret;
 
 }
-
+/*----------------------------------------------------------------------------
+  * name	 : __exit ad9363_cleanup_module
+  * function	 : ad9363 device module exit function
+  * author	 version	 date		 note
+  * feller	 1.0	 20151229
+  *----------------------------------------------------------------------------
+ */
 static void __exit ad9363_cleanup_module(void)
 {
 	spi_unregister_driver(&ad9363_driver);

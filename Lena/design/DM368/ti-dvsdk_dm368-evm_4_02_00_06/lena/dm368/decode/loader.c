@@ -61,6 +61,9 @@ Void *loaderThrFxn(Void *arg)
     }
 	sleep(2);
     while (1) {
+	usleep(2000);
+#if 0
+	
         /* Load a new frame from the file system */
         ret = Loader_readData(envp->hLoader);
 
@@ -78,6 +81,7 @@ Void *loaderThrFxn(Void *arg)
         else if (ret == Dmai_EFLUSH) {
             break;
         }
+#endif
     }
 
 cleanup:
