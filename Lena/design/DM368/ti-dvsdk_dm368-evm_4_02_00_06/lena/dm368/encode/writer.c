@@ -49,7 +49,7 @@
 #include "../demo.h"
 
 /* Number of buffers in writer pipe */
-#define NUM_WRITER_BUFS         10
+#define NUM_WRITER_BUFS         (10)
 
 /******************************************************************************
  * writerThrFxn

@@ -62,9 +62,9 @@ typedef struct Args {
     {Display_Output_COMPONENT,\
     VideoStd_720P_60,\
     "720P 60Hz",\
-    "1080p.264",\
-    NULL,\
-    FALSE,\
+    "720p.264",\
+    &engine->videoDecoders[1],\
+    TRUE,\
     FALSE,\
     FOREVER,\
     FALSE}

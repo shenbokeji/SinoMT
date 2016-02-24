@@ -15,8 +15,8 @@
 #include "../common.h"
 /*****************structure type definition*****************/
 typedef struct I2CRegStruct {
-    UInt uiAddr;	//I2C  bus, address  
-    UInt uiValue;	//I2C bus,data
+    unsigned int uiAddr;	//I2C  bus, address  
+    unsigned int uiValue;	//I2C bus,data
 } tI2CReg;
 
 /*****************macro definition*****************/
@@ -24,7 +24,7 @@ typedef struct I2CRegStruct {
 #define IT66121_REG_END_ADDR (0X2FF)
 #define IT66121_ADDR_INVALID(a) ( ( a > IT66121_REG_END_ADDR ) || ( a < IT66121_REG_START_ADDR ) ) 
 #define DEVICE_IT66121 "/dev/it66121_reg"
-#define DEVICE_ADV7611 "/dev/adv7611"
+#define DEVICE_ADV7611 "/dev/adv7611_reg"
 /*****************extern function declaration*****************/
 extern Int GetIT66121Reg( const unsigned int uiAddr, unsigned char * const pusRdValue );
 extern Int SetIT66121Reg( const unsigned int uiAddr, const unsigned char ucValue );

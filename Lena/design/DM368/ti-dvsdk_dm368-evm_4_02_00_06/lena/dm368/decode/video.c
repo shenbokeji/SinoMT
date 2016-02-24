@@ -703,7 +703,7 @@ prime:
 
         /* Keep track of the number of buffers sent to the display thread */
         numDisplayBufs += bufsSent;
-
+	
         /* Load a new encoded frame from the file system */
         if (Loader_getFrame(hLoader, hInBuf) < 0) {
             ERR("Failed to get frame of encoded data from file system\n");

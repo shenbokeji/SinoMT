@@ -33,7 +33,8 @@ Int InitAirVideoProcess( Args *args )
     Rendezvous_Handle   hRendezvousWriter   = NULL;
     Rendezvous_Handle   hRendezvousCleanup  = NULL;
     Pause_Handle        hPauseProcess       = NULL;
-
+	UI_Handle           hUI                 = NULL;
+	UI_Attrs            uiAttrs;
     struct sched_param  schedParam;
     pthread_t           captureThread;
     pthread_t           writerThread;
@@ -63,8 +64,14 @@ Int InitAirVideoProcess( Args *args )
     Dmai_init();
 
     initMask |= LOGSINITIALIZED;
+    /* Create the user interface */    
+	uiAttrs.osd = args->osd;    
+	uiAttrs.videoStd = args->videoStd;
 
-    
+    hUI = UI_create(&uiAttrs);
+    if (hUI == NULL) {
+        cleanup(EXIT_FAILURE);
+    }
     /* Create the Pause object */
     hPauseProcess = Pause_create(&pAttrs);
 
@@ -130,7 +137,7 @@ Int InitAirVideoProcess( Args *args )
             ERR("******Encoder Failed to create capture thread******\\n");
             cleanup(EXIT_FAILURE);
         }
-
+		
         initMask |= CAPTURETHREADCREATED;
 
         /*
@@ -183,7 +190,7 @@ Int InitAirVideoProcess( Args *args )
             ERR("******Encoder Failed to create video thread******\\n");
             cleanup(EXIT_FAILURE);
         }
-
+		
         initMask |= VIDEOTHREADCREATED;
 
         /*
@@ -210,15 +217,13 @@ Int InitAirVideoProcess( Args *args )
 
     }
 
-
-
-
     /* Main thread becomes the control thread */
     ctrlEnv.hRendezvousInit    = hRendezvousInit;
     ctrlEnv.hRendezvousCleanup = hRendezvousCleanup;
     ctrlEnv.hPauseProcess      = hPauseProcess;
     ctrlEnv.keyboard           = args->keyboard;
     ctrlEnv.time               = args->time;
+	ctrlEnv.hUI                = hUI;
     ctrlEnv.engineName         = engine->engineName;
     ctrlEnv.osd                = args->osd;
 
@@ -323,15 +328,8 @@ Int main(Int argc, Char *argv[])
 	Int	iReturn;	
 	
 	iReturn = ushell_init();
-	if( 0 == iReturn )
-	{
-		printf( "\nushell_init ok (~!~)\n" );
-	}
-	else
-	{
-		printf( "\nushell_init error\n" );
-		return 0;
-	}
+	ver();
+    	printf("**********SinoMartin Ari_Station Encoder started.**********\n");
 #if 0	
     //Get the Air or Ground Station flag
     GetAirGroundStationFlag();
@@ -344,7 +342,7 @@ Int main(Int argc, Char *argv[])
         cleanup(EXIT_FAILURE);
     }
 	
-    printf("**********SinoMartin Ari_Station Encoder started.**********\n");
+
     
 
 
@@ -369,7 +367,7 @@ Int main(Int argc, Char *argv[])
 
     //Initialize the air station video process,include capture/encode/write pthread
 #endif
-    //status = InitAirVideoProcess( &args );
+    status = InitAirVideoProcess( &args );
 
 	while(1)
 	{

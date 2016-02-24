@@ -336,7 +336,8 @@ int main(int argc, char *argv[])
     Int  status = EXIT_SUCCESS;	
     Int	iReturn;
     unsigned int uiFlag = 0XFFFFFFFF;	
-    ver();		
+    ver();	
+    printf("**********SinoMartin Ground_Station decoder started.**********\n");	
     iReturn = ushell_init();	
 	
     //Get the Air or Ground Station flag
@@ -349,7 +350,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 	
-    printf("**********SinoMartin Ground_Station decoder started.**********\n");
+
     
 
     /* Set the priority of this whole process to max (requires root) */
