@@ -1550,3 +1550,270 @@ U_BOOT_CMD(
 	"memory copy with dma",
 	"[.b, .w, .l] source target count"
 );
+
+int do_dma_send ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	ulong	addr, dest, count;
+	int	size;
+	EDMA_Config image_transfer;
+	unsigned int timer_start=0;
+	unsigned int timer_end=0;
+	unsigned short *p=(unsigned short *)0x88000000;
+
+	if (argc != 4)
+		return cmd_usage(cmdtp);
+
+	//for(size = 0;size<0x10000; size++)
+		//*p++ = size;
+
+	*(unsigned int *)0x01c67008 = 0x1;
+	*(unsigned int *)0x01c67010 |= 0x8;
+	*(unsigned int *)0x01c67024 = 0x8;
+	*(unsigned int *)0x01c67030 = 0x8;
+
+	/* Check for size specification.
+	*/
+	size = 2;
+
+
+	addr = simple_strtoul(argv[1], NULL, 16);
+	addr += base_address;
+
+	dest = simple_strtoul(argv[2], NULL, 16);
+	dest += base_address;
+
+	count = simple_strtoul(argv[3], NULL, 16);
+
+	if (count == 0) {
+		puts ("Zero length ???\n");
+		return 1;
+	}
+while(1)
+{
+	*p++ = *(unsigned int *)0x01c21414;
+
+	IO_WRITE(EDMACC_EECRH_ADDR, 1<<3);
+	
+	//IO_WRITE(EDMACC_ICRH_ADDR, 1<<3);
+	IO_WRITE(EDMACC_ESR_ADDR-4, 1<<3);
+	//hEdma=_EDMA_MK_HANDLE(10*_EDMA_ENTRY_SIZE,EDMA_RSV6,_EDMA_TYPE_C);
+	
+	{
+		image_transfer.opt=0x00123004;
+		image_transfer.src=0x84000000;
+		image_transfer.acnt=2;
+		//image_transfer.bcnt=count/2;
+		image_transfer.bcnt=0x2130;
+		image_transfer.dst=0x2002004;
+		image_transfer.srcbidx=size;
+		image_transfer.dstbidx=0;
+		image_transfer.link=0xFFFF;
+		image_transfer.bcntrld=0;
+		image_transfer.srccidx=0;
+		image_transfer.dstcidx=0;
+		image_transfer.ccnt=1;
+	}			
+	
+	EDMA_config(35, &image_transfer);
+	IO_WRITE(EDMACC_ICRH_ADDR, 1<<3);
+
+	IO_WRITE(EDMACC_SECRH_ADDR, 1<<3);
+	IO_WRITE(EDMACC_EESRH_ADDR, 1<<3);
+
+	*p++ = *(unsigned int *)0x01c21414;
+	//printf("dma send  tb1 start wait! time = %d\n",timer_end -timer_start);	
+
+	while((IO_READ(EDMACC_IPRH_ADDR)&(1<<3)) ==0);
+
+	IO_WRITE(EDMACC_EECRH_ADDR, 1<<3);
+
+	*p++ = *(unsigned int *)0x01c21414;
+	//printf("dma send  tb1 OK! time = %d\n",timer_end -timer_start);	
+
+	IO_WRITE(EDMACC_EECR_ADDR, 1<<10);
+
+	{
+		image_transfer.opt=0x0010A004;
+		image_transfer.src=0x86000000;
+		image_transfer.acnt=2;
+		//image_transfer.bcnt=count/2;
+		image_transfer.bcnt=0x554;
+		image_transfer.dst=0x2002008;
+		image_transfer.srcbidx=size;
+		image_transfer.dstbidx=0;
+		image_transfer.link=0xffff;
+		image_transfer.bcntrld=0;
+		image_transfer.srccidx=0;
+		image_transfer.dstcidx=0;
+		image_transfer.ccnt=1;
+	}
+	EDMA_config(10, &image_transfer);
+
+	
+	IO_WRITE(EDMACC_ICR_ADDR, 1<<10);
+	//EDMA_enableChannel(35);                        //EESR
+
+	IO_WRITE(EDMACC_SECR_ADDR, 1<<10);
+	IO_WRITE(EDMACC_ESR_ADDR, 1<<10);
+	IO_WRITE(EDMACC_EESR_ADDR, 1<<10);
+
+	*p++ = *(unsigned int *)0x01c21414;
+	//printf("dma send  tb2 start wait! time = %d\n",timer_end -timer_start);	
+
+	while((IO_READ(EDMACC_IPR_ADDR)&(1<<10)) ==0);
+
+	IO_WRITE(EDMACC_EECR_ADDR, 1<<10);
+
+	*p++ = *(unsigned int *)0x01c21414;	
+
+	//printf("dma send tb2 OK! time = %d\n",timer_end -timer_start);
+
+	if (ctrlc()) 
+	{
+		putc ('\n');
+		break;
+	}
+
+	*p++ = *(unsigned int *)0x01c21414;	
+}
+	return 0;
+
+}
+
+U_BOOT_CMD(
+	dmasend,	4,	1,	do_dma_send,
+	"memory copy with dma",
+	"[.b, .w, .l] source target count"
+);
+
+int do_dma_rev ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	ulong	addr, dest, count;
+	int	size;
+	EDMA_Config image_transfer;
+	unsigned int timer_start=0;
+	unsigned int timer_end=0;
+	unsigned short *p=(unsigned short *)0x8A000000;
+
+	if (argc != 4)
+		return cmd_usage(cmdtp);
+
+	*(unsigned int *)0x01c67008 = 0x1;
+	*(unsigned int *)0x01c67010 |= 0x8;
+	*(unsigned int *)0x01c67024 = 0x8;
+	*(unsigned int *)0x01c67030 = 0x8;
+
+	/* Check for size specification.
+	*/
+	if ((size = cmd_get_data_size(argv[0], 4)) < 0)
+		return 1;
+
+	addr = simple_strtoul(argv[1], NULL, 16);
+	addr += base_address;
+
+	dest = simple_strtoul(argv[2], NULL, 16);
+	dest += base_address;
+
+	count = simple_strtoul(argv[3], NULL, 16);
+
+	if (count == 0) {
+		puts ("Zero length ???\n");
+		return 1;
+	}
+	
+	while(1)
+	{
+
+	*p++ = *(unsigned int *)0x01c21414;
+	IO_WRITE(EDMACC_EECRH_ADDR, 1<<3);
+	IO_WRITE(EDMACC_ESR_ADDR-4, 1<<3);
+	
+	//hEdma=_EDMA_MK_HANDLE(10*_EDMA_ENTRY_SIZE,EDMA_RSV6,_EDMA_TYPE_C);
+	
+	{
+		image_transfer.opt=0x00123004;
+		image_transfer.src=0x2002020;
+		image_transfer.acnt=2;
+		image_transfer.bcnt=0x2130;
+		image_transfer.dst=0x85000000;
+		image_transfer.srcbidx=0;
+		image_transfer.dstbidx=2;
+		image_transfer.link=0xffff;
+		image_transfer.bcntrld=0;
+		image_transfer.srccidx=0;
+		image_transfer.dstcidx=0;
+		//image_transfer.ccnt=count/(size*1062);
+		image_transfer.ccnt=1;
+
+	}			
+		
+	EDMA_config(35, &image_transfer);
+	IO_WRITE(EDMACC_ICRH_ADDR, 1<<3);
+	//EDMA_enableChannel(35);                        //EESR
+	IO_WRITE(EDMACC_SECRH_ADDR, 1<<3);
+	IO_WRITE(EDMACC_EESRH_ADDR, 1<<3);
+	//EDMA_setChannel(35);                              //ESR
+	//IO_WRITE(EDMACC_ESR_ADDR+4, 1<<3);
+
+	while((IO_READ(EDMACC_IPRH_ADDR)&(1<<3)) ==0);
+
+	IO_WRITE(EDMACC_EECRH_ADDR, 1<<3);
+
+	*p++ = *(unsigned int *)0x01c21414;
+	//printf("dma recv  tb1 OK! time = %d\n",timer_end -timer_start);	
+
+	IO_WRITE(EDMACC_EECR_ADDR, 1<<11);
+	{
+		image_transfer.opt=0x0010B004;
+		image_transfer.src=0x2002040;
+		image_transfer.acnt=2;
+		image_transfer.bcnt=0x554;
+		image_transfer.dst=0x87000000;
+		image_transfer.srcbidx=0;
+		image_transfer.dstbidx=2;
+		image_transfer.link=0xffff;
+		image_transfer.bcntrld=0;
+		image_transfer.srccidx=0;
+		image_transfer.dstcidx=0;
+		//image_transfer.ccnt=count/(size*1062);
+		image_transfer.ccnt=1;
+
+	}			
+		
+	EDMA_config(11, &image_transfer);
+	IO_WRITE(EDMACC_ICR_ADDR, 1<<11);
+	//EDMA_enableChannel(35);                        //EESR
+	IO_WRITE(EDMACC_SECR_ADDR, 1<<11);
+	IO_WRITE(EDMACC_ESR_ADDR, 1<<11);
+	IO_WRITE(EDMACC_EESR_ADDR, 1<<11);
+	//EDMA_setChannel(35);                              //ESR
+	//IO_WRITE(EDMACC_ESR_ADDR+4, 1<<3);
+
+	while((IO_READ(EDMACC_IPR_ADDR)&(1<<11)) ==0);
+
+	IO_WRITE(EDMACC_EECR_ADDR, 1<<11);
+
+	*p++ = *(unsigned int *)0x01c21414;	
+
+	
+	//printf("dma recv tb2 OK! time = %d\n",timer_end -timer_start);
+	//run_command("cmp.b 0x86000000 0x87000000 0xAA8",0);
+	//run_command("cmp.b 0x84000000 0x85000000 0x4260",0);
+
+	if (ctrlc()) 
+	{
+		putc ('\n');
+		break;
+	}
+	*p++ = *(unsigned int *)0x01c21414;	
+   }
+	return 0;
+
+}
+
+U_BOOT_CMD(
+	dmarev,	4,	1,	do_dma_rev,
+	"memory copy with dma",
+	"[.b, .w, .l] source target count"
+);
+

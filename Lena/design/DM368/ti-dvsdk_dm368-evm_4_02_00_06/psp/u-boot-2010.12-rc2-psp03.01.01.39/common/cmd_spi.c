@@ -543,7 +543,22 @@ U_BOOT_CMD(
 		(((unsigned short)(x) & (unsigned short)0xff00U) >> 8) ))
 
 #define WRFPGA( b,addr ) ((*(volatile unsigned short *) ( ( addr << 1 )+ EMIF_BASE_ADDR ) ) =___swab16(b))
-#define RDFPGA( addr ) ___swab16(*(volatile unsigned short *) ( ( addr << 1 ) + EMIF_BASE_ADDR ) )
+// below is a bug ,every read ,in fact two read operation because of macor 
+//#define RDFPGA( addr ) ___swab16(*(volatile unsigned short *) ( ( addr << 1 ) + EMIF_BASE_ADDR ) )
+
+ /*----------------------------------------------------------------------------
+  * name	 : RDFPGA
+  * function	 : RDFPGA function
+  * author	 version	 date		 note
+  * feller	 1.0	 20160219
+  *----------------------------------------------------------------------------
+ */
+unsigned short RDFPGA( unsigned int uiaddr )
+{
+	unsigned short usTmp;
+	usTmp = *(volatile unsigned short *) ( ( uiaddr << 1 ) + EMIF_BASE_ADDR ) ;
+	return ___swab16(usTmp);
+}
 
 /*----------------------------------------------------------------------------
  * name		: do_wrfpga
