@@ -5,23 +5,27 @@
 #
 # Version:	@(#)/etc/init.d/rcS  2.76  19-Apr-1999  miquels@cistron.nl
 #
-
+# set -x
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 runlevel=S
 prevlevel=N
 umask 022
 export PATH runlevel prevlevel
+
 #make node for user device
-mknod /dev/misc/fpga c 10 223
-mknod /dev/misc/ad9363 c 10 224
-mknod /dev/misc/davinci_gpio c 10 225
+mknod /dev/fpga c 10 223
+mknod /dev/ad9363 c 10 224
+mknod /dev/davinci_gpio c 10 225
+mknod /dev/it66121 c 10 226
+mknod /dev/adv7611 c 10 227
 
 #make node for dm368 *.ko
-cd /lib/modules/2.6.32.17-davinci1/kernel/drivers/dsp/
-if [ -x loadmodule-rc ]
-then
-  ./loadmodule-rc start
-fi
+
+#if [ -x loadmodule-rc ]
+#then
+#  ./loadmodule-rc start
+#fi
+
 
 #	Make sure proc is mounted
 #
@@ -35,7 +39,6 @@ if [ -x /sbin/unconfigured.sh ]
 then
  /sbin/unconfigured.sh
 fi
-
 
 
 #

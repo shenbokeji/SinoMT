@@ -7,14 +7,14 @@
 # 0x00001000    32K     ARM TCM memory
 # 0x80000000    48 MB   Linux
 # 0x83000000    12 MB   Video driver memory (Linux)
-# 0x83C00000    68 MB   CMEM
-# 0x88000000    BOTTOM  ADDRESS
-
+# 0x86000000    128 MB   CMEM
+# 0x90000000    BOTTOM  ADDRESS
 load () {
-    insmod cmemk.ko phys_start=0x83C00000 phys_end=0x88000000 allowOverlap=1 phys_start_1=0x00001000 phys_end_1=0x00008000 pools_1=1x28672 useHeapIfPoolUnavailable=1
-    insmod irqk.ko 
-    insmod edmak.ko
-    insmod dm365mmap.ko
+    insmod /lib/modules/$(uname -r)/kernel/drivers/dsp/cmemk.ko phys_start=0x83C00000 phys_end=0x88000000 allowOverlap=1 phys_start_1=0x00001000 phys_end_1=0x00008000 pools_1=1x28672 useHeapIfPoolUnavailable=1
+    insmod /lib/modules/$(uname -r)/kernel/drivers/dsp/irqk.ko 
+    insmod /lib/modules/$(uname -r)/kernel/drivers/dsp/edmak.ko
+    insmod /lib/modules/$(uname -r)/kernel/drivers/dsp/dm365mmap.ko
+
     mknod /dev/dm365mmap c `awk "\\$2==\"dm365mmap\" {print \\$1}" /proc/devices` 0
 }
 
