@@ -6,6 +6,10 @@
 //#define adv7611_write(chip_addr,reg_addr,value)	gpio_i2c_write(chip_addr,reg_addr,value) 
 //#define adv7611_read(chip_addr,reg_addr) gpio_i2c_read(chip_addr,reg_addr) 
 
+#define	LENA_AIR 	 	(1)
+#define	LENA_GROUND  	(0)
+
+
 #define SUCCESS		1
 #define FAIL		0
 /*
@@ -26,7 +30,15 @@
 #define HDMI_MAP_I2C		0x68
 #define CP___MAP_I2C		0x44
 
-
+/* Number of pixels and number of lines per frame for different standards */
+#define NTSC_NUM_ACTIVE_PIXELS          (720)
+#define NTSC_NUM_ACTIVE_LINES           (480)
+#define PAL_NUM_ACTIVE_PIXELS           (720)
+#define PAL_NUM_ACTIVE_LINES            (576)
+#define HD_720_NUM_ACTIVE_PIXELS        (1280)
+#define HD_720_NUM_ACTIVE_LINES         (720)
+#define HD_1080_NUM_ACTIVE_PIXELS       (1920)
+#define HD_1080_NUM_ACTIVE_LINES        (1080)
 
 
 typedef struct device_operation
@@ -55,6 +67,7 @@ void adv7611_1920_1080P_60_3(void);
 void adv7611_edid_8_bit(void);
 void adv7611_reset(void);
 
+extern unsigned char device_lena_air_id;
 
 #endif	/* __ADV7611_H__ */
 

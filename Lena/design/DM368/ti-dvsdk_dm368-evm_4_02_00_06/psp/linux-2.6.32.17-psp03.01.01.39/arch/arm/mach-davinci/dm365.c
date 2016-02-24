@@ -488,7 +488,8 @@ MUX_CFG(DM365,	SD1_CLK,	0,   16,    3,	  1,	 false)
 MUX_CFG(DM365,	SD1_CMD,	4,   30,    3,	  1,	 false)
 MUX_CFG(DM365,	SD1_DATA3,	4,   28,    3,	  1,	 false)
 MUX_CFG(DM365,	SD1_DATA2,	4,   26,    3,	  1,	 false)
-MUX_CFG(DM365,	SD1_DATA1,	4,   24,    3,	  1,	 false)
+//config TVP5151 RESET,will delete in future
+MUX_CFG(DM365,	SD1_DATA1,	4,   24,    3,	  0,	 false)
 MUX_CFG(DM365,	SD1_DATA0,	4,   22,    3,	  1,	 false)
 
 MUX_CFG(DM365,	I2C_SDA,	3,   23,    3,	  2,	 false)

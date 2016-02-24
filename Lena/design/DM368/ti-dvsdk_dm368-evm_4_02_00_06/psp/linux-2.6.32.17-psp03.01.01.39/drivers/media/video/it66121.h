@@ -6,8 +6,13 @@
 //#define IT66121_write(chip_addr,reg_addr,value)	gpio_i2c_write(chip_addr,reg_addr,value) 
 //#define IT66121_read(chip_addr,reg_addr) gpio_i2c_read(chip_addr,reg_addr) 
 
-#define SUCCESS		1
-#define FAIL		0
+
+
+#define	LENA_AIR 	 	(1)
+#define	LENA_GROUND  	(0)
+
+#define SUCCESS		(1)
+#define FAIL		(0)
 /*
  *	I2C Address.
  */
@@ -994,5 +999,6 @@ struct it66121 {
 void hdmitx_LoadRegSetting(RegSetEntry table[]);
 BOOL HDMITX_EnableAVIInfoFrame(BYTE bEnable,BYTE *pAVIInfoFrame);
 
+extern unsigned char device_lena_air_id;
 
 #endif	/* __IT66121_H__ */

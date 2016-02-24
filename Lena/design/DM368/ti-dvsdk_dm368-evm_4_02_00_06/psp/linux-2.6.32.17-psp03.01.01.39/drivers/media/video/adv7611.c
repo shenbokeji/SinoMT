@@ -1,105 +1,156 @@
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/ioctl.h>
+#include <linux/fb.h>
 #include <asm/uaccess.h>
 #include <linux/i2c.h>
 #include <linux/i2c-id.h>
 #include <linux/videodev2.h>
+#include <mach/gpio.h>
 #include <media/v4l2-device.h>
 #include <media/v4l2-chip-ident.h>
-#include <media/v4l2-i2c-drv.h>
+#include <mach/hardware.h>
 
-MODULE_DESCRIPTION("Analog Devices ADV7175 video encoder driver");
+//#include <media/v4l2-i2c-drv.h>
+#include <linux/miscdevice.h>  
+
+#include <linux/delay.h>
+#include <media/v4l2-subdev.h>
+#include <media/davinci/videohd.h>
+
+
+
+MODULE_DESCRIPTION("Analog Devices ADV7611 video encoder driver");
 MODULE_AUTHOR("Dave Perks");
 MODULE_LICENSE("GPL");
 
 #include "adv7611.h"
 
+#define ADV7611_DRIVER_NAME  "adv7611_reg"
+#define ADV7611_DEVICE_MINOR   (227)
+
+
 static int debug;
 module_param(debug, int, 0);
 MODULE_PARM_DESC(debug, "Debug level (0-1)");
 
-static unsigned char buf[2]={};
+
+struct adv7611_decoder {
+	struct v4l2_subdev sd;
+
+	int ver;
+	int streaming;
+
+	struct v4l2_pix_format pix;
+	//int num_fmts;
+	//const struct v4l2_fmtdesc *fmt_list;
+
+	int current_std;
+	/*
+	int num_stds;
+	struct tvp7002_std_info *std_list;
+	*/
+	/* Input and Output Routing parameters */
+	u32 input;
+	u32 output;
+};
+
+static struct adv7611_decoder adv7611_devinfo = {
+	.streaming = 0,
+
+	//.fmt_list = tvp7002_fmt_list,
+	//.num_fmts = ARRAY_SIZE(tvp7002_fmt_list),
+
+	.pix = {
+		/* Default to NTSC 8-bit YUV 422 */
+		.width = HD_720_NUM_ACTIVE_PIXELS,
+		.height = HD_720_NUM_ACTIVE_LINES,
+		.pixelformat = V4L2_PIX_FMT_UYVY,
+		.field = V4L2_FIELD_NONE,
+		.bytesperline = HD_720_NUM_ACTIVE_PIXELS * 2,
+		.sizeimage =
+		HD_720_NUM_ACTIVE_PIXELS * 2 * HD_720_NUM_ACTIVE_LINES,
+		.colorspace = V4L2_COLORSPACE_JPEG,
+		},
+
+	.current_std = 0,
+	/*
+	.std_list = tvp7002_std_list,
+	.num_stds = ARRAY_SIZE(tvp7002_std_list),
+	*/
+};
+
 
 /****************************************************************************
 			I2C Client & Driver
  ****************************************************************************/
-struct adv7611_state {
-	struct v4l2_subdev sd;
-};
+
 static struct v4l2_subdev *adv7611_sd;
 
+#define I2C_RETRY_COUNT                 (5)
 
-unsigned char adv7611_read(unsigned char devaddress, unsigned char address)
+int adv7611_read(unsigned char devaddress, unsigned char address)
 {
-	struct i2c_adapter *adap;
-	struct i2c_client *c = v4l2_get_subdevdata(adv7611_sd);
-	struct i2c_msg msg[2];
-	int ret;
+	//struct i2c_adapter *adap;
+	int err, retry = 0;
+	unsigned short client_temp;
+	struct i2c_client *client = v4l2_get_subdevdata(adv7611_sd);
 
-	adap=c->adapter;
+	//printk("adv7611_read(%02x,%02x,%02x)\n",client->addr,devaddress,address);
 
-	buf[0] = address;
+	client_temp = client->addr;
+	client->addr = devaddress>>1;
+	read_again:
+	
+		err = i2c_smbus_read_byte_data(client, address);
+		if (err == -1) {
+			if (retry <= I2C_RETRY_COUNT) {
+				v4l2_warn(adv7611_sd, "Read: retry ... %d\n", retry);
+				retry++;
+				msleep_interruptible(10);
+				goto read_again;
+			}
+		}
+	client->addr = client_temp;
+	return err;
 
-	msg[0].addr = devaddress;
-	msg[0].flags = 0;
-	msg[0].len = 1;
-	msg[0].buf = (unsigned char *)buf;
-
-	msg[1].addr = devaddress;
-	msg[1].flags = I2C_M_RD;
-	msg[1].len = 1;
-	msg[1].buf = (unsigned char *)buf;
-
-	ret = i2c_transfer(adap, &msg, 2);
-
-	/* If everything went ok (i.e. 1 msg transmitted), return #bytes
-	   transmitted, else error code. */
-	return ret;
 }
 
-void adv7611_write(unsigned char devaddress, unsigned char address, unsigned char value)
+
+int adv7611_write(unsigned char devaddress, unsigned char address, unsigned char value)
 {
-	struct i2c_adapter *adap;
-	struct i2c_client *c = v4l2_get_subdevdata(adv7611_sd);
-	struct i2c_msg msg;
+	int err, retry = 0;
+	unsigned short client_temp;
+	struct i2c_client *client = v4l2_get_subdevdata(adv7611_sd);
 
-	adap=c->adapter;
+	printk("adv7611_write(%02x,%02x,%02x,%02x)\n",client->addr,devaddress,address,value);
 
-	buf[0] = address;
-	buf[1] = value;
 
-	msg.addr = devaddress;
-	msg.flags = 0;
-	msg.len = 2;
-	msg.buf = (char *)buf;
+	client_temp = client->addr;
+	client->addr = devaddress>>1;
 
-	i2c_transfer(adap, &msg, 1);
+	write_again:
+	
+		err = i2c_smbus_write_byte_data(client, address, value);
+		if (err) {
+			if (retry <= I2C_RETRY_COUNT) {
+				v4l2_warn(adv7611_sd, "Write: retry ... %d\n", retry);
+				retry++;
+				msleep_interruptible(10);
+				goto write_again;
+			}
+		}
 
-	return 0;
+	client->addr = client_temp;
+	return err;
 }
+
 
 #if 1
 
-// Added Recommended Settings for non-fast switching scripts
-void adv7611_adi_recommended_setting(void)
-{
-	adv7611_write(0x68, 0xC1, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC2, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC3, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC4, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC5, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC6, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC7, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC8, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xC9, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xCA, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xCB, 0x01); // ADI recommended setting
-	adv7611_write(0x68, 0xCC, 0x01); // ADI recommended setting
-}
-
 void adv7611_reset(void)
 {
+
 	adv7611_write(0x98, 0xFF, 0x80); // I2C reset
 	// 56 17 0x02); // Encoder reset
 }
@@ -107,11 +158,12 @@ void adv7611_reset(void)
 // :6-1e Port A, 720p,1080i Any Color Space In (YCrCb 444 24bit from ADV761x) 
 void adv7611_720P_1080i(void)
 {
-	adv7611_write(0x98, 0xFF, 0x80); // I2C reset
+	//adv7611_write(0x98, 0xFF, 0x80); // I2C reset
 	adv7611_write(0x98, 0x01, 0x06); // Prim_Mode =110b HDMI-GR	60 Hz
 	adv7611_write(0x98, 0x02, 0xF5); // Auto CSC, YCrCb out, Set op_656 bit
 	//adv7611_write(0x98, 0x03, 0x40); // 24 bit SDR 444 Mode 0
-	adv7611_write(0x98, 0x03, 0x2A); // 12-bit 4:2:2 DDR mode 2 (ITU-656 mode)
+	adv7611_write(0x98, 0x03, 0x80); // 16-bit 4:2:2 SDR mode 0 
+	//adv7611_write(0x98, 0x04, 0x80); // 16-bit 4:2:2 SDR mode 0 
 	adv7611_write(0x98, 0x05, 0x28); // AV Codes Off
 	adv7611_write(0x98, 0x06, 0xA6); // Invert VS,HS pins
 	adv7611_write(0x98, 0x0B, 0x44); // Power up part
@@ -349,7 +401,7 @@ void adv7611_1920_1080P_60_3(void)
 // ADV7611 EDID 8 bit only NO DSD or HBR Support:
 void adv7611_edid_8_bit(void)
 {
-	adv7611_write(0x64, 0x77, 0x00); // Disable the Internal EDID
+	adv7611_write(0x64, 0x74, 0x00); // Disable the Internal EDID
 	adv7611_write(0x6C, 0x00, 0x00); // 
 	adv7611_write(0x6C, 0x01, 0xFF); // 
 	adv7611_write(0x6C, 0x02, 0xFF); // 
@@ -698,66 +750,62 @@ static void write_map_i2c_address(unsigned char addr, unsigned char num,  unsign
 	adv7611_write_table(addr, num, value);
 }
 
+typedef struct ADV7611RegStruct {
+    unsigned int uiAddr;	//I2C reg, address  
+    unsigned int uiValue;		//I2C bus,data
+} tadv7611Reg;
+
+static tadv7611Reg adv7611_reg={0};
+
+
+//static unsigned int rw_buf=0;
+ssize_t adv7611_readreg(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
+{
+
+		copy_from_user(&adv7611_reg, buf, 8);
+		adv7611_reg.uiValue = adv7611_read((unsigned char)(adv7611_reg.uiAddr>>16),(unsigned char)(adv7611_reg.uiAddr&0xff));
+		copy_to_user(buf, &adv7611_reg, 8); 
+		//printk("adv7611_readreg(%x,%x)\n",adv7611_reg.uiAddr,adv7611_reg.uiValue);
+		
+		return 8;
+}
+
+ssize_t adv7611_writereg(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
+{
+
+    copy_from_user(&adv7611_reg, buf, 8);
+	printk("adv7611_writereg(%x,%x)\n",adv7611_reg.uiAddr,adv7611_reg.uiValue);
+	adv7611_write((unsigned char)(adv7611_reg.uiAddr>>16),(unsigned char)(adv7611_reg.uiAddr&0xff),(unsigned char)adv7611_reg.uiValue);
+     
+    return 8;
+
+}
+
 /*
  * Initialization settings for HDMI Mode.
  */
-static void initialize_hdmi_mode(unsigned char addr, unsigned char num ,unsigned char * value)
+
+#define GET_INFO	0U
+#define SET_INFO	1U
+
+#define ADV7611_CMD_SIZE	2U
+
+
+
+static int adv7611_ioctl(struct inode *inode, struct file *file,
+		     u_int cmd, u_long arg)
 {
-	adv7611_write_table(CP___MAP_I2C, sizeof(cp_map)/2 , cp_map);
-	adv7611_write_table(addr , num , value);
-}
+	int ret = 0;
 
-static long adv7611_ioctl(struct file * file, unsigned int cmd, unsigned long arg)
-{
-	unsigned int value;
-	unsigned int __user *argp = (unsigned int __user *)arg;
-	device_operation operation;
-
-	switch(_IOC_NR(cmd)) {
-
-		/* 
-		 * read all register 
-		 */
-		case _IOC_NR(ADV7611_GET_ALL_REG):	
-			break;
-		
-		/* 
-		 * set single register 
-		 */
-		case _IOC_NR(ADV7611_SET_SINGLE_REG):
-			
-			if (copy_from_user(&operation, argp, sizeof(operation))) {
-				printk(KERN_ALERT "\tERROR: ADV7611_SET_SINGLE_REG\n");
-				return -EINVAL;
-			}
-
-			adv7611_write(operation.addr, operation.reg, operation.value);
-			break;
-
-		/*
-		 * read single register 
-		 */
-		case _IOC_NR(ADV7611_GET_SINGLE_REG):	
-
-			if (copy_from_user(&operation, argp, sizeof(operation))) {
-				printk(KERN_ALERT "\tERROR: ADV7611_GET_SINGLE_REG \n");
-				return -EINVAL;
-			}
-
-			operation.value = adv7611_read(operation.addr, (u8)operation.reg);
-			// printk("[[kernel 0x%02x 0x%02x 0x%02x]]\n", operation.addr, operation.reg, operation.value);
-
-			if (copy_to_user(argp, &operation, sizeof(operation)))
-				return -1;
-
-			break;
-
+	switch (cmd) {
+	
 		default:
-			return -EINVAL;
+			ret = -ENOTTY;
 	}
 
-	return 0;
+	return ret;
 }
+
 
 /*
  *	ºÏ≤‚ HDMI cableΩ”»Î
@@ -786,40 +834,227 @@ static int check_hdmi_clock(void)
 	
 	return 0;
 }
+#if 1
+void DumpHDMIRXReg()
+{
+    int i,j ;
+    unsigned char ucData ;
+
+    printk("       ");
+    for(j = 0 ; j < 16 ; j++)
+    {
+        printk(" %02X",(int)j);
+        if((j == 3)||(j==7)||(j==11))
+        {
+            printk("  ");
+        }
+    }
+    printk("\n        -----------------------------------------------------\n");
+
+    //Switch_HDMITX_Bank(0);
+
+    for(i = 0 ; i < 0x100 ; i+=16)
+    {
+        printk("[%3X]  ",i);
+        for(j = 0 ; j < 16 ; j++)
+        {
+
+            ucData = adv7611_read(0x98,((i+j)&0xFF));
+            printk(" %02X",(int)ucData);
+
+
+            if((j == 3)||(j==7)||(j==11))
+            {
+                printk(" -");
+            }
+        }
+        printk("\n");
+        if((i % 0x40) == 0x30)
+        {
+            printk("        -----------------------------------------------------\n");
+        }
+    }
+}
+
+#endif
+
 
 static int adv7611_device_init(void)
 {
     unsigned char ireg, reg;
 
+	__raw_writel(0xFFFFFF7F,IO_ADDRESS(0x01c67038));
+	//udelay(20000);
+	__raw_writel(0x14456745,IO_ADDRESS(0x01c40010));
+	//udelay(20000);
+	__raw_writel(0x0000080,IO_ADDRESS(0x01c67040));
+	//udelay(20000);	
+
 	ireg = adv7611_read(ADV7611__I2C,0xF4); 
     adv7611_write(ADV7611__I2C,0xF4, 0x80);
     reg = adv7611_read(ADV7611__I2C,0xF4); 
 	if( reg != 0x80 ) {
-        printk(KERN_ALERT "ERROR : read adv7611 register is 0x%02x\n",reg);
+        printk( "ERROR : read adv7611 register is 0x%02x\n",reg);
         return -EFAULT;        
     }
 	adv7611_write(ADV7611__I2C,0xF4, ireg);
 
 	adv7611_reset();
+	//udelay(1000000);
 	write_map_i2c_address( ADV7611__I2C, sizeof ( i2c_address ) / 2, i2c_address );
 	//write_map_i2c_address( ADV7611__I2C, sizeof ( io_map ) / 2, io_map );
 	//initialize_hdmi_mode ( HDMI_MAP_I2C, sizeof (hdmi_map) / 2, hdmi_map);
-	adv7611_1080P();
+	adv7611_720P_1080i();
 	adv7611_edid_8_bit();
 	reg = check_hdmi_cable();
 	printk("\t[check_hdmi_cable = 0x%02x]\n", reg);
 	reg = check_hdmi_clock();
 	printk("\t[check_hdmi_clock = 0x%02x]\n", reg);
 
+	DumpHDMIRXReg();
+
 	return 0;
 }
 
-static int adv7611_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *chip)
+/* adv7611_querystd :
+* Function to return standard detected by decoder
+*/
+static int adv7611_querystd(struct v4l2_subdev *sd, v4l2_std_id *id)
 {
-	struct i2c_client *client = v4l2_get_subdevdata(sd);
+	int err = 0;
+	u32 val, val1, val_t;
+	u32  width,height,field;
 
-	return v4l2_chip_ident_i2c_client(client, chip, V4L2_IDENT_ADV7175, 0);
+	v4l2_dbg(1, debug, sd, "Starting querystd function...\n");
+	if (id == NULL) {
+		v4l2_err(sd, "NULL Pointer.\n");
+		return -EINVAL;
+	}
+
+	val = adv7611_read(0x68, 0x07);
+	val &= 0x1F;
+	val <<= 8;
+	val += adv7611_read(0x68, 0x08);
+	if(val == 0x1FFF) return -ENODEV;
+	width =val;
+	
+	val1 = adv7611_read(0x68, 0x09);
+	val1 &= 0x1F;
+	val1 <<= 8;
+	val1 += adv7611_read(0x68, 0x0A);	
+	if(val1 == 0x1FFF) return -ENODEV;
+	height = val1;
+		
+	val_t = adv7611_read(0x68, 0x0B)&0x20;
+
+	if(val_t==0x0) field= V4L2_FIELD_NONE;
+	else  field=V4L2_FIELD_INTERLACED;
+
+
+
+	if ((V4L2_FIELD_INTERLACED == field)&& (HD_1080_NUM_ACTIVE_PIXELS == width) &&
+		(height == HD_1080_NUM_ACTIVE_LINES))
+		*id = V4L2_STD_1080I_60;
+	else if ((V4L2_FIELD_NONE == field)&& (HD_1080_NUM_ACTIVE_PIXELS == width) &&
+		(height == HD_1080_NUM_ACTIVE_LINES))
+		*id = V4L2_STD_1080P_60;
+	else if ((V4L2_FIELD_NONE == field)&& (HD_720_NUM_ACTIVE_PIXELS == width) &&
+		(height == HD_720_NUM_ACTIVE_LINES))
+		*id = V4L2_STD_720P_60;
+	else {
+		v4l2_err(sd,
+			"querystd, erorxxx, val = %x, val1 = %x\n", val, val1);
+		return -EINVAL;
+	}
+
+	printk( "End of querystd function.\n");
+
+	return err;
 }
+
+
+static int adv7611_g_fmt_cap(struct v4l2_subdev *sd, struct v4l2_format *f)
+{
+	struct adv7611_decoder *decoder = &adv7611_devinfo;
+	struct v4l2_pix_format *pix = &(adv7611_devinfo.pix);
+	u32 value=0;
+
+	if (f == NULL)
+		return -EINVAL;
+
+	if (f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
+		/* only capture is supported */
+		return -EINVAL;
+
+	
+	value = adv7611_read(0x68, 0x07);
+	value &= 0x1F;
+	value <<= 8;
+	value += adv7611_read(0x68, 0x08);
+	if(value == 0x1FFF) return -ENODEV;
+	pix->width		=  value;
+
+	value = adv7611_read(0x68, 0x09);
+	value &= 0x1F;
+	value <<= 8;
+	value += adv7611_read(0x68, 0x0A);	
+	if(value == 0x1FFF) return -ENODEV;
+	if(0x20==(adv7611_read(0x68, 0x0B)&0x20)) value <<= 1;
+	pix->height		= value;
+	
+	pix->pixelformat	= V4L2_PIX_FMT_YUYV;
+	pix->field		= V4L2_FIELD_NONE;
+	pix->colorspace		= V4L2_COLORSPACE_JPEG;	
+	decoder->pix.bytesperline = pix->width * 2;
+
+	f->fmt.pix = adv7611_devinfo.pix;
+
+	//v4l2_dbg(1, debug, sd, "Current FMT: bytesperline - %d"
+	printk("Current FMT: bytesperline - %d Width - %d, Height - %d",
+			decoder->pix.bytesperline,
+			decoder->pix.width, decoder->pix.height);
+	return 0;
+}
+
+static int adv7611_s_stream(struct v4l2_subdev *sd, int enable)
+{
+	int err = 0;
+	struct adv7611_decoder *decoder = &adv7611_devinfo;
+
+	if (decoder->streaming == enable)
+		return 0;
+
+	switch (enable) {
+	case 0:
+	{
+		//err = tvp7002_write_reg(sd, TVP7002_MISC_CONTROL_2, 0x1);
+		//if (err) {
+		//	v4l2_err(sd, "Unable to turn off decoder\n");
+		//	return err;
+		//}
+		decoder->streaming = enable;
+		break;
+	}
+	case 1:
+	{
+		/* Power Up Sequence */
+		//err = tvp7002_write_reg(sd, TVP7002_MISC_CONTROL_2, 0x0);
+		//if (err) {
+			//v4l2_err(sd, "Unable to turn off decoder\n");
+			//return err;
+		//}
+		decoder->streaming = enable;
+		break;
+	}
+	default:
+		err = -ENODEV;
+		break;
+	}
+
+	return err;
+}
+
+
 /* ----------------------------------------------------------------------- */
 
 static const struct v4l2_subdev_core_ops adv7611_core_ops = {
@@ -829,7 +1064,7 @@ static const struct v4l2_subdev_core_ops adv7611_core_ops = {
 	//.queryctrl = adv7611_queryctrl,
 	//.s_std = adv7611_s_std,
 	//.reset = adv7611_reset,
-	.g_chip_ident = adv7611_g_chip_ident,
+	//.g_chip_ident = adv7611_g_chip_ident,
 #ifdef CONFIG_VIDEO_ADV_DEBUG
 	//.g_register = adv7611_g_register,
 	//.s_register = adv7611_s_register,
@@ -837,10 +1072,10 @@ static const struct v4l2_subdev_core_ops adv7611_core_ops = {
 };
 
 static const struct v4l2_subdev_video_ops adv7611_video_ops = {
-	//.s_routing = adv7611_s_routing,
-	//.g_fmt = adv7611_g_fmt,
-	//.s_fmt = adv7611_s_fmt,
-	//.g_sliced_vbi_cap = tadv7611_g_sliced_vbi_cap,
+	.querystd = adv7611_querystd,
+	.g_fmt = adv7611_g_fmt_cap,
+	.s_stream = adv7611_s_stream,
+
 };
 
 static const struct v4l2_subdev_ops adv7611_ops = {
@@ -849,50 +1084,60 @@ static const struct v4l2_subdev_ops adv7611_ops = {
 	.video = &adv7611_video_ops,
 };
 
+static const struct file_operations adv7611_fops = {
+	.owner		= THIS_MODULE,
+	.read           = adv7611_readreg,
+	.write           = adv7611_writereg,
+	.ioctl		= adv7611_ioctl,
+	.open		= adv7611_open,
+	.release	= adv7611_close,
+
+};
+
+static struct miscdevice adv7611_dev = {
+ 	.minor = ADV7611_DEVICE_MINOR,  
+	.name = ADV7611_DRIVER_NAME,  
+	.fops = &adv7611_fops,  
+};
+
 
 static int adv7611_probe(struct i2c_client *c,
 			 const struct i2c_device_id *id)
 {
-	struct adv7611_state *state;
-	
+	//struct adv7611_state *state;
+	int ret;
 
-	/* Check if the adapter supports the needed features */
+		/* Check if the adapter supports the needed features */
 	if (!i2c_check_functionality(c->adapter,
 	     I2C_FUNC_SMBUS_READ_BYTE | I2C_FUNC_SMBUS_WRITE_BYTE_DATA))
 		return -EIO;
 
-	state = kzalloc(sizeof(struct adv7611_state), GFP_KERNEL);
-	if (state == NULL)
+	adv7611_sd = kzalloc(sizeof(struct v4l2_subdev), GFP_KERNEL);
+	if (adv7611_sd == NULL)
 		return -ENOMEM;
-	adv7611_sd = &state->sd;
+
 	v4l2_i2c_subdev_init(adv7611_sd, c, &adv7611_ops);
 	v4l_info(c, "chip found @ 0x%02x (%s)\n",
 		 c->addr << 1, c->adapter->name);
 
-	//core->norm = V4L2_STD_ALL;	/* Default is autodetect */
-	//core->input = TVP5150_COMPOSITE1;
-	//core->enable = 1;
-	//core->bright = 128;
-	//core->contrast = 128;
-	//core->hue = 0;
-	//core->sat = 128;
 	adv7611_device_init();
+
+	ret = misc_register(&adv7611_dev);
+	printk(ADV7611_DRIVER_NAME"\t misc initialized %s!\n", (0==ret)?"successed":"failed");
 
 	//if (debug > 1)
 		//adv7611_log_status(sd);
 	return 0;
 }
-static inline struct adv7611_state *to_state(struct v4l2_subdev *sd)
-{
-	return container_of(sd, struct adv7611_state, sd);
-}
+
 
 static int adv7611_remove(struct i2c_client *client)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
 
 	v4l2_device_unregister_subdev(sd);
-	kfree(to_state(sd));
+
+	misc_deregister(&adv7611_dev);
 
 	return 0;
 }
@@ -904,12 +1149,37 @@ static const struct i2c_device_id adv7611_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, adv7611_id);
 
-static struct v4l2_i2c_driver_data v4l2_i2c_data = {
-	.name = "adv7611",
+static struct i2c_driver adv7611_driver = {
+	.driver = {
+		.owner	= THIS_MODULE,
+		.name	= "adv7611",
+	},	
 	.command = adv7611_ioctl,
 	.probe = adv7611_probe,
 	.remove = adv7611_remove,
 	.id_table = adv7611_id,
 };
+
+
+static int __init adv7611_init(void)
+{
+	if( LENA_AIR == device_lena_air_id )
+	{
+		return i2c_add_driver(&adv7611_driver);
+	}
+	return 0;
+}
+
+static void __exit adv7611_exit(void)
+{
+	if( LENA_AIR == device_lena_air_id )
+	{
+		i2c_del_driver(&adv7611_driver);
+	}
+}
+
+module_init(adv7611_init);
+module_exit(adv7611_exit);
+MODULE_LICENSE("GPL");
 
 

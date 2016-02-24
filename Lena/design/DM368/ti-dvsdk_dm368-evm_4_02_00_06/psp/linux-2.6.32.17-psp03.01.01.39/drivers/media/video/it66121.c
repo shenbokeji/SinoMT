@@ -3179,12 +3179,19 @@ static struct i2c_driver it66121_driver = {
 };
 static int __init it66121_init(void)
 {
-	return i2c_add_driver(&it66121_driver);
+	if( LENA_GROUND == device_lena_air_id )
+	{
+		return i2c_add_driver(&it66121_driver);
+	}
+	return 0; 
 }
 
 static void __exit it66121_exit(void)
 {
-	i2c_del_driver(&it66121_driver);
+	if( LENA_GROUND == device_lena_air_id )
+	{
+		i2c_del_driver(&it66121_driver);
+	}
 }
 
 module_init(it66121_init);

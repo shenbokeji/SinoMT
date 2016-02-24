@@ -122,8 +122,21 @@ static void __iomem *fpga_buf=NULL;
 		(((unsigned short)(x) & (unsigned short)0xff00U) >> 8) ))
 
 #define WRFPGA( addr,b ) ((*(volatile unsigned short *) ( ( addr << 1 )+ fpga ) ) =___swab16(b))
-#define RDFPGA( addr ) ___swab16(*(volatile unsigned short *) ( ( addr << 1 ) + fpga ) )
-
+// below is a bug ,every read ,in fact two read operation because of macor 
+//#define RDFPGA( addr ) ___swab16(*(volatile unsigned short *) ( ( addr << 1 ) + fpga ) )
+ /*----------------------------------------------------------------------------
+  * name	 : RDFPGA
+  * function	 : RDFPGA function
+  * author	 version	 date		 note
+  * feller	 1.0	 20160219
+  *----------------------------------------------------------------------------
+ */
+unsigned short RDFPGA( unsigned int uiaddr )
+{
+	unsigned short usTmp;
+	usTmp = __raw_readw( ( uiaddr << 1 ) + fpga ) ;
+	return ___swab16(usTmp);
+}
 
 typedef struct {
   unsigned int opt;

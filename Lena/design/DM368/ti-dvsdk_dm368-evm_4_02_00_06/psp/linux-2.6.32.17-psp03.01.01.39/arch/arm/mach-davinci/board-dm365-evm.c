@@ -332,7 +332,24 @@ static struct vpfe_route tvp5150_routes[] = {
 	},
 };
 
+#define ADV7611_STD_ALL        (V4L2_STD_720P_50   | V4L2_STD_720P_60 	|\
+				V4L2_STD_1080I_50  | V4L2_STD_1080I_60 	|\
+				V4L2_STD_1080P_50  | V4L2_STD_1080P_60)
+
+
+/* Inputs available at the adv7611 */
+static struct v4l2_input adv7611_inputs[] = {
+	{
+		.index = 0,
+		.name = "Component",
+		.type = V4L2_INPUT_TYPE_CAMERA,
+		.std = ADV7611_STD_ALL,
+	},
+};
+
+
 static struct vpfe_subdev_info vpfe_sub_devs[] = {
+	#if 0
 	{
 		.module_name = "tvp5150",
 		.grp_id = VPFE_SUBDEV_TVP5150,
@@ -350,11 +367,22 @@ static struct vpfe_subdev_info vpfe_sub_devs[] = {
 			//.platform_data = &tvp5150_pdata,
 		},
 	},
+	#endif
 	{
 		.module_name = "adv7611",
 		.grp_id = VPFE_SUBDEV_ADV7611,
+		.num_inputs = ARRAY_SIZE(adv7611_inputs),
+		.inputs = adv7611_inputs,
+		//.routes = tvp5150_routes,
+		//.can_route = 1,
+		.ccdc_if_params = {
+			.if_type = VPFE_YCBCR_SYNC_16,
+			.hdpol = VPFE_PINPOL_POSITIVE,
+			.vdpol = VPFE_PINPOL_POSITIVE,
+		},		
 		.board_info = {
 			I2C_BOARD_INFO("adv7611", 0x4C),
+			//.platform_data = &adv7611_pdata,	
 		},
 	},
 
@@ -431,8 +459,8 @@ static struct i2c_board_info i2c_info[] = {
 
 
 static struct davinci_i2c_platform_data i2c_pdata = {
-	.bus_freq	= 400	/* kHz */,
-	.bus_delay	= 0	/* usec */,
+	.bus_freq	= 100	/* kHz */,
+	.bus_delay	= 20000	/* usec */,
 };
 
 static void __init evm_init_i2c(void)
@@ -443,7 +471,10 @@ static void __init evm_init_i2c(void)
 	davinci_init_i2c(&i2c_pdata);
 	//if (have_imager())
 	//	i2c_add_driver(&pca9543a_driver);
-	i2c_register_board_info(1, i2c_info, ARRAY_SIZE(i2c_info));
+	if( LENA_GROUND == device_lena_air_id )
+	{
+		i2c_register_board_info(1, i2c_info, ARRAY_SIZE(i2c_info));
+	}
 }
 
 static struct platform_device *dm365_evm_nand_devices[] __initdata = {
@@ -670,6 +701,8 @@ static struct spi_board_info dm365_evm_spi4_info[] __initconst = {
 #define AIR_GROUND_GPIO (29) 
 #define FPGA_RESET_GPIO	(9)
 #define IT66121_POWERON	(103)
+#define ADV7611_POWERON	(39)
+
 /*--------------------------------------------------------------------------
   * function : GPIO_init
   * output	 : GPIO init
@@ -684,6 +717,7 @@ void GPIORequsetInit(void)
   	gpio_request( AIR_GROUND_GPIO, "AIR_GROUND_GPIO" );
 	gpio_request( FPGA_RESET_GPIO, "FPGA_RESET_GPIO" );
 	gpio_request( IT66121_POWERON, "IT66121_POWERON" );
+	gpio_request( ADV7611_POWERON, "ADV7611_POWERON" );
   	return;
 }
  /*--------------------------------------------------------------------------
@@ -702,6 +736,8 @@ void GetAirGroundStationFlag(void)
 	uiFlag = gpio_get_value( AIR_GROUND_GPIO );
 	if( uiFlag ) 
 	{
+		davinci_cfg_reg( DM365_SD1_DATA1 );//config the gio39
+		gpio_direction_output( ADV7611_POWERON, 1 );//supply the 5v for adv7611	
 		device_lena_air_id = LENA_AIR;
 		printk("EVM: LENA AIR device!\n");
 	}
