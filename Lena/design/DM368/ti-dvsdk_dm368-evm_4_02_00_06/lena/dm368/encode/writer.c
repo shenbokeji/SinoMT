@@ -112,11 +112,13 @@ Void *writerThrFxn(Void *arg)
         if (!envp->writeDisabled) {
             /* Store the encoded frame to disk */
             if (Buffer_getNumBytesUsed(hOutBuf)) {
+#if (~WRITE_YUV_FILE)		
                 if (fwrite(Buffer_getUserPtr(hOutBuf),
                        Buffer_getNumBytesUsed(hOutBuf), 1, outFile) != 1) {
                     ERR("writerThrFxn:Error writing the encoded data to video file\n");
                     cleanup(THREAD_FAILURE);
                 }
+#endif				
             }
             else {
                 printf("writerThrFxn:Warning, writer received 0 byte encoded frame\n");

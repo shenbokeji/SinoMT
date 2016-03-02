@@ -187,7 +187,11 @@ Void *captureThrFxn(Void *arg)
     ColorSpace_Type       colorSpace = ColorSpace_YUV420PSEMI;
     Int                   bufIdx;
     Int                   numCapBufs;
-
+#if WRITE_YUV_FILE
+	FILE			   *outFile 		= NULL;
+	/* Open the output video file */
+	outFile = fopen( "video.yuv", "wb");
+#endif  
     /* Create capture device driver instance */
     cAttrs.numBufs = NUM_CAPTURE_BUFS;
     cAttrs.videoInput = envp->videoInput;
@@ -195,7 +199,7 @@ Void *captureThrFxn(Void *arg)
     cAttrs.colorSpace = colorSpace;
 
     videoStd = envp->videoStd;
-
+	static int iCount = 0;
     /* We only 720P and 1080P input */
     if (videoStd != VideoStd_1080I_60 && videoStd != VideoStd_1080P_30 
         && videoStd != VideoStd_720P_60 && videoStd != VideoStd_720P_50 &&
@@ -362,14 +366,28 @@ Void *captureThrFxn(Void *arg)
     Rendezvous_meet(envp->hRendezvousInit);
 
     while (!gblGetQuit()) {
+		
         /* Pause processing? */
         Pause_test(envp->hPauseProcess);
-
+		
         /* Capture a frame */
         if (Capture_get(hCapture, &hCapBuf) < 0) {
             ERR("Failed to get capture buffer\n");
             cleanup(THREAD_FAILURE);
         }
+#if WRITE_YUV_FILE
+
+		/* Store the frame to disk for debug sample YUV raw data*/
+		if( iCount < 2)
+		{
+			if (fwrite(Buffer_getUserPtr(hCapBuf),
+            	Buffer_getNumBytesUsed(hCapBuf), 1, outFile) != 1) {
+               	ERR("captureThrFxn:Error writing the raw data to video file\n");
+               cleanup(THREAD_FAILURE);
+        	}
+			iCount++;
+		}
+#endif        		
 
         /* Get a buffer from the display device */
         if ((!envp->previewDisabled) && (Display_get(hDisplay, &hDisBuf) < 0)) {
@@ -402,7 +420,6 @@ Void *captureThrFxn(Void *arg)
                 cleanup(THREAD_FAILURE);
             }
         }
-
         if (envp->previewDisabled) {
             /* Return the processed buffer to the capture driver */
             if (Capture_put(hCapture, hDstBuf) < 0) {
@@ -417,7 +434,7 @@ Void *captureThrFxn(Void *arg)
                 cleanup(THREAD_FAILURE);
             }
         }
-
+		
         /* Increment statistics for the user interface */
         gblIncFrames();
 
@@ -436,7 +453,12 @@ cleanup:
     if (hDisplay) {
         Display_delete(hDisplay);
     }
-
+#if WRITE_YUV_FILE
+    /* Clean up the thread before exiting */
+    if (outFile) {
+        fclose(outFile);
+    }
+#endif  
     if (hCapture) {
         Capture_delete(hCapture);
     }

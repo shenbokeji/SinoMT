@@ -48,7 +48,7 @@ typedef struct Args {
 
 
 #define DEFAULT_ARGS\
-    { VideoStd_1080I_30,\
+    { VideoStd_1080I_60,\
       "1080P 60Hz",\
       Capture_Input_COMPONENT,\
       "1080p.264",\
@@ -58,7 +58,7 @@ typedef struct Args {
       20000000,\
       "20000000M",\
       FALSE,\
-      3,\
+      2,\
       FALSE,\
       TRUE,\
       FALSE}

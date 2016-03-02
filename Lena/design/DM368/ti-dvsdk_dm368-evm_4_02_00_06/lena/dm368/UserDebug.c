@@ -991,11 +991,10 @@ int rdsysreg( unsigned int uiStartAddr, const int iNum )
 	unsigned int uiOffsetAddr;
 	unsigned int uiMapAddr;
 
-	uibool = ( NULL == uiStartAddr ) || ( ( uiStartAddr & 3 )!= 0 )  || ( iNum > 64 );
+	uibool = ( ( NULL == uiStartAddr ) || ( ( uiStartAddr & 3 )!= 0 ) );
 	if( uibool )
 	{
 		printf( "rdsysreg 0xstartaddr,0xoffsetaddr,number\n" );
-		printf( "** we only support read 32*4byte everytime **\n" );
 		printf( "** address must be multiple of 4           **\n" );
 		return LENA_FALSE;
 	}

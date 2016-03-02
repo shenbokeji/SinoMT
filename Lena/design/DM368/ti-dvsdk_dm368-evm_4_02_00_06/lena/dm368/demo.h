@@ -57,7 +57,11 @@
 #define THREAD_FAILURE      (Void *) -1
 
 /* The input buffer height alignment restriction imposed by codecs */
-#define CODECHEIGHTALIGN       16
+#define CODECHEIGHTALIGN       (16)
+
+#define WRITE_YUV_FILE (0)//debug for wirte yuv file flag
+
+
 
 typedef struct Codec {
     /* String name of codec for CE to locate it */

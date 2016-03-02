@@ -64,7 +64,8 @@ int InitGroundVideoProcess( Args *args )
     Dmai_clear(displayEnv);
     Dmai_clear(videoEnv);
     Dmai_clear(ctrlEnv);
-    args->videoDecoder = &engine->videoDecoders[1];//h.264 decoder
+   args->videoDecoder = &engine->videoDecoders[1];//h.264 decoder
+    //args->videoDecoder = &engine->videoDecoders[0];//mpeg4 decoder
     printf( "args->videoDecoder->codecName = %s\n", args->videoDecoder->codecName );
 
 

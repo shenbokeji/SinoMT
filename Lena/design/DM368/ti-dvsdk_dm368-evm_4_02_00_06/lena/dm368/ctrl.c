@@ -198,8 +198,8 @@ static Void drawDynamicData(Engine_Handle hEngine, Cpu_Handle hCpu,
     sprintf(tmpString, "%d kbps", videoKbps);
     UI_updateValue(hUI, UI_Value_VideoKbps, tmpString);
 
-    sprintf(tmpString, "%d kbps", soundKbps);
-    UI_updateValue(hUI, UI_Value_SoundKbps, tmpString);
+    //sprintf(tmpString, "%d kbps", soundKbps);
+    //UI_updateValue(hUI, UI_Value_SoundKbps, tmpString);
 
     UI_update(hUI);
 }
