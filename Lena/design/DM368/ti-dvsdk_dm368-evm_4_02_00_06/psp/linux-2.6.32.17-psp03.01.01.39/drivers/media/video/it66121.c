@@ -353,17 +353,6 @@ int HDMITX_SetI2C_Byte(BYTE Reg,BYTE Mask,BYTE Value)
     return it66121_write(Reg,Temp);
 }
 
-void it66121_reset(void)
-{
-	//apply 5V 
-	__raw_writel(0x00FC0001,IO_ADDRESS(0x01c40000));
-	//gpio_request(103, "IT66121_POWER_GPIO");
-	//gpio_direction_output(103, 1);
-	__raw_writel(0xFFFFFF7F,IO_ADDRESS(0x01c67088));
-	__raw_writel(0x80,IO_ADDRESS(0x01c6708C));
-	return;
-
-}
 static int it66121_device_init(void);
 
 static ssize_t it66121_open(struct inode * indoe, struct file * file)
@@ -2348,8 +2337,6 @@ static int hdmi_edid_parse_dtd(unsigned char *block, struct fb_videomode *mode)
 	mode->xres = H_ACTIVE;
 	mode->yres = V_ACTIVE;
 	mode->pixclock = PIXEL_CLOCK;
-//	mode->pixclock /= 1000;
-//	mode->pixclock = KHZ2PICOS(mode->pixclock);
 	mode->right_margin = H_SYNC_OFFSET;
 	mode->left_margin = (H_ACTIVE + H_BLANKING) -
 		(H_ACTIVE + H_SYNC_OFFSET + H_SYNC_WIDTH);
@@ -2524,105 +2511,10 @@ static int hdmi_edid_get_cea_svd(unsigned char *buf, struct hdmi_edid *pedid)
 		hdmi_add_vic(vic, &pedid->modelist);
 	}
 	
-//	struct list_head *pos;
-//	struct display_modelist *modelist;
-//
-//	list_for_each(pos, &pedid->modelist) {
-//		modelist = list_entry(pos, struct display_modelist, list);
-//		printk("%s vic %d\n", __FUNCTION__, modelist->vic);
-//	}	
-	return 0;
-}
-#if 0
-// Parse CEA Short Audio Descriptor
-static int hdmi_edid_parse_cea_sad(unsigned char *buf, struct hdmi_edid *pedid)
-{
-	int i, count;
-	
-	count = buf[0] & 0x1F;
-	pedid->audio = kmalloc((count/3)*sizeof(struct hdmi_audio), GFP_KERNEL);
-	if(pedid->audio == NULL)
-		return E_HDMI_EDID_NOMEMORY;
-
-	pedid->audio_num = count/3;
-	for(i = 0; i < pedid->audio_num; i++)
-	{
-		pedid->audio[i].type = (buf[1 + i*3] >> 3) & 0x0F;
-		pedid->audio[i].channel = (buf[1 + i*3] & 0x07) + 1;
-		pedid->audio[i].rate = buf[1 + i*3 + 1];
-		if(pedid->audio[i].type == HDMI_AUDIO_LPCM)//LPCM 
-		{
-			pedid->audio[i].word_length = buf[1 + i*3 + 2];
-		}
-//		printk("[EDID-CEA] type %d channel %d rate %d word length %d\n", 
-//			pedid->audio[i].type, pedid->audio[i].channel, pedid->audio[i].rate, pedid->audio[i].word_length);
-	}
-	return E_HDMI_EDID_SUCCESS;
-}
-
-static int hdmi_edid_parse_3dinfo(unsigned char *hdmi_edid_parse_3dinfobuf, struct list_head *head)
-{
-	int i, j, len = 0, format_3d, vic_mask;
-	unsigned char offset = 2, vic_2d, structure_3d;
-	struct list_head *pos;
-	struct display_modelist *modelist;
-	
-	if(buf[1] & 0xF0) {
-		len = (buf[1] & 0xF0) >> 4;
-		for(i = 0; i < len; i++) {
-			hdmi_add_vic( (buf[offset++] | HDMI_VIDEO_EXT), head);
-		}
-	}
-	
-	if(buf[0] & 0x80) {
-		//3d supported
-		len += (buf[0] & 0x0F) + 2;
-		if( ( (buf[0] & 0x60) == 0x40) || ( (buf[0] & 0x60) == 0x20) ) {
-			format_3d = buf[offset++] << 8;
-			format_3d |= buf[offset++];
-		}
-		if( (buf[0] & 0x60) == 0x40)
-			vic_mask = 0xFFFF;
-		else {
-			vic_mask  = buf[offset++] << 8;
-			vic_mask |= buf[offset++];
-		}
-
-		for(i = 0; i < 16; i++)
-		{
-			if(vic_mask & (1 << i)) {
-				j = 0;
-				for (pos = (head)->next; pos != (head); pos = pos->next) {
-					j++;
-					if(j == i) {
-						modelist = list_entry(pos, struct display_modelist, list);
-						modelist->format_3d = format_3d;
-						break;
-					}
-				}
-			}
-		}
-		while(offset < len)
-		{
-			vic_2d = (buf[offset] & 0xF0) >> 4;
-			structure_3d = (buf[offset++] & 0x0F);
-			j = 0;
-			for (pos = (head)->next; pos != (head); pos = pos->next) {
-				j++;
-				if(j == vic_2d) {
-					modelist = list_entry(pos, struct display_modelist, list);
-					modelist->format_3d = format_3d;
-					if(structure_3d & 0x80)
-					modelist->detail_3d = (buf[offset++] & 0xF0) >> 4;
-					break;
-				}
-			}
-		}
-	}
 	
 	return 0;
 }
-#endif
+
 
 // Parse CEA 861 Serial Extension.
 static int hdmi_edid_parse_extensions_cea(unsigned char *buf, struct hdmi_edid *pedid)
@@ -2642,12 +2534,11 @@ static int hdmi_edid_parse_extensions_cea(unsigned char *buf, struct hdmi_edid *
 	}
 	
 	ddc_offset = buf[2];
-//	underscan_support = (buf[3] >> 7) & 0x01;
-//	baseaudio_support = (buf[3] >> 6) & 0x01;
+
 	pedid->ycbcr444 = (buf[3] >> 5) & 0x01;
 	pedid->ycbcr422 = (buf[3] >> 4) & 0x01;
 	native_dtd_num = buf[3] & 0x0F;
-//	hdmi_edid_debug("[EDID-CEA] ddc_offset %d underscan_support %d baseaudio_support %d yuv_support %d native_dtd_num %d\n", ddc_offset, underscan_support, baseaudio_support, yuv_support, native_dtd_num);
+
 	// Parse data block
 	while(cur_offset < ddc_offset)
 	{
@@ -3045,8 +2936,6 @@ static int it66121_device_init(void)
 
 	unsigned char VendorID0, VendorID1, DeviceID0, DeviceID1;
 
-	it66121_reset();
-	
 	Switch_HDMITX_Bank(0);
 	VendorID0 = it66121_read(REG_TX_VENDOR_ID0);
 	VendorID1 = it66121_read(REG_TX_VENDOR_ID1);

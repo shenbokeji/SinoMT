@@ -154,7 +154,7 @@
 #define CONFIG_UNI_SLLD
 #define CONFIG_CMD_SF
 #define CONFIG_CMD_SPI
-#define CONFIG_SF_DEFAULT_SPEED	(48000000)
+#define CONFIG_SF_DEFAULT_SPEED	(40000000)
 #define CONFIG_JFFS2_IN_SPI_FLASH
 #endif
 
@@ -217,14 +217,18 @@
 
 
 #define CONFIG_BOOTDELAY	3
-#define CONFIG_BOOTCOMMAND	"sf probe 0:0 42500000; sf read 0x80700000 0x500000 0x180000; bootm 0x80700000"
+#define CONFIG_BOOTCOMMAND	"loadfpga;sf read 0x86000000 0x300000 0x1100000; bootm 0x86000000"
+//#define CONFIG_BOOTCOMMAND	"sf probe 0:0 4000000; sf read 0x84000000 0xA00000 0x1100000; bootm 0x84000000"
 #define CONFIG_BOOTARGS \
-		"console=ttyS0,115200n8 rw rdinit=/sbin/init mem=64M" 
-
+		"console=ttyS0,115200n8 rw rdinit=/sbin/init mem=60M" 
+		
+//#define CONFIG_BOOTARGS \
+ 	//"console=ttyS0,115200n8 rw rdinit=/sbin/init mem=60M dm365_imp.oper_mode=0"
 
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_VERSION_VARIABLE
 #define CONFIG_TIMESTAMP
+#define CONFIG_INITRD_TAG
 
 /* U-Boot memory configuration */
 #define CONFIG_STACKSIZE		(256 << 10)	/* 256 KiB */

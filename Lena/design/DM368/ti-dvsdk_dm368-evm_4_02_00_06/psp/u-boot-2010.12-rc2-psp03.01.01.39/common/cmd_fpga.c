@@ -474,6 +474,68 @@ U_BOOT_CMD(
 	"updateuboot"
 );
 
+/*----------------------------------------------------------------------------
+ * name 		: do_uImage_load
+ * function 	: load uImage from FLASH,and bootm 
+ * input		: none
+ * author	version 	date		note
+ * feller	1.0 	20160224
+ *----------------------------------------------------------------------------
+*/
 
+int do_uImage_load( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	printf( "*****uImage size can not bigger than 0xb00000 byte*****\n");
+	run_command("sf probe 0:0 40000000",0);
+	udelay(COMMAND_DELAY);
+	run_command("sf read 0x84000000 0x300000 0xb00000",0);
+	udelay(COMMAND_DELAY);
+	printf("Read uImage from FLASH over\n");
+	run_command("bootm 0x84000000",0);
+	udelay(COMMAND_DELAY);
+	return 0;
+}
+
+
+U_BOOT_CMD(
+	loaduImage,	1,	0,	do_uImage_load,
+	"loaduImage from FLASH",
+	"loaduImage"
+);
+
+/*----------------------------------------------------------------------------
+ * name 		: do_uImage_update
+ * function 	: update uImage from PC,and bootm 
+ * input		: none
+ * author	version 	date		note
+ * feller	1.0 	20160224
+ *----------------------------------------------------------------------------
+*/
+	
+int do_uImage_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	printf( "*****uImage size can not bigger than 0xb00000 byte*****\n");
+	run_command("sf probe 0:0 40000000",0);
+	udelay(COMMAND_DELAY);
+	run_command("sf erase 0x300000 0xb00000",0);
+	udelay(COMMAND_DELAY);
+	run_command("loady 0x84000000",0);
+	udelay(COMMAND_DELAY);
+	run_command("sf write 0x84000000 0x300000 0xb00000",0);
+	udelay(COMMAND_DELAY);
+	run_command("sf read 0x86000000 0x300000 0xb00000",0);
+	udelay(COMMAND_DELAY);
+	run_command("cmp.b 0x86000000 0x84000000 0xb00000",0);	
+	udelay(COMMAND_DELAY);
+	
+	printf("please check the same byte must be %d\n, meaning uImage write into SPI FLASH OK\n", 0xb00000);
+	
+	return 0;
+}
+U_BOOT_CMD(
+	updateuImage,	1,	0,	do_uImage_update,
+	"update uImage from PC",
+	"updateuImage"
+);
 
 

@@ -160,11 +160,11 @@ void adv7611_720P_1080i(void)
 {
 	//adv7611_write(0x98, 0xFF, 0x80); // I2C reset
 	adv7611_write(0x98, 0x01, 0x06); // Prim_Mode =110b HDMI-GR	60 Hz
-	adv7611_write(0x98, 0x02, 0xF5); // Auto CSC, YCrCb out, Set op_656 bit
+	adv7611_write(0x98, 0x02, 0xF0); // Auto CSC, YCrCb out
 	//adv7611_write(0x98, 0x03, 0x40); // 24 bit SDR 444 Mode 0
 	adv7611_write(0x98, 0x03, 0x80); // 16-bit 4:2:2 SDR mode 0 
 	//adv7611_write(0x98, 0x04, 0x80); // 16-bit 4:2:2 SDR mode 0 
-	adv7611_write(0x98, 0x05, 0x28); // AV Codes Off
+	adv7611_write(0x98, 0x05, 0x38); // AV Codes Off
 	adv7611_write(0x98, 0x06, 0xA6); // Invert VS,HS pins
 	adv7611_write(0x98, 0x0B, 0x44); // Power up part
 	adv7611_write(0x98, 0x0C, 0x42); // Power up part
@@ -533,7 +533,7 @@ void adv7611_edid_8_bit(void)
 	adv7611_write(0x6C, 0x80, 0x02); // 
 	adv7611_write(0x6C, 0x81, 0x03); // 
 	adv7611_write(0x6C, 0x82, 0x34); // 
-	adv7611_write(0x6C, 0x83, 0x71); // 
+	adv7611_write(0x6C, 0x83, 0x51); // YUV422,no YUV444
 	adv7611_write(0x6C, 0x84, 0x4D); // 
 	adv7611_write(0x6C, 0x85, 0x82); // 
 	adv7611_write(0x6C, 0x86, 0x05); // 
@@ -657,7 +657,7 @@ void adv7611_edid_8_bit(void)
 	adv7611_write(0x6C, 0xFC, 0x00); // 
 	adv7611_write(0x6C, 0xFD, 0x00); // 
 	adv7611_write(0x6C, 0xFE, 0x00); // 
-	adv7611_write(0x6C, 0xFF, 0xDA); // 
+	adv7611_write(0x6C, 0xFF, 0xBA); // 
 	adv7611_write(0x64, 0x77, 0x00); // Set the Most Significant Bit of the SPA location to 0
 	adv7611_write(0x64, 0x52, 0x20); // Set the SPA for port B.
 	adv7611_write(0x64, 0x53, 0x00); // Set the SPA for port B.
@@ -999,11 +999,20 @@ static int adv7611_g_fmt_cap(struct v4l2_subdev *sd, struct v4l2_format *f)
 	value <<= 8;
 	value += adv7611_read(0x68, 0x0A);	
 	if(value == 0x1FFF) return -ENODEV;
-	if(0x20==(adv7611_read(0x68, 0x0B)&0x20)) value <<= 1;
+
+	if(0x20==(adv7611_read(0x68, 0x0B)&0x20)) 
+	{	
+		value <<= 1;
+		pix->field		= V4L2_FIELD_INTERLACED;
+	}else
+	{
+		pix->field		= V4L2_FIELD_NONE;
+	}
 	pix->height		= value;
 	
 	pix->pixelformat	= V4L2_PIX_FMT_YUYV;
-	pix->field		= V4L2_FIELD_NONE;
+
+
 	pix->colorspace		= V4L2_COLORSPACE_JPEG;	
 	decoder->pix.bytesperline = pix->width * 2;
 
