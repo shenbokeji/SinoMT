@@ -429,7 +429,7 @@ U_BOOT_CMD(
 
 int do_fpga_load( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	run_command("sf probe 0:0 40000000",0);
+	run_command("sf probe 0:0 42500000",0);
 	udelay(COMMAND_DELAY);
 	run_command("sf read 0x82000000 0x1500000 0x6b2190",0);
 	udelay(COMMAND_DELAY);
@@ -528,7 +528,7 @@ int do_uImage_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	run_command("cmp.b 0x86000000 0x84000000 0xb00000",0);	
 	udelay(COMMAND_DELAY);
 	
-	printf("please check the same byte must be %d\n, meaning uImage write into SPI FLASH OK\n", 0xb00000);
+	printf("please check the same byte must be %d\n, meaning uImage write into SPI FLASH OK!!\n", 0xb00000);
 	
 	return 0;
 }

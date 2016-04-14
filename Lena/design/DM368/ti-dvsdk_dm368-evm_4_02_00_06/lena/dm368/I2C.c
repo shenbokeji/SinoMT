@@ -165,5 +165,61 @@
 	 fid = NULL;
 	 return iReturn;
  }
+  
+/*----------------------------------------------------------------------------
+* name	   : Get66121Sta
+* function : get IT66121 status
+* input    : none
+* author   version	   date 	   note
+* feller   1.0	   20160331 	 
+*----------------------------------------------------------------------------
+*/
+void Get66121Sta( void )
+{
+	unsigned int uiAddrTmp = IT66121_STATUS_ADDR;
+	int iReturn;
+	unsigned char ucRdValue;
+	unsigned char ucValue[4];
+	iReturn = GetIT66121Reg( uiAddrTmp, &ucRdValue );
+	printf( "addr=%#X	value=%#X\n", uiAddrTmp, ucRdValue );
+	ucValue[0] =	ucRdValue & 0x80;
+	printf( "HDMI interrupt is %s\n", ucValue[0] ? "active": "non active" );  
+	ucValue[1] =	ucRdValue & 0x40;
+	printf( "HDMI hot plug is %s\n", ucValue[1] ? "plug on": "plug off" );	  
+	ucValue[2] =	ucRdValue & 0x10;
+	printf( "HDMI video input  is %s\n", ucValue[2] ? "stable": "unstable" ); 
+	ucValue[3] =	ucRdValue & 0x01;
+	printf( "HDMI make interrupt clear %s\n", ucValue[3] ? "active": "disable" ); 		  
+	return ;
+}
+  
+/*----------------------------------------------------------------------------
+* name	   : Get7611Sta
+* function : get adv7611 status
+* input    : none
+* author   version	   date 	   note
+* feller   1.0	   20160331 	 
+*----------------------------------------------------------------------------
+*/
+void Get7611Sta( void )
+{
+  unsigned int uiAddrTmp = ADV611_STATUS_ADDR;
+  int iReturn;
+  unsigned char ucRdValue = 0;
+  unsigned char ucValue[5];
+  iReturn = GetADV7611Reg( uiAddrTmp, &ucRdValue );
+  
+  printf( "addr=%#X	value=%#X\n", uiAddrTmp, ucRdValue );
+  ucValue[0] =	ucRdValue & 0x40;
+  printf( "HDMI TMDS PLL %s\n", ucValue[0] ? "lock": "not lock" );  
+  ucValue[1] =	ucRdValue & 0x10;
+  printf( "HDMI TMDS clock is %s\n", ucValue[1] ? "detect": "not detect" );	  
+  ucValue[2] =	ucRdValue & 0x2;
+  printf( "HDMI vertical sync parameters is %s\n", ucValue[2] ? "valid": "invalid" ); 
+  ucValue[3] =	ucRdValue & 0x01;
+  printf( "HDMI DE regeneration block %s\n", ucValue[3] ? "lock": "not lock" ); 
+ 
+  return ;
+}
 
 

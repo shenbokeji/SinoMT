@@ -30,5 +30,7 @@ extern Int GetIT66121Reg( const unsigned int uiAddr, unsigned char * const pusRd
 extern Int SetIT66121Reg( const unsigned int uiAddr, const unsigned char ucValue );
 extern Int GetADV7611Reg( const unsigned int uiAddr, unsigned char * const pusRdValue );
 extern Int SetADV7611Reg( const unsigned int uiAddr, const unsigned char ucValue );
+extern void Get66121Sta( void );
+extern void Get7611Sta( void );
 #endif /* __I2C_DEVICE_H */
 

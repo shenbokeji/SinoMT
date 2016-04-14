@@ -70,13 +70,20 @@
  * author	version		date		note
  * feller	1.0		20150928	create         
  ******************************************************************************/
- int ver( void )
+ void ver( void )
  {
 	unsigned int uiFlag = 0XFFFFFFFF;
- 	uiFlag = GetAirGroundStationFlag();
-
+	unsigned int uiAddr = 0X6FE;
+	int iReturn;
+	unsigned short usRdValue;
+	uiFlag = GetAirGroundStationFlag();
+	
 	printf( DSP_TIME"%s", uiFlag ? AIR_VERSION : GROUND_VERSION );
-	return LENA_OK;
+	
+	iReturn = GetFpgaReg( uiAddr, &usRdValue );
+	printf( "FPGA version : %#X\n", usRdValue  );
+	
+	return ;
  }
 /*****************************************************************************
 
@@ -111,7 +118,7 @@
  * feller	1.0		20151126      
  *----------------------------------------------------------------------------
 */
-int  reset( void )
+int  resetsystem( void )
 {
 	system("reboot");
 	return LENA_OK;
@@ -408,7 +415,7 @@ int sf( int number, int iflag )
 	const char *cvideofile;
 
 
-	cvideofile =  ( 0 == iflag ) ? SEND_VIDEO_FILE_384 : SEND_VIDEO_FILE_1080P;
+	cvideofile =  ( 0 == iflag ) ? SEND_VIDEO_FILE_384 : SEND_VIDEO_FILE;
 
 	printf( "send video file : %s\n", cvideofile );
 
@@ -424,7 +431,7 @@ int sf( int number, int iflag )
 	ilen = (int)fstatbuf.st_size;
 
 	uimaplen = TRANS_ODD2EVEN( ilen );// for odd length, must even
-
+	
 	//open the mem file 
 	fsenddev = open( MEM_FILENAME,O_RDWR | O_SYNC );
 
@@ -442,6 +449,9 @@ int sf( int number, int iflag )
                 MAP_SHARED,
                 fsenddev,
                 SEND_PHY_ADDR);
+	printf( "uimaplen = %d\n", uimaplen );
+	printf( "SEND_PHY_ADDR=%#X\n", SEND_PHY_ADDR );
+	
 	if( MAP_FAILED == ptrSend )
 	{
 		perror("mmap");
@@ -477,13 +487,13 @@ int sf( int number, int iflag )
 
 	tFPGADataTmp.source_addr = (unsigned int)SEND_PHY_ADDR;
 	tFPGADataTmp.byte_size = uimaplen;
-	if(1)
+	if(0)
 	{
-		tFPGADataTmp.tb_size = 2728;
+		tFPGADataTmp.tb_size = 2728;//TB3
 	}
 	else
 	{
-		tFPGADataTmp.tb_size = 16992;
+		tFPGADataTmp.tb_size = 16992;//TB6 
 	}
 	printf( "send start\n" );
 	for( uiLoop = 0; uiLoop < number; uiLoop++ )
@@ -507,7 +517,7 @@ int sf( int number, int iflag )
 } 
 /*----------------------------------------------------------------------------
  * name		: receivefile
- * function	: send local file to another side 
+ * function	: receive remote file from another side 
  * input 	: ilen :data length
  * author	version		date		note
  * feller	1.0		20151208      
@@ -526,7 +536,6 @@ int receivefile( const int ilen )
 
 	uirdlen = TRANS_ODD2EVEN( ilen );// for odd length, must even
 
-	printf( "receive over ,start write file\n" );
 	//open the mem device
 	receivedev = open( MEM_FILENAME,O_RDWR|O_NDELAY );
  	if( receivedev <= 0 )
@@ -566,7 +575,7 @@ int receivefile( const int ilen )
 	}
 	else
 	{
-		tFPGADataTmp.tb_size = 16992;//TB1 SIZE
+		tFPGADataTmp.tb_size = 16992;//TB6 SIZE
 	}	
 
 	{
@@ -617,6 +626,114 @@ void rf( int ilen )
     receivefile( ilen );
     return;
 }
+ 
+ /*----------------------------------------------------------------------------
+  * name	 : rf3
+  * function : receive remote file from another side ,
+  * input	 : iReqDatLen :data length
+  * author	 version	 date		 note
+  * feller	 1.0	 20160312	   this is for kernel return the data length
+  *----------------------------------------------------------------------------
+ */
+
+ void rf3( int iReqDatLen )
+ {
+	//int iLen = 0;//tmp for every time byte number
+	int iReceiveLen = 0;//receive data byte number
+	size_t uirdlen ;//even
+	int fidfpga;
+	int receivedev;
+	FILE *fid;
+	void *ptrrece;
+	tfpgadata tFPGADataTmp; 
+	unsigned int uiRet; 
+	if(0)
+	{
+		tFPGADataTmp.tb_size = 2728;//TB3 SIZE
+	}
+	else
+	{
+		tFPGADataTmp.tb_size = 16992;//TB6 SIZE
+	}	
+	//protect the kernel receive
+	if( iReqDatLen < tFPGADataTmp.tb_size )
+	{
+		iReqDatLen = tFPGADataTmp.tb_size;
+	}
+
+	uirdlen = iReqDatLen;
+	printf( "request receive file length %d\n", iReqDatLen );
+	//open the mem device
+	receivedev = open( MEM_FILENAME,O_RDWR|O_NDELAY );
+ 	if( receivedev <= 0 )
+	{
+		printf( MEM_FILENAME" ERROR:open failed !\n" );
+		return ;
+	}
+	ptrrece = mmap( NULL,
+                uirdlen,
+                PROT_READ|PROT_WRITE,
+                MAP_SHARED,
+                receivedev,
+                RECEIVE_PHY_ADDR);
+	if( MAP_FAILED == ptrrece )
+	{
+		close(receivedev);
+		receivedev = NULL;
+		return;
+	}
+
+	
+	//open the transfer channel
+	fidfpga = open( DEVICE_FPGA, O_RDONLY, 0 );
+
+	if( fidfpga < 0 )
+	{
+		printf( DEVICE_FPGA"ERROR:open failed !\n" );
+		return ;
+	}
+
+	tFPGADataTmp.dst_addr = (unsigned int)RECEIVE_PHY_ADDR;
+	tFPGADataTmp.byte_size = iReqDatLen;//kernel do not use this value	
+	printf( " tFPGADataTmp.tb_size = %d \n", tFPGADataTmp.tb_size );	
+	printf( " tFPGADataTmp.dst_addr = %#X \n", tFPGADataTmp.dst_addr );	
+	printf( " tFPGADataTmp.byte_size = %d \n", tFPGADataTmp.byte_size );	
+	while( iReceiveLen < iReqDatLen )
+	{
+		uiRet = ioctl( fidfpga, FPGA_DMA_RECV, &tFPGADataTmp );
+		printf( " tFPGADataTmp.byte_size = %d \n", tFPGADataTmp.byte_size );	
+		printf( " tFPGADataTmp.tb_size = %d \n", tFPGADataTmp.tb_size );	
+		printf( " tFPGADataTmp.dst_addr = %#X \n", tFPGADataTmp.dst_addr );			
+		iReceiveLen += tFPGADataTmp.byte_size;
+	}
+   	close( fidfpga );
+   	fid = NULL;	
+
+
+	fid = fopen( RECE_VIDEO_FILE, "wb"  );
+	if( (int)fid <= 0 )
+	{
+		printf( RECE_VIDEO_FILE"ERROR:open failed !\n" );
+		munmap( ptrrece,uirdlen ); 
+		close(receivedev);
+		receivedev = NULL;
+		return ;
+	}
+	
+	uiRet = fwrite( ptrrece, 1, iReceiveLen, fid );
+	if( uiRet != iReceiveLen )
+	{
+		printf( "write data %d byte ,expect data %d byte \n", uiRet,iReceiveLen );
+	}
+
+	fclose(fid);
+	fid = NULL;	
+	munmap( ptrrece,uirdlen ); 
+	close( receivedev );
+	receivedev = NULL;
+	printf( "receive over\n" );	
+	return;
+ }
 
  /*----------------------------------------------------------------------------
   * name	 : wr9363
@@ -708,13 +825,225 @@ void rf( int ilen )
  * feller	1.0		20150728	
  *----------------------------------------------------------------------------
 */
-int init9363( const int iAirorGround )
+int init9363( const int iFlag  )
 {
-    InitAD9363( iAirorGround );
+	if( iFlag != g_AirGround )
+	{
+		printf( "Are you sure want to init9363 %s ?\n", iFlag ? "AIR" : "GROUND"  );
+		return LENA_FALSE;
+	}
+    InitAD9363( g_AirGround );
     return LENA_OK;
 }
 
+/*--------------------------------------------------------------------------
+ * name	 : attshow
+ * function : attenuation value show
+ * input	 :none
+ * author	 version	 date		 note
+ * feller	 1.0	 20151223
+ *----------------------------------------------------------------------------
+*/
+int attshow( void )
+{
+	 unsigned char ucValue[4] = {0};
+	 float fvalue[2] = {0.0f};
+	 int iReturn;
+ 
+	 iReturn = GetAD9363Reg( 0x073, &ucValue[0] );
+	 iReturn = GetAD9363Reg( 0x074, &ucValue[1] );
+	 iReturn = GetAD9363Reg( 0x075, &ucValue[2] );
+	 iReturn = GetAD9363Reg( 0x076, &ucValue[3] );
+ 
+	 fvalue[0] = (float)( ( ucValue[1] << 8 ) | ucValue[0] ) * 0.25f;// LSB FOR 0.25dB
+	 fvalue[1] = (float)( ( ucValue[3] << 8 ) | ucValue[2] )* 0.25f;// LSB FOR 0.25dB
+ 
+	 printf( "TX 0 att :%f dB\n", fvalue[0] );
+	 printf( "TX 1 att :%f dB\n", fvalue[1] );
+	 return LENA_OK;
+}
+  int attshow2( void )
+  {
+	   unsigned char ucValue[4] = {0};
+	   float fvalue[2] = {0.0f};
+	   int iReturn;
+    	unsigned int uiAddr[2][4] = 
+	  	{ {0x109,0x10C,0,0},
+	  	{0x73,0x74,0x75,0x76} } ;
+	  unsigned int iGorA = -1;
+	  iGorA = g_AirGround; 
 
+	   iReturn = GetAD9363Reg( uiAddr[iGorA][0], &ucValue[0] );
+	   iReturn = GetAD9363Reg( uiAddr[iGorA][1], &ucValue[1] );
+	   iReturn = GetAD9363Reg( uiAddr[iGorA][2], &ucValue[2] );
+	   iReturn = GetAD9363Reg( uiAddr[iGorA][3], &ucValue[3] );
+   
+	   fvalue[0] = (float)( ( ucValue[1] << 8 ) | ucValue[0] ) * 0.25f;// LSB FOR 0.25dB
+	   fvalue[1] = (float)( ( ucValue[3] << 8 ) | ucValue[2] )* 0.25f;// LSB FOR 0.25dB
+   
+	   printf( "%s 0 att :%f dB\n", iGorA ? "TX": "RX", fvalue[0] );
+	   printf( "%s 1 att :%f dB\n", iGorA ? "TX": "RX", fvalue[1] );
+	   return LENA_OK;
+  }
+
+  /*--------------------------------------------------------------------------
+  * name	 : settxatt
+  * function : set tx attenuation
+  * intput	 : chan:channel num; 0:channel 0 ,1:channel 1; 2 :both channel
+		 value :attenuation value,0.25dB step, 0 is 0 dB
+  * author	 version	 date		 note
+  * feller	 1.0	 20151223
+  * note1	this function use some magic number ,you can find them is AD9363 datasheet
+  * note2	can not use float input parameter because of ushell:(
+  * note3	so we use 0.25/100dB unit for input parameter
+  *----------------------------------------------------------------------------
+ */
+ int settxatt( const unsigned int ichan, const int iattvalue )
+ {
+	 int iReturn;
+	 int itmp = 0;
+	 float ftmp;
+	 unsigned int uiAddrTmp[2];
+	 
+	 ftmp = (float)iattvalue / 100.0f;
+	 printf( "INFO: You want set the chan %d att :	%f dB\n", ichan, ftmp );
+	 
+	 if( AD9363_CHAN_INVALID(ichan) )
+	 {
+		 printf( "invalid channel number:  %d \n", ichan );  
+		 return LENA_FALSE;
+	 }
+ 
+	 if( ( iattvalue < 0 ) || ( iattvalue > 359*25 ) )// LSB FOR 0.25dB ,max register value 359
+	 {
+		 printf( "the tx att value should between 0 dB and 89.75 dB \n" );
+		 return LENA_FALSE;
+	 }
+ 
+	 iReturn = SetAD9363Reg( 0X014, 0X03 );
+ 
+	 itmp = (int)( iattvalue * 4 / 100 );// LSB FOR 0.25dB, debug command,excute speed is ignore, so we use "/"
+	 if( ichan < 2 )
+	 {
+		 uiAddrTmp[0] = ( 0 == ichan ) ? 0x73 : 0x75;
+		 uiAddrTmp[1] = ( 0 == ichan ) ? 0x74 : 0x76;
+ 
+		 iReturn = SetAD9363Reg( uiAddrTmp[0], (unsigned char)( itmp & 0XFF ) );
+		 iReturn = SetAD9363Reg( uiAddrTmp[1], (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
+ 
+	 }
+	 else
+	 {
+		 iReturn = SetAD9363Reg( 0x73, (unsigned char)( itmp & 0XFF ) );
+		 iReturn = SetAD9363Reg( 0x74, (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
+		 iReturn = SetAD9363Reg( 0x75, (unsigned char)( itmp & 0XFF ) );
+		 iReturn = SetAD9363Reg( 0x76, (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
+	 }
+	 iReturn = SetAD9363Reg( 0X014, 0X23 );
+	 iReturn = attshow();
+	 return iReturn;
+ }
+
+
+
+  /*--------------------------------------------------------------------------
+  * name	 : setRXatt
+  * function : set Rx attenuation
+  * intput	 : chan:channel num; 0:channel 0 ,1:channel 1; 2 :both channel
+		 value :attenuation value,0.25dB step, 0 is 0 dB
+  * author	 version	 date		 note
+  * feller	 1.0	 20160327
+  * note1	this function use some magic number ,you can find them is AD9363 datasheet
+  * note2	can not use float input parameter because of ushell:(
+  * note3	so we use 0.25/100dB unit for input parameter
+  *----------------------------------------------------------------------------
+ */
+ int setrxatt( const unsigned int ichan, const int iattvalue )
+ {
+	return LENA_OK;
+ }
+
+ /*--------------------------------------------------------------------------
+  * name  : rfshow
+  * function : RF carrier poistion show
+  * input	  :none
+  * author	  version	  date		  note
+  * feller	  1.0	  20160306
+  *----------------------------------------------------------------------------
+ */
+ int rfshow( void )
+ {
+	  unsigned char ucValue[5] = {0};
+	  unsigned int uiValue[2] = {0};
+	  float fvalue[3] = {0};
+	  int iReturn;
+  	  unsigned int uiAddr[2][5] = 
+	  	{ {0x231,0x232,0x233,0x234,0x235},
+	  	{0x271,0x272,0x273,0x274,0275} } ;
+	  unsigned int iGorA = -1;
+	  iGorA = g_AirGround;
+	  
+	 // for ( ii = 0; ii < 2; ii++ )
+	  {
+	  	iReturn = GetAD9363Reg( uiAddr[iGorA][0], &ucValue[0] );
+	  	iReturn = GetAD9363Reg( uiAddr[iGorA][1], &ucValue[1] );
+	  	iReturn = GetAD9363Reg( uiAddr[iGorA][2], &ucValue[2] );
+	  	iReturn = GetAD9363Reg( uiAddr[iGorA][3], &ucValue[3] );
+	  	iReturn = GetAD9363Reg( uiAddr[iGorA][4], &ucValue[4] );
+
+	 	uiValue[0] = (unsigned int)( ( (unsigned int)ucValue[1] << 8 ) | ucValue[0] );
+	  	uiValue[1] = (unsigned int)( ( (unsigned int)ucValue[4] << 16 ) | ( (unsigned int)ucValue[3] << 8 ) | ucValue[2] );
+
+		fvalue[0] = (float)uiValue[0] ;//integer
+	  	fvalue[1] = (float)uiValue[1]  / AD9363_FREF_FRACDIV_CONST;//frac
+
+	  	fvalue[2] =  AD9363_FREF / AD9363_LO_DIV * ( fvalue[1] + fvalue[0] ) ;
+  
+	  	printf( "%s RF point : %f KHz\n", 0 == iGorA ? "RX" : "TX", fvalue[2] );
+	  }
+	  return LENA_OK;
+ }
+ /*--------------------------------------------------------------------------
+   * name  : setrf
+   * function : set radio frequency point
+   * input	   :rf point, kHz
+   * author    version	   date 	   note
+   * feller    1.0	   20160327
+   *----------------------------------------------------------------------------
+  */
+  int setrf( const int irfpoint )
+  {
+	   unsigned char ucValue[5] = {0};
+	   int ivalue[2] = {0};
+	   int iReturn;
+   	   int iTmpValue = 0;
+	   unsigned int uiAddr[2][5] = 
+		 { {0x231,0x232,0x233,0x234,0x235},
+		 {0x271,0x272,0x273,0x274,0275} } ;
+	   unsigned int iGorA = -1;
+	   iGorA = g_AirGround;
+
+	   printf( "please make sure the unit of frequency is KHz %d \n", irfpoint );
+ 	   iTmpValue = irfpoint * AD9363_LO_DIV;
+	   ivalue[0] = iTmpValue / AD9363_FREF;//int value
+	   ivalue[1] = ( iTmpValue -  ivalue[0] * AD9363_FREF ) * (int)AD9363_FREF_FRACDIV_CONST ;//frac value
+
+	   ucValue[1] =  (unsigned char)( ivalue[0] >> 8 );
+	   ucValue[0] =  (unsigned char)( ivalue[0] & 0XFF );
+
+	   ucValue[4] = (unsigned char)( ivalue[1] >> 16 );
+	   ucValue[3] = (unsigned char)( ( ivalue[1] >> 8 ) & 0XFF );
+	   ucValue[2] = (unsigned char)( ivalue[1] & 0XFF );
+	
+	   iReturn = SetAD9363Reg( uiAddr[iGorA][2], ucValue[2] );
+	   iReturn = SetAD9363Reg( uiAddr[iGorA][3], ucValue[3] );
+	   iReturn = SetAD9363Reg( uiAddr[iGorA][4], ucValue[4] );
+ 	   iReturn = SetAD9363Reg( uiAddr[iGorA][1], ucValue[1] );
+	   iReturn = SetAD9363Reg( uiAddr[iGorA][0], ucValue[0] );
+   
+		printf( "%s RF point : %d KHz\n", 0 == iGorA ? "RX" : "TX", irfpoint );
+	   return LENA_OK;
+  }
 
  /*----------------------------------------------------------------------------
   * name	 : wr66121
@@ -786,6 +1115,21 @@ int init9363( const int iAirorGround )
 	return LENA_OK;
  }
 
+ /*----------------------------------------------------------------------------
+  * name	 : get66121sta
+  * function : get IT66121 status
+  * input	 : none
+  * author	 version	 date		 note
+  * feller	 1.0	 20160331	   
+  *----------------------------------------------------------------------------
+ */
+	 
+void get66121sta( void )
+{
+	Get66121Sta();
+
+	return;
+}
 
  /*----------------------------------------------------------------------------
   * name	: wr7611
@@ -837,6 +1181,21 @@ int init9363( const int iAirorGround )
   	}
 	return LENA_OK;
  }
+  /*----------------------------------------------------------------------------
+   * name	  : get7611sta
+   * function : get ADV7611 status
+   * input	  : none
+   * author   version	  date		  note
+   * feller   1.0	  20160402		
+   *----------------------------------------------------------------------------
+  */
+	  
+ void get7611sta( void )
+ {
+	 Get7611Sta();
+ 
+	 return;
+ }
 
  /*--------------------------------------------------------------------------
  * name		: getedid
@@ -858,118 +1217,36 @@ int getedid( int idevice )
 		printf( "1:IT66121, 2:adv7611,others ,no use\n" );
 		return LENA_OK;		
 	}
-	switch( idevice )
+	switch( g_AirGround )
 	{
-		case 1://read monitor EDID info from IT66121
+		case 0://read monitor EDID info from IT66121
 			for( ii = 0; ii < 8; ii++ )//256byte EDID info for HDMI,FIFO depth 32byte
 			{
 				iReturn = SetIT66121Reg( 0X12, itmp * ii );//set the register offset address
 				iReturn = SetIT66121Reg( 0X15, 0XF );//abort read EDID
 				iReturn = SetIT66121Reg( 0X15, 0X9 );//clear the EDID fifo
 				iReturn = SetIT66121Reg( 0X15, 0X3 );//start read EDID	
-				usleep(500);//this is must delay
+				usleep(50);//this is must delay
 				for( jj = 0; jj < itmp; jj++ )
 				{
 					iReturn = GetIT66121Reg( 0X17, &cArray[ ii * 32 + jj ] );
 				}
 			}
-			printf( "**********the EDID information read from IT66121********** \n" );
+			
 			iReturn = SetIT66121Reg( 0x12, 0 );//set the register offset address
 			break;
-		case 2:
+		case 1:
 			break;
+	
 		default:
 			printf( "getedid para,\n1:it66121, 2:adv7611,others ,no use\n" );
 			return LENA_OK;	
 	}
+	printf( "**the EDID information read from %s** \n",g_AirGround? "ADV7611":"IT66121" );
 	PrintfArray( &cArray[0], EDID_MAX_NUMBER );
 	return LENA_OK;		
 }
 
-
- /*--------------------------------------------------------------------------
- * name		: attshow
- * function	: attenuation value show
- * input 	:none
- * author	version		date		note
- * feller	1.0		20151223
- *----------------------------------------------------------------------------
-*/
-int attshow( void )
-{
-	unsigned char ucValue[4] = {0};
-	float fvalue[2] = {0.0f};
-	int iReturn;
-
-	iReturn = GetAD9363Reg( 0x073, &ucValue[0] );
-	iReturn = GetAD9363Reg( 0x074, &ucValue[1] );
-	iReturn = GetAD9363Reg( 0x075, &ucValue[2] );
-	iReturn = GetAD9363Reg( 0x076, &ucValue[3] );
-
-	fvalue[0] = (float)( ( ucValue[1] << 8 ) | ucValue[0] ) * 0.25f;// LSB FOR 0.25dB
- 	fvalue[1] = (float)( ( ucValue[3] << 8 ) | ucValue[2] )* 0.25f;// LSB FOR 0.25dB
-
-	printf( "TX 0 att :%f dB\n", fvalue[0] );
-	printf( "TX 1 att :%f dB\n", fvalue[1] );
-	return LENA_OK;
-}
- /*--------------------------------------------------------------------------
- * name		: settxatt
- * function	: set tx attenuation
- * intput 	: chan:channel num; 0:channel 0 ,1:channel 1; 2 :both channel
-		value :attenuation value,0.25dB step, 0 is 0 dB
- * author	version		date		note
- * feller	1.0		20151223
- * note1   this function use some magic number ,you can find them is AD9363 datasheet
- * note2   can not use float input parameter because of ushell:(
- * note3   so we use 0.25/100dB unit for input parameter
- *----------------------------------------------------------------------------
-*/
-int settxatt( const unsigned int ichan, const int iattvalue )
-{
-	int iReturn;
-	int itmp = 0;
-	float ftmp;
-	unsigned int uiAddrTmp[2];
-	
-	ftmp = (float)iattvalue / 100.0f;
-	printf( "INFO: You want set the chan %d att :  %f dB\n", ichan, ftmp );
-	
-	if( AD9363_CHAN_INVALID(ichan) )
-	{
-		printf( "invalid channel number:  %d \n", ichan );	
-		return LENA_FALSE;
-	}
-
-	if( ( iattvalue < 0 ) || ( iattvalue > 359*25 ) )// LSB FOR 0.25dB ,max register value 359
-	{
-		printf( "the tx att value should between 0 dB and 89.75 dB \n" );
-		return LENA_FALSE;
-	}
-
-	iReturn = SetAD9363Reg( 0X014, 0X03 );
-
-	itmp = (int)( iattvalue * 4 / 100 );// LSB FOR 0.25dB, debug command,excute speed is ignore, so we use "/"
-	if( ichan < 2 )
-	{
-		uiAddrTmp[0] = ( 0 == ichan ) ? 0x73 : 0x75;
-		uiAddrTmp[1] = ( 0 == ichan ) ? 0x74 : 0x76;
-
-		iReturn = SetAD9363Reg( uiAddrTmp[0], (unsigned char)( itmp & 0XFF ) );
-		iReturn = SetAD9363Reg( uiAddrTmp[1], (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
-
-	}
-	else
-	{
-		iReturn = SetAD9363Reg( 0x73, (unsigned char)( itmp & 0XFF ) );
-		iReturn = SetAD9363Reg( 0x74, (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
-		iReturn = SetAD9363Reg( 0x75, (unsigned char)( itmp & 0XFF ) );
-		iReturn = SetAD9363Reg( 0x76, (unsigned char)( ( itmp >> 8 ) & 0X1 ) );
-	}
-	iReturn = SetAD9363Reg( 0X014, 0X23 );
-	iReturn = attshow();
-	return iReturn;
-}
 
  /*--------------------------------------------------------------------------
 
@@ -1035,23 +1312,7 @@ int rdsysreg( unsigned int uiStartAddr, const int iNum )
 	printf( "Read physical register over\n" );
     return 0;
 }
-/*--------------------------------------------------------------------------
 
-
- * name		: rdsys
- * function	: read system register
- * intput 	: 
- * author	version		date		note
- * feller	1.0		20160116
- *----------------------------------------------------------------------------
-*/
-const unsigned int guiAddrLut[20] = { 0,0};
-int rdsys( const unsigned int uiFlag )
-
-{
-    
-    return 0;
-}
 
  /*--------------------------------------------------------------------------
  * name			: physta
@@ -1123,4 +1384,26 @@ int physta( const int iFlag )
 	return LENA_OK;
 }
 
+ /*--------------------------------------------------------------------------
+ * name			: led
+ * function		: light air or ground led
+ * intput 		: none 
+ * author	version		date		note
+ * feller	1.0		20160402
+ *----------------------------------------------------------------------------
+*/
+
+void led( const int iflag )
+{
+	int iStatus = 0;
+	if( 0 == iflag ) 
+	{
+		LedNormal( g_AirGround, &iStatus );
+	}
+	else
+	{
+		LedAlarm( g_AirGround, &iStatus );
+	}
+	return;
+}
 

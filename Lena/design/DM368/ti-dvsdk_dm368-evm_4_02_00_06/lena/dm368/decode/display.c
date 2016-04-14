@@ -184,7 +184,7 @@ Void *displayThrFxn(Void *arg)
             }
         }
 
-        if (envp->videoStd == VideoStd_720P_60) {
+        if ( ( VideoStd_720P_60 == envp->videoStd ) || ( VideoStd_1080I_30 == envp->videoStd)  ) {
             if (Time_delta(hTime, (UInt32*)&time) < 0) {
                 ERR("Failed to get timer delta\n");
                 cleanup(THREAD_FAILURE);

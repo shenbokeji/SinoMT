@@ -320,54 +320,72 @@ cleanup:
  * feller	1.0		20150728	create         
  ******************************************************************************/
 
+tSystemStartStatus gtSystemStartStatus;
+
 Int main(Int argc, Char *argv[])
 {
     Args args = DEFAULT_ARGS;
     Int status = EXIT_SUCCESS;	
+	unsigned int uiFlag = 0XFFFFFFFF;	
 
 	Int	iReturn;	
-	
+#if (!DEBUG_OR_VIDEO)	
 	iReturn = ushell_init();
+#endif
 	ver();
-    	printf("**********SinoMartin Ari_Station Encoder started.**********\n");
+    printf("**********SinoMartin Ari_Station Encoder started.**********\n");
 #if 0	
-    //Get the Air or Ground Station flag
-    GetAirGroundStationFlag();
-
-	
     /* Parse the arguments given to the app and set the app environment */    
     parseArgs(argc, argv, &args);
     /* Validate arguments */
     if (validateArgs(&args) == FAILURE) {
         cleanup(EXIT_FAILURE);
     }
-	
-
-    
-
-
+#endif
     /* Set the priority of this whole process to max (requires root) */
     setpriority(PRIO_PROCESS, 0, -20);
-    //mmap the physical address to virtual address
-    status = InitMmapAddress(  );
-    if( 0 != status )
-    {
-        ERR("******Encoder Failed InitMmapAddress******\n");
-        cleanup(status);
-    }
-    
-    //Initialize FPGA configuration and release reset 
-    InitFPGA( AIR_STATION );
-
+	InitStatus();
+	printf( "ResetFPGA\n" );
+	ResetFPGA();
     //Initialize AD9363 transiver and release reset
-    InitAD9363( AIR_STATION );
-    
-    //release the control of AD9363
+    InitAD9363( g_AirGround );
+	gtSystemStartStatus.iAD9363Status = 1;
+    InitFPGAReg( g_AirGround );
+    //Initialize FPGA configuration and release reset 
+    InitFPGA( g_AirGround );
+	gtSystemStartStatus.iFPGAStatus = 1;
+	//release the control of AD9363
 
+	 
+	// check sync
+	do
+	{
+		status = ReFreshAirInterface( g_AirGround );
+		if( LENA_OK != status ) 
+		{
+			LedAlarm( g_AirGround, &gtSystemStartStatus.iLEDStatus );
+			printf( "ReFreshAirInterface not ok" );
+		}
+	}while(LENA_OK != status);
+	gtSystemStartStatus.iAirInterfaceStatus = 1;
+	
+	//check video connect
+	do
+	{
+		status = CheckVideoConnect( g_AirGround );
+		if( LENA_OK != status ) 
+		{
+			printf( "CheckVideoConnect not ok" );
+			sleep(1);
+			LedAlarm( g_AirGround, &gtSystemStartStatus.iLEDStatus );
+		}	
+	}while(LENA_OK != status);
+	gtSystemStartStatus.iVideoStatus = 1;
+#if (DEBUG_OR_VIDEO)
 
-    //Initialize the air station video process,include capture/encode/write pthread
-#endif
     status = InitAirVideoProcess( &args );
+#endif
+	LedNormal( g_AirGround, &gtSystemStartStatus.iLEDStatus );
 
 	while(1)
 	{

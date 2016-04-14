@@ -82,7 +82,7 @@ Void *videoThrFxn(Void *arg)
     Bool                    localBufferAlloc = TRUE;
     BufferGfx_Dimensions    dim;
     Int32                   bufSize;
-
+	defaultDynParams.forceFrame = IVIDEO_IDR_FRAME;//test for all IDR
     /* Open the codec engine */
     hEngine = Engine_open(envp->engineName, NULL, NULL);
 
@@ -257,11 +257,34 @@ Void *videoThrFxn(Void *arg)
         dim.height = Dmai_roundUp(dim.height, CODECHEIGHTALIGN);
         BufferGfx_setDimensions(hCapBuf, &dim);
 
+	// Send a IDR FRAM per x frame
+	if( 0 == (frameCnt & 0XF) )
+	{
+		/* Encode the video buffer */
+		if (Venc1_process_IDR(hVe1, hCapBuf, hDstBuf) < 0) {
+			ERR("Failed to encode video buffer\n");
+			cleanup(THREAD_FAILURE);
+		}
+	}
+	else
+	{
+		/* Encode the video buffer */
+		if (Venc1_process(hVe1, hCapBuf, hDstBuf) < 0) {
+			ERR("Failed to encode video buffer\n");
+			cleanup(THREAD_FAILURE);
+		}
+	}
+
+
+
+		
+#if 0
         /* Encode the video buffer */
         if (Venc1_process(hVe1, hCapBuf, hDstBuf) < 0) {
             ERR("Failed to encode video buffer\n");
             cleanup(THREAD_FAILURE);
         }
+#endif
 
         /* Reset the dimensions to what they were originally */
         BufferGfx_resetDimensions(hCapBuf);

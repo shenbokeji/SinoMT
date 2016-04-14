@@ -5,7 +5,7 @@
 #
 # Version:	@(#)/etc/init.d/rcS  2.76  19-Apr-1999  miquels@cistron.nl
 #
-# set -x
+#set -x
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 runlevel=S
 prevlevel=N
@@ -18,19 +18,12 @@ mknod /dev/ad9363 c 10 224
 mknod /dev/davinci_gpio c 10 225
 mknod /dev/it66121 c 10 226
 mknod /dev/adv7611 c 10 227
-
-#make node for dm368 *.ko
-
-#if [ -x loadmodule-rc ]
-#then
-#  ./loadmodule-rc start
-#fi
+mknod /dev/davinci_pwm c 10 228
 
 
 #	Make sure proc is mounted
 #
 [ -d "/proc/1" ] || mount /proc
-
 #
 #	See if system needs to be setup. This is ONLY meant to
 #	be used for the initial setup after a fresh installation!
@@ -40,12 +33,10 @@ then
  /sbin/unconfigured.sh
 fi
 
-
 #
 #	Source defaults.
 #
 . /etc/default/rcS
-
 #
 #	Trap CTRL-C &c only in this shell so we can interrupt subprocesses.
 #
@@ -54,6 +45,12 @@ trap ":" INT QUIT TSTP
 #
 #	Call all parts in order.
 #
+
+#make node for dm368 *.ko
+
+/etc/init.d/loadmodule-rc start
+
+#/LENA.EXE &
 exec /etc/init.d/rc S
 
 #
@@ -69,6 +66,5 @@ if [ -x /sbin/setup.sh ]
 then
  /sbin/setup.sh
 fi
-
 
 

@@ -130,7 +130,7 @@ void InitAD9363( const int iAirorGround )
 	printf( "open: %s \n", cfile );
 	while( EOF != fscanf( fid, "%x,%x,%d", &str[0], &str[1], &str[2] ) )
 	{
-		printf( "%#05X,%#04X,%d\n", str[0], str[1], str[2] );
+		//printf( "%#05X,%#04X,%d\n", str[0], str[1], str[2] );
 		iReturn = SetAD9363Reg( (unsigned int)str[0], (unsigned char)str[1] );
 		usleep( str[2] );
 	}

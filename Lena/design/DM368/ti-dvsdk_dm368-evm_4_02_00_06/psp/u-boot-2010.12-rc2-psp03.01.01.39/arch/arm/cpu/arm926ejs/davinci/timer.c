@@ -61,7 +61,7 @@ static struct davinci_timer * const timer =
 
 #define TIMER_LOAD_VAL	0xffffffff
 
-#define TIM_CLK_DIV	16
+#define TIM_CLK_DIV	1
 
 int timer_init(void)
 {

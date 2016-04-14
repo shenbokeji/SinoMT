@@ -218,12 +218,9 @@
 
 #define CONFIG_BOOTDELAY	3
 #define CONFIG_BOOTCOMMAND	"loadfpga;sf read 0x86000000 0x300000 0x1100000; bootm 0x86000000"
-//#define CONFIG_BOOTCOMMAND	"sf probe 0:0 4000000; sf read 0x84000000 0xA00000 0x1100000; bootm 0x84000000"
-#define CONFIG_BOOTARGS \
-		"console=ttyS0,115200n8 rw rdinit=/sbin/init mem=60M" 
 		
-//#define CONFIG_BOOTARGS \
- 	//"console=ttyS0,115200n8 rw rdinit=/sbin/init mem=60M dm365_imp.oper_mode=0"
+#define CONFIG_BOOTARGS \
+ 	"console=ttyS0,115200n8 rw rdinit=/sbin/init mem=60M dm365_imp.oper_mode=0"
 
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_VERSION_VARIABLE

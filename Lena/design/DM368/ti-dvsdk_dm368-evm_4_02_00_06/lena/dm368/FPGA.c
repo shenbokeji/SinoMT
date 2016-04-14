@@ -103,51 +103,49 @@ int SetFpgaReg( const unsigned int uiAddr, const unsigned short usValue )
  * feller	1.0		20150729
  *----------------------------------------------------------------------------
 */
-void InitFPGAReg( void )
+void InitFPGAReg( const int iAirGround )
 {
-    // ground FPGA register init value
-    g_tFPGACfg[GROUND_STATION].FPGAReg[0].uiAddr = 0X620;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[0].uiValue = 0X0;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[1].uiAddr = 0X622;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[1].uiValue = 0X0;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[2].uiAddr = 0X624;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[2].uiValue = 0X0;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[3].uiAddr = 0X626;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[3].uiValue = 0X0;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[4].uiAddr = 0X628;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[4].uiValue = 0X1;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[5].uiAddr = 0X62A;
-    g_tFPGACfg[GROUND_STATION].FPGAReg[5].uiValue = 0X1;
-    g_tFPGACfg[GROUND_STATION].iValidLen  = 6;
+	if( 0 == iAirGround )
+	{
+    	// ground FPGA register init value
+    	g_tFPGACfg[GROUND_STATION].FPGAReg[0].uiAddr = 0X61E;
+    	g_tFPGACfg[GROUND_STATION].FPGAReg[0].uiValue = 0X23;
+    	g_tFPGACfg[GROUND_STATION].FPGAReg[1].uiAddr = 0X602;
+    	g_tFPGACfg[GROUND_STATION].FPGAReg[1].uiValue = 0X6;
+    	g_tFPGACfg[GROUND_STATION].FPGAReg[1].uiAddr = 0X674;
+    	g_tFPGACfg[GROUND_STATION].FPGAReg[1].uiValue = 0X1;		
+    	g_tFPGACfg[GROUND_STATION].iValidLen  = 2;
+			
+	}
+	else
+	{
+    	// air FPGA register init value
+    	g_tFPGACfg[AIR_STATION].FPGAReg[0].uiAddr = 0X620;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[0].uiValue = 0X1;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[1].uiAddr = 0X622;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[1].uiValue = 0X1;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[2].uiAddr = 0X624;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[2].uiValue = 0X1;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[3].uiAddr = 0X626;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[3].uiValue = 0X0;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[4].uiAddr = 0X628;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[4].uiValue = 0X0;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[5].uiAddr = 0X62A;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[5].uiValue = 0X0;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[6].uiAddr = 0X612;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[6].uiValue = 0X200;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[7].uiAddr = 0X614;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[7].uiValue = 0X200;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[8].uiAddr = 0X616;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[8].uiValue = 0X200;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[9].uiAddr = 0X618;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[9].uiValue = 0X200;
+    	g_tFPGACfg[AIR_STATION].FPGAReg[10].uiAddr = 0X61A;
+		//0:normal signal 1:single tone,2:constant;3:loopaback
+    	g_tFPGACfg[AIR_STATION].FPGAReg[10].uiValue = 0X0;
 
-
-    // air FPGA register init value
-    g_tFPGACfg[AIR_STATION].FPGAReg[0].uiAddr = 0X620;
-    g_tFPGACfg[AIR_STATION].FPGAReg[0].uiValue = 0X1;
-    g_tFPGACfg[AIR_STATION].FPGAReg[1].uiAddr = 0X622;
-    g_tFPGACfg[AIR_STATION].FPGAReg[1].uiValue = 0X0;
-    g_tFPGACfg[AIR_STATION].FPGAReg[2].uiAddr = 0X624;
-    g_tFPGACfg[AIR_STATION].FPGAReg[2].uiValue = 0X1;
-    g_tFPGACfg[AIR_STATION].FPGAReg[3].uiAddr = 0X626;
-    g_tFPGACfg[AIR_STATION].FPGAReg[3].uiValue = 0X0;
-    g_tFPGACfg[AIR_STATION].FPGAReg[4].uiAddr = 0X628;
-    g_tFPGACfg[AIR_STATION].FPGAReg[4].uiValue = 0X0;
-    g_tFPGACfg[AIR_STATION].FPGAReg[5].uiAddr = 0X62A;
-    g_tFPGACfg[AIR_STATION].FPGAReg[5].uiValue = 0X0;
-    g_tFPGACfg[AIR_STATION].FPGAReg[6].uiAddr = 0X612;
-    g_tFPGACfg[AIR_STATION].FPGAReg[6].uiValue = 0X200;
-    g_tFPGACfg[AIR_STATION].FPGAReg[7].uiAddr = 0X614;
-    g_tFPGACfg[AIR_STATION].FPGAReg[7].uiValue = 0X200;
-    g_tFPGACfg[AIR_STATION].FPGAReg[8].uiAddr = 0X616;
-    g_tFPGACfg[AIR_STATION].FPGAReg[8].uiValue = 0X200;
-    g_tFPGACfg[AIR_STATION].FPGAReg[9].uiAddr = 0X618;
-    g_tFPGACfg[AIR_STATION].FPGAReg[9].uiValue = 0X200;
-    g_tFPGACfg[AIR_STATION].FPGAReg[10].uiAddr = 0X61A;
-    g_tFPGACfg[AIR_STATION].FPGAReg[10].uiValue = 0X0;
-
-
-    g_tFPGACfg[AIR_STATION].iValidLen  = 11;
-	
+    	g_tFPGACfg[AIR_STATION].iValidLen  = 11;
+	}
     return ;
 }
 
@@ -155,7 +153,7 @@ void InitFPGAReg( void )
 
  /*--------------------------------------------------------------------------
  * name			: InitFPGA
- * function 		: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
+ * function 	: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
  * author	version		date		note
  * feller	1.0		20150729	
  *----------------------------------------------------------------------------
@@ -165,7 +163,8 @@ void InitFPGA( const int iAirorGround )
     int iLoop;
     unsigned int uiTmp;
     unsigned short usTmp;
-    Int iLen;
+    int iLen;
+	int iReturn;
 	
     iLen =  g_tFPGACfg[iAirorGround].iValidLen;
     printf( "iAirorGround=%d\n", iAirorGround );
@@ -173,12 +172,55 @@ void InitFPGA( const int iAirorGround )
     for( iLoop = 0; iLoop < iLen; iLoop++ )
     {
         uiTmp = g_tFPGACfg[iAirorGround].FPGAReg[iLoop].uiAddr;
-	usTmp = (UInt16)g_tFPGACfg[iAirorGround].FPGAReg[iLoop].uiValue;	
-	printf( "%#X,%#X\n", uiTmp, usTmp );
+		usTmp = (UInt16)g_tFPGACfg[iAirorGround].FPGAReg[iLoop].uiValue;	
+		printf( "%#X,%#X\n", uiTmp, usTmp );
         //configure FPGA by EMIF
-	SetFpgaReg( uiTmp, usTmp );
+		iReturn = SetFpgaReg( uiTmp, usTmp );
     }
-		
+	//iReturn = GetFpgaReg();
     return ;
 }
- 
+/*--------------------------------------------------------------------------
+ * name			: ReFreshFPGAAirInterface
+ * function 	: iAirorGround: air and ground station flag,0:ground 1:air,others:invalid
+ * author	version		date		note
+ * feller	1.0		20160402
+ *----------------------------------------------------------------------------
+*/
+int ReFreshAirInterface( const int iAirorGround )
+{
+	int iReturn = LENA_OK;
+	//unsigned int uiAddr = 0x61C;
+	unsigned int uiUEIDAddr = 0x6C8;
+	unsigned short usRdValue;
+	int icount = 0; 
+	//sync	
+	if( 0 == iAirorGround ) //for ground ,we should sync for air interface
+	{
+		iReturn = GetFpgaReg( uiUEIDAddr, &usRdValue );
+		if( 1 == usRdValue )
+		{
+			iReturn = LENA_OK;
+			printf( "Ground ReFreshAirInterface ok\n" );
+		}
+		else
+		{
+			iReturn = GetFpgaReg( 0X688, &usRdValue );
+			printf( "CRC =%#X\n", usRdValue );	
+			
+			ResetFPGA();
+			iReturn = SetFpgaReg( 0X61E, 0X23 );//refresh sync
+			iReturn = SetFpgaReg( 0X674, 0X1 );//refresh sync
+			usleep(20000);
+			iReturn = SetFpgaReg( 0X61C, 1 );//refresh sync			
+			printf( "Ground ReFreshAirInterface not ok\n" );
+			sleep(FPGA_SYN_FREASH_DELAY);
+			iReturn = LENA_FALSE;
+		}
+	}
+	else
+	{	
+		printf( "Air ReFreshAirInterface ok\n" );//by now ,do nothing 
+	}	
+	return iReturn;
+}

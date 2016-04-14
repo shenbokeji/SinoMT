@@ -48,17 +48,17 @@ typedef struct Args {
 
 
 #define DEFAULT_ARGS\
-    { VideoStd_1080I_60,\
-      "1080P 60Hz",\
+    { VideoStd_720P_60,\
+      "720P 60Hz",\
       Capture_Input_COMPONENT,\
-      "1080p.264",\
+      "720p.264",\
       &engine->videoEncoders[1],\
-      1920,\
-      1080,\
-      20000000,\
-      "20000000M",\
+      1280,\
+      720,\
+      6000000,\
+      "6000000bps",\
       FALSE,\
-      2,\
+      5,\
       FALSE,\
       TRUE,\
       FALSE}

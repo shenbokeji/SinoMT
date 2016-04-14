@@ -39,6 +39,9 @@ int board_init(void)
 unsigned short dummy=0;
  gd->bd->bi_arch_number = MACH_TYPE_DAVINCI_DM365_EVM;
  gd->bd->bi_boot_params = PHYS_SDRAM_1 + 0x100;
+
+ writel((readl(PINMUX3) & 0xFFF80000), PINMUX3);
+
  /* PINMUX4 for AIR GROUND FLAG to GPIO29  */
  writel((readl(PINMUX4) & 0xFFFFFFCF), PINMUX4);
  /* PINMUX4 for i2c  */

@@ -330,42 +330,74 @@ cleanup:
  * author	version		date		note
  * feller	1.0		20150731	create         
  ******************************************************************************/
+	 
+tSystemStartStatus gtSystemStartStatus;
 
 int main(int argc, char *argv[])
 {
     Args args   = DEFAULT_ARGS;
     Int  status = EXIT_SUCCESS;	
-    Int	iReturn;
-    unsigned int uiFlag = 0XFFFFFFFF;	
+    Int	iReturn;	
     ver();	
     printf("**********SinoMartin Ground_Station decoder started.**********\n");	
+	
+#if (!DEBUG_OR_VIDEO)
     iReturn = ushell_init();	
-	
-    //Get the Air or Ground Station flag
-    uiFlag = GetAirGroundStationFlag();    
-	
+#endif	 
+#if 0	
     /* Parse the arguments given to the app and set the app environment */    
     parseArgs(argc, argv, &args);
     /* Validate arguments */
     if ( FAILURE == validateArgs(&args) ) {
         return 0;
     }
-	
-
-    
-
+#endif	
     /* Set the priority of this whole process to max (requires root) */
     setpriority(PRIO_PROCESS, 0, -20);
-	
-    //Initialize AD9363 transiver and release reset, must before FPGA initialization
-    //InitAD9363( uiFlag );
 
+	InitStatus();
+	ResetFPGA();
+    //Initialize AD9363 transiver and release reset
+    InitAD9363( g_AirGround );
+
+    InitFPGAReg( g_AirGround );
     //Initialize FPGA configuration and release reset 
-    //InitFPGAReg();
-    //InitFPGA( uiFlag );
-   
+    InitFPGA( g_AirGround );
+
+	//release the control of AD9363
+
+	 
+	// check sync
+	do
+	{
+		status = ReFreshAirInterface( g_AirGround );
+		if( LENA_OK != status ) 
+		{
+			LedAlarm( g_AirGround, &gtSystemStartStatus.iLEDStatus );
+			sleep(1);
+			printf( "ReFreshAirInterface" );
+		}
+	}while(LENA_OK != status);
+
+	//check video connect
+	do
+	{
+		status = CheckVideoConnect( g_AirGround );
+		if( LENA_OK != status ) 
+		{
+			printf( "CheckVideoConnect" );
+			LedAlarm( g_AirGround, &gtSystemStartStatus.iLEDStatus );
+		}	
+	}while(LENA_OK != status);
+	
+
+	LedNormal( g_AirGround, &gtSystemStartStatus.iLEDStatus );
+ 
     //Initialize the air station video process,include capture/encode/write pthread
+#if DEBUG_OR_VIDEO 	
+
     status = InitGroundVideoProcess( &args );
+#endif
 	while(1)
 	{
 		sleep(1);
@@ -375,30 +407,4 @@ int main(int argc, char *argv[])
     return 0;
 }
  
- /*****************************************************************************
- * filename	: playvideo
- * function	: playvide test function
- * author	version		date		note
- * feller	1.0		20160116	create         
- ******************************************************************************/
-int playvideo( const unsigned int uinum )
-{
-	Args args	 = DEFAULT_ARGS;
-	Int  status = EXIT_SUCCESS; 
-	Int iReturn;
-	unsigned int uiFlag = 0XFFFFFFFF;	 
 
-	printf("**********SinoMartin Ground_Station decoder started.**********\n");
-		 
-	 
-	/* Set the priority of this whole process to max (requires root) */
-	setpriority(PRIO_PROCESS, 0, -20);
-		 
-	//Initialize the air station video process,include capture/encode/write pthread
-	//status = InitGroundVideoProcess( &args );
-	while( 0 )
-	{
-		sleep(1);
-	}
-    return 0;
-}

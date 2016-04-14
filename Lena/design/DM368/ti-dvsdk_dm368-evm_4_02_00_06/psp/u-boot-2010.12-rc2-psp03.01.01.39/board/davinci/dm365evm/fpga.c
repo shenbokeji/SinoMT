@@ -43,13 +43,24 @@ Altera_desc cyclone2 = {
 	NULL,
 	0
 };
-
-#define GPIO_RESET		9
-#define GPIO_DCLK		6
-#define GPIO_nSTATUS	8
-#define GPIO_CONF_DONE	11
-#define GPIO_nCONFIG	7
-#define GPIO_DATA0		10
+#define LENA_2016//this is the second version of LENA
+//#undef LENA_2016//this is the first version for LENA
+#ifndef LENA_2016
+#define GPIO_RESET	(9)
+#define GPIO_DCLK	(6)
+#define GPIO_nSTATUS	(8)
+#define GPIO_CONF_DONE	(11)
+#define GPIO_nCONFIG	(7)
+#define GPIO_DATA0	(10)
+#else
+#define GPIO_RESET	(9)
+#define GPIO_DCLK	(28)
+#define GPIO_nSTATUS	(8)
+#define GPIO_CONF_DONE	(11)
+#define GPIO_nCONFIG	(7)
+#define GPIO_DATA0	(27)
+#define GPIO_DATA0_BUG	(10)//hardware design bug, GPIO10 must be input
+#endif
 
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -64,10 +75,11 @@ int dm365_init_fpga(void)
 	fpga_add(fpga_altera, &cyclone2);
 
 	/* Configure PINMUX 3 to enable FPGA pins */
-	writel((readl(PINMUX3) & 0xFFFFF81F), PINMUX3);
-
+	writel( (readl(PINMUX3) & 0xFFFFF81F) , PINMUX3 );
+	writel( (readl(PINMUX4) & 0xFFFFFFF0) , PINMUX4 );
 	
-	writel(0x04222385, DAVINCI_ASYNC_EMIF_CNTRL_BASE+0x10);
+	//EMIF time config
+	writel(0x0c7669b5, DAVINCI_ASYNC_EMIF_CNTRL_BASE+0x10);
 
 	/* set up outputs */
 	gpio_direction_output(GPIO_DCLK,  0);
@@ -75,17 +87,14 @@ int dm365_init_fpga(void)
 	gpio_direction_output(GPIO_DATA0, 0);
 	gpio_direction_output(GPIO_RESET, 1);
 
-	/* NB omap_free_gpio() resets to an input, so we can't
-	 * free ie. nCONFIG, or else the FPGA would reset
-	 * Q: presumably gpio_free() has the same effect?
-	 */
-
 	/* set up inputs */
 	gpio_direction_input(GPIO_nSTATUS);
 #ifndef CONFIG_SYS_FPGA_DONT_USE_CONF_DONE
 	gpio_direction_input(GPIO_CONF_DONE);
 #endif
-
+#ifdef LENA_2016
+	gpio_direction_input(GPIO_DATA0_BUG);//for bug
+#endif	
 	fpga_config_fn(0, 1, 0);
 	udelay(60);
 
@@ -161,84 +170,149 @@ static inline int _write_fpga(u8 byte)
 
 	return 0;
 }
-#if 0
-int fpga_wr_fn(const void *buf, size_t len, int flush, int cookie)
-{
-	unsigned char *data = (unsigned char *) buf;
-	int i;
-	int headerlen = len - cyclone2.size;
+/**************************************************************************
+ 函数名称：fpga_wr_fn 
+ 功能描述：load fpga ,write gpio interface
+ 输入参数：
+ 返   回：
+ 
+**************************************************************************/
+#define FPGA_SET_DATA_ADDR (0x01C67018)
+#define FPGA_CLR_DATA_ADDR (0x01C6701C)
 
-	if (headerlen < 0)
-		return FPGA_FAIL;
-	else if (headerlen == sizeof(uint32_t)) {
-		const unsigned int fpgavers_len = 11; /* '0x' + 8 hex digits + \0 */
-		char fpgavers_str[fpgavers_len];
-		sprintf(fpgavers_str, "0x%08x",
-				be32_to_cpup((uint32_t*)data));
-		setenv("fpgavers", fpgavers_str);
-	}
+#ifdef LENA_2016
+#define  gpio_set_fpgadata(addr)  (*(volatile unsigned int *)(addr)=0x08000000)
+#define  gpio_set_fpgaclk(addr)  (*(volatile unsigned int *)(addr)=0x10000000)
 
-	fpga_debug("fpga_wr: buf %p / size %d\n", buf, len);
-	for (i = headerlen; i < len; i++)
-		_write_fpga(data[i]);
-	fpga_debug("-%s\n", __func__);
+#else
+#define  gpio_set_fpgadata(addr)  (*(volatile unsigned int *)(addr)=0x400)
+#define  gpio_set_fpgaclk(addr)  (*(volatile unsigned int *)(addr)=0x40)
 
-	return FPGA_SUCCESS;
-}
-#else 
-
+#endif
 int fpga_wr_fn(const void *buf, size_t len, int flush, int cookie)
 {
 			unsigned char *data = (unsigned char *) buf;
-			int i;
 			size_t bytecount = 0;
-			//int headerlen = len - cyclone2.size;
 
 		/* Load the data */
 		while (bytecount < len) {
-			unsigned char val=0;
-
+			unsigned char val = 0;
+			unsigned char valbit[8] = {0};
 			/* Altera detects an error if INIT goes low (active)
 			   while DONE is low (inactive) */
 
 			val = data [bytecount ++ ];
-			i = 8;
-			do {
-				#if 0
-				/* Deassert the clock */
-				(*fn->clk) (false, true, cookie);
-				CONFIG_FPGA_DELAY ();
-				/* Write data */
-				//(*fn->data) ((val & 0x01), true, cookie);
-				gpio_set_value(GPIO_DATA0, val & 0x01);
-				CONFIG_FPGA_DELAY ();
-				/* Assert the clock */
-				(*fn->clk) (true, true, cookie);
-				CONFIG_FPGA_DELAY ();
-				#else
-				/* Write data */
-				gpio_set_value(GPIO_DATA0, val & 0x01);
-				//udelay(1);
-					/* clock */
-				gpio_set_value(GPIO_DCLK, 1);
-				//udelay(1);
-				gpio_set_value(GPIO_DCLK, 0);
-				//udelay(1);		
+			valbit[0] = val & 0x01;
+			valbit[1] = val & 0x02;
+			valbit[2] = val & 0x04;
+			valbit[3] = val & 0x08;
+			valbit[4] = val & 0x10;
+			valbit[5] = val & 0x20;
+			valbit[6] = val & 0x40;
+			valbit[7] = val & 0x80;				
+			if( valbit[0] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);
+			if( valbit[1] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);
 
-				#endif
-				val >>= 1;
-				i --;
-			} while (i > 0);
+			if( valbit[2] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);
 
-#if 1
-			if (bytecount % (len / 40) == 0)
-				putc ('.');		/* let them know we are alive */
-#endif
+			if( valbit[3] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);				
+			if( valbit[4] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);
+			if( valbit[5] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);
+
+			if( valbit[6] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);
+
+			if( valbit[7] )
+			{
+				gpio_set_fpgadata( FPGA_SET_DATA_ADDR );
+			}
+			else
+			{
+				gpio_set_fpgadata( FPGA_CLR_DATA_ADDR );
+			}
+     		/* clock */;
+			gpio_set_fpgaclk(FPGA_SET_DATA_ADDR);
+    		gpio_set_fpgaclk(FPGA_CLR_DATA_ADDR);
+
+			//if ( 0 == ( bytecount & 0X7FFFF ) )
+				//putc ('.');		/* let them know we are alive */
+
 		}
 
 		return FPGA_SUCCESS;
 }
-#endif
+
 
 int dm365_reset_fpga(void)
 {

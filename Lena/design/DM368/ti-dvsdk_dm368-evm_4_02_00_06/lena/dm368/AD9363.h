@@ -32,6 +32,11 @@ typedef struct AD9363CfgStruct{
 #define DEVICE_AD9363 "/dev/ad9363"
 #define AD9363_REGVALUE_G_FILE "/usr/src/ad9363_regvalue_g.txt"
 #define AD9363_REGVALUE_A_FILE "/usr/src/ad9363_regvalue_a.txt"
+#define AD9363_LO_FRQ (2412000) //given desired lo frequency
+#define AD9363_FREF (30720<<1) //30720KHz
+#define AD9363_FREF_FRACDIV_CONST (8388593.0f) //0X7FFFF1,const value
+#define AD9363_LO_DIV (4)
+
 /*****************extern function declaration*****************/
 extern void InitAD9363( const int iAirorGround );
 extern int GetAD9363Reg( const unsigned int uiAddr, unsigned char * const pusRdValue );

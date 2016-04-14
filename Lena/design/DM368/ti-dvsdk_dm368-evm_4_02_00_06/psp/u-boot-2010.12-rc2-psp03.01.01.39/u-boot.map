@@ -1,0 +1,1363 @@
+Archive member included because of file (symbol)
+
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o)
+                              arch/arm/cpu/arm926ejs/davinci/libdavinci.o (__aeabi_uidiv)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divsi3.o)
+                              common/libcommon.o (__aeabi_idiv)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_lshrdi3.o)
+                              lib/libgeneric.o (__aeabi_llsr)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_ashldi3.o)
+                              lib/libgeneric.o (__aeabi_llsl)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_aeabi_uldivmod.o)
+                              arch/arm/cpu/arm926ejs/davinci/libdavinci.o (__aeabi_uldivmod)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_dvmd_lnx.o)
+                              /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o) (__aeabi_idiv0)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+                              /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_aeabi_uldivmod.o) (__gnu_uldivmod_helper)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+                              /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o) (__divdi3)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+                              /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o) (__udivdi3)
+/opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_clz.o)
+                              /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o) (__clz_tab)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+                0x00000000                . = 0x0
+                0x00000000                . = ALIGN (0x4)
+
+.text           0x80180000    0x1f420
+ arch/arm/cpu/arm926ejs/start.o(.text)
+ .text          0x80180000      0x420 arch/arm/cpu/arm926ejs/start.o
+                0x80180070                relocate_code
+                0x8018004c                IRQ_STACK_START_IN
+                0x80180000                _start
+                0x80180044                _bss_start_ofs
+                0x80180048                _bss_end_ofs
+                0x80180040                _TEXT_BASE
+ *(.text)
+ .text          0x80180420      0x390 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+                0x8018063c                __udelay
+                0x801805dc                reset_timer
+                0x801804d0                cpu_eth_init
+                0x80180670                get_tbclk
+                0x801805f0                get_timer
+                0x80180550                timer_init
+                0x80180678                lpsc_on
+                0x80180704                reset_cpu
+                0x801805a0                get_ticks
+                0x801806f4                davinci_enable_i2c
+                0x801806fc                davinci_enable_uart0
+                0x801804d8                print_cpuinfo
+ .text          0x801807b0       0x20 arch/arm/cpu/arm926ejs/libarm926ejs.o
+                0x801807b0                cleanup_before_linux
+ .text          0x801807d0      0x8d8 arch/arm/lib/libarm.o
+                0x80180c40                arch_lmb_reserve
+                0x801807e8                __yellow_LED_off
+                0x80180d88                dcache_enable
+                0x801807dc                green_LED_on
+                0x80180810                hang
+                0x801807dc                __green_LED_on
+                0x801807e4                __yellow_LED_on
+                0x801807f4                __dram_init_banksize
+                0x80180fa0                do_fiq
+                0x801807e4                yellow_LED_on
+                0x801807e0                __green_LED_off
+                0x80180c64                flush_cache
+                0x80180df8                interrupt_init
+                0x801807d8                __red_LED_off
+                0x80181054                do_undefined_instruction
+                0x80180e20                show_regs
+                0x80180f7c                do_irq
+                0x801808c8                board_init_r
+                0x801807f0                blue_LED_off
+                0x80180d6c                icache_enable
+                0x801807d0                coloured_LED_init
+                0x80181078                do_reset
+                0x801807f0                __blue_LED_off
+                0x80180f60                bad_mode
+                0x801807ec                blue_LED_on
+                0x801807e8                yellow_LED_off
+                0x801807d8                red_LED_off
+                0x80180a78                do_bootm_linux
+                0x801807e0                green_LED_off
+                0x801807d0                __coloured_LED_init
+                0x8018100c                do_prefetch_abort
+                0x801807d4                red_LED_on
+                0x80180df0                icache_disable
+                0x80180970                board_init_f
+                0x80180e18                disable_interrupts
+                0x80180fc4                do_not_used
+                0x80180fe8                do_data_abort
+                0x80180d90                dcache_status
+                0x801807ec                __blue_LED_on
+                0x80181030                do_software_interrupt
+                0x801807d4                __red_LED_on
+                0x80180e14                enable_interrupts
+                0x80180d74                icache_status
+                0x80180de8                dcache_disable
+ .text          0x801810a8      0x124 board/davinci/common/libdavinci.o
+                0x801811ac                dram_init
+                0x8018115c                davinci_configure_pin_mux_items
+                0x801810a8                dram_init_banksize
+                0x801810c4                davinci_configure_pin_mux
+ .text          0x801811cc    0x115a4 common/libcommon.o
+                0x8018b2e4                flash_write
+                0x8018ef24                stdio_clone
+                0x80191eb4                xyzModem_error
+                0x80189018                do_imgextract
+                0x8018fb70                usb_set_idle
+                0x80190b30                usb_storage_probe
+                0x801897b8                console_init_r
+                0x801850fc                do_mem_base
+                0x80188980                usb_display_conf_desc
+                0x8018f0a4                usb_maxpacket
+                0x801814bc                do_bootd
+                0x80187260                do_rd9363
+                0x801893c4                find_cmd_tbl
+                0x801812c8                do_go
+                0x801865e4                do_env_edit
+                0x8018204c                do_coninfo
+                0x8018b63c                new_pipe
+                0x8018da60                __show_boot_progress
+                0x801899c0                printf
+                0x8018db60                run_command
+                0x80182bc4                __def_i2c_get_bus_speed
+                0x80191b30                usb_stor_CB_transport
+                0x80183898                k_data_init
+                0x8018397c                s1_sendpacket
+                0x8018d534                getenv_bootm_size
+                0x8018709c                do_fpgaramtest
+                0x801898c4                console_assign
+                0x8018852c                usb_show_tree_graph
+                0x801847f4                do_mem_mw
+                0x80186f4c                do_physta
+                0x8018b4a8                mapset
+                0x80182bd0                __def_i2c_set_bus_speed
+                0x801839a8                handle_send_packet
+                0x8018213c                do_echo
+                0x8018adfc                env_relocate_spec
+                0x8018daf0                do_run
+                0x80187e84                usb_get_class_desc
+                0x8018d590                image_print_contents
+                0x80185cec                getenv
+                0x8018ad04                env_import
+                0x8018d2a0                genimg_get_comp_id
+                0x801861f4                do_env_ask
+                0x80187f2c                usb_display_ep_desc
+                0x80182568                do_uImage_update
+                0x8018269c                do_uboot_update
+                0x8018d2e8                genimg_get_os_id
+                0x8019157c                usb_stor_CB_comdat
+                0x801812b0                do_go_exec
+                0x801853a8                do_mem_crc
+                0x801856b0                do_mem_nm
+                0x80190f78                usb_stor_write
+                0x80189aa4                getc
+                0x8018da64                parse_line
+                0x80190358                usb_hub_probe
+                0x801823cc                do_fat_fsload
+                0x8018d16c                get_table_entry_name
+                0x8018b038                flash_protect
+                0x8018989c                search_device
+                0x80186ee0                ASCII2HEX
+                0x8018d1f8                genimg_has_config
+                0x8018ea00                readline
+                0x801841ec                do_save_serial
+                0x80189964                puts
+                0x80189798                dbg
+                0x801856d0                do_mem_mm
+                0x80189f50                malloc
+                0x8018f428                usb_stop
+                0x801906e0                usb_init
+                0x80191f50                xyzModem_stream_close
+                0x801877c0                do_spi
+                0x8018d2d0                genimg_get_arch_id
+                0x80186cf0                RDFPGA
+                0x80186d14                do_rdfpga
+                0x80189368                cmd_usage
+                0x80185c34                getenv_f
+                0x80189a18                serial_printf
+                0x8018c878                parse_string_outer
+                0x80191fa4                CYGACC_COMM_IF_GETC_TIMEOUT
+                0x8018da60                show_boot_progress
+                0x801838d8                k_data_restore
+                0x8018adcc                env_get_char
+                0x80191d8c                parse_num
+                0x801849ec                do_mem_cp
+                0x8018d1ac                genimg_get_arch_name
+                0x80188788                usb_display_desc
+                0x8018a698                pvalloc
+                0x80182880                do_fpga
+                0x8018ea1c                main_loop
+                0x8018c1e8                update_ifs_map
+                0x8018f08c                usb_disable_asynch
+                0x80182550                fpga_loadbitstream
+                0x8018eb30                get_ram_size
+                0x8018d810                boot_get_ramdisk
+                0x801827b4                do_fpga_update
+                0x80188000                usb_display_class_sub
+                0x8018ef18                stdio_get_list
+                0x8018febc                usb_clear_halt
+                0x801896dc                ftstc
+                0x80183b6c                send_nack
+                0x8018d7bc                image_check_hcrc
+                0x801821ec                do_fat_fsinfo
+                0x80183d54                do_load_serial_bin
+                0x8018f488                usb_bulk_msg
+                0x8018ae00                env_get_char_spec
+                0x8019077c                usb_stor_get_dev
+                0x80184f58                do_mem_mtest
+                0x8018fa90                usb_get_class_descriptor
+                0x8018c034                set_local_var
+                0x80190664                usb_scan_devices
+                0x80192028                xyzModem_stream_terminate
+                0x8018f038                stdio_get_by_name
+                0x8018b260                flash_read
+                0x8018c834                parse_file_outer
+                0x80183594                binary_test
+                0x80186db0                do_wrfpga
+                0x8018efac                stdio_init
+                0x8018a6bc                calloc
+                0x80189b0c                malloc_usable_size
+                0x80185140                do_mem_cmp
+                0x80191178                usb_stor_read
+                0x8018d194                genimg_get_os_name
+                0x8018f7a4                usb_get_hub_descriptor
+                0x8018f5dc                usb_get_port_status
+                0x80182bd0                i2c_set_bus_speed
+                0x80189904                fprintf
+                0x80189a8c                tstc
+                0x8018d1c4                genimg_get_type_name
+                0x8018f424                usb_submit_int_msg
+                0x80181360                arch_preboot_os
+                0x8018b384                simple_itoa
+                0x801907a4                usb_show_progress
+                0x8018e1b0                readline_into_buffer
+                0x80189980                vprintf
+                0x8018d324                genimg_get_format
+                0x8018ac28                env_get_addr
+                0x801821bc                do_exit
+                0x8018d1dc                genimg_get_comp_name
+                0x80189464                find_cmd
+                0x80181db4                do_bootm
+                0x80183774                do_itest
+                0x80186b78                source
+                0x801838fc                k_data_char
+                0x8018274c                do_fpga_load
+                0x8018f2d0                usb_parse_config
+                0x80184d10                do_dma_send
+                0x8018d774                image_check_dcrc
+                0x80191378                usb_stor_scan
+                0x80186a80                do_ubl_write
+                0x80182864                do_fpga_reset
+                0x8018ac58                set_default_env
+                0x80185e4c                _do_env_set
+                0x8018b93c                unset_local_var
+                0x801917a8                usb_stor_BBB_comdat
+                0x80185848                do_sleep
+                0x80189bc0                mem_malloc_init
+                0x8018f4ec                usb_control_msg
+                0x8018fbd4                usb_set_protocol
+                0x80186380                setenv
+                0x80189abc                ctrlc
+                0x8018a79c                realloc
+                0x801892f0                cmd_get_data_size
+                0x801875e0                do_wr9363
+                0x80190054                usb_hub_port_connect_change
+                0x8018fca8                usb_set_interface
+                0x8018acf0                env_relocate
+                0x8018d3cc                genimg_print_size
+                0x80189c48                malloc_trim
+                0x8018d224                getenv_bootm_low
+                0x80188754                usb_show_tree
+                0x8018f1e8                usb_hub_allocate
+                0x80186364                do_env_set
+                0x8018d1f4                genimg_get_image
+                0x801848b8                do_dma_cp
+                0x8018d144                image_multi_count
+                0x8018d2b8                genimg_get_type_id
+                0x80189bf0                sbrk
+                0x801871a4                do_rdfpgaram
+                0x8019260c                xyzModem_stream_open
+                0x8018f990                usb_string
+                0x8018b4e0                do_showvar
+                0x801811e0                do_bdinfo
+                0x801846fc                do_mem_loop
+                0x801852dc                do_gpio_op
+                0x8018382c                chk1
+                0x8018fb00                usb_get_report
+                0x801888b8                usb_display_string
+                0x8018d3fc                memmove_wd
+                0x80191d1c                usb_stor_info
+                0x801858c8                get_env_id
+                0x80187a08                do_test
+                0x80189b50                mallopt
+                0x8018fdb8                usb_get_descriptor
+                0x801822c4                do_fat_ls
+                0x8018948c                _do_help
+                0x8018ae0c                env_init
+                0x8018d254                get_table_entry_id
+                0x80189a70                putc
+                0x801888f8                usb_display_if_desc
+                0x80188a2c                usb_display_config
+                0x8018f800                usb_get_string
+                0x80190144                usb_hub_configure
+                0x80182628                do_uImage_load
+                0x80187400                do_SPIWrite
+                0x8018975c                disable_ctrlc
+                0x801908b4                usb_stor_get_info
+                0x8018f464                wait_ms
+                0x801896b4                fgetc
+                0x8018a588                memalign
+                0x801838b8                k_data_save
+                0x8018f750                usb_clear_hub_feature
+                0x801879f8                do_false
+                0x801856f0                do_mem_md
+                0x8018fe24                usb_get_configuration_no
+                0x80189f4c                cfree
+                0x80189774                had_ctrlc
+                0x80190d60                usb_stor_BBB_clear_endpt_stall
+                0x80182b58                do_help
+                0x80181b6c                do_bootm_subcommand
+                0x8018bb00                reserved_word
+                0x8018a6b0                valloc
+                0x8018f6f0                usb_clear_port_feature
+                0x80186ca8                do_source
+                0x80189704                fputc
+                0x8018ae30                jumptable_init
+                0x801857cc                do_mem_mdc
+                0x8018f690                usb_set_port_feature
+                0x801903b8                usb_new_device
+                0x8018f63c                usb_get_hub_status
+                0x80191f9c                CYGACC_COMM_IF_PUTC
+                0x8018380c                ktrans
+                0x801854e8                do_mem_mwc
+                0x8018b134                addr2info
+                0x801897a4                console_init_f
+                0x80182bc4                i2c_get_bus_speed
+                0x80191a60                usb_stor_CBI_get_status
+                0x8018fc34                usb_set_configuration
+                0x8018f140                usb_set_maxpacket
+                0x8018394c                send_pad
+                0x80189784                clear_ctrlc
+                0x8018d408                boot_ramdisk_high
+                0x8018b17c                flash_perror
+                0x8018ecac                srec_decode
+                0x8018b5cc                u_boot_hush_start
+                0x8018ae28                get_version
+                0x80185dc0                do_env_print
+                0x8018fd74                usb_set_address
+                0x8018ac48                env_get_char_memory
+                0x8018f22c                usb_alloc_new_device
+                0x80188ff8                do_version
+                0x801897b4                stdio_print_current_devices
+                0x8018f1d4                usb_hub_reset
+                0x8018d348                image_multi_getimg
+                0x80185bd4                envmatch
+                0x80183bcc                send_ack
+                0x80181360                __arch_preboot_os
+                0x80189730                fputs
+                0x80184ac0                do_dma_rev
+                0x8018f1a4                usb_get_dev_index
+                0x80188174                do_usbboot
+                0x80188abc                do_usb
+                0x8018d200                getenv_yesno
+                0x801845a0                do_load_serial
+                0x80181450                do_iminfo
+                0x8018ef6c                stdio_register
+                0x8018b030                write_buff
+                0x80192380                xyzModem_stream_read
+                0x80189d14                free
+                0x80187a00                do_true
+                0x80191894                usb_stor_BBB_transport
+ .text          0x80192770      0x89c disk/libdisk.o
+                0x80192dec                get_partition_info_dos
+                0x80192fe0                print_part_dos
+                0x80192858                dev_print
+                0x80192b5c                test_part_dos
+                0x80192770                print_part
+                0x80192ab4                get_dev
+                0x80192a74                get_partition_info
+                0x80192a98                init_part
+ .text          0x8019300c      0x890 drivers/fpga/libfpga.o
+                0x80193234                fpga_info
+                0x80193720                CYC2_load
+                0x80193468                altera_dump
+                0x801936d4                CYC2_info
+                0x801933c0                fpga_init
+                0x801930ec                fpga_add
+                0x80193040                fpga_count
+                0x80193334                fpga_load
+                0x801934c8                altera_info
+                0x80193660                altera_load
+                0x801936dc                CYC2_dump
+                0x801932a8                fpga_dump
+ .text          0x8019389c      0x5d8 drivers/i2c/libi2c.o
+                0x80193a20                i2c_write
+                0x80193da4                i2c_probe
+                0x801939f0                flush_rx
+                0x80193bc8                i2c_read
+                0x80193950                i2c_init
+ .text          0x80193e74     0x1bfc drivers/mtd/libmtd.o
+                0x80194054                GetSpiFlashHandle
+                0x80194910                SpiFlashEnter_4B_Mode
+                0x8019584c                sf_cmd_read
+                0x801941a0                SpiFlashIDParse
+                0x801954dc                sf_cmd_write
+                0x80195a08                sf_read_common
+                0x80193f10                del_mtd_device
+                0x80194f84                sf_write
+                0x80193fc8                get_mtd_device_nm
+                0x80194da4                flash_erase
+                0x80193e74                get_mtd_device
+                0x80195464                flash_init
+                0x8019449c                spi_flash_probe
+                0x80194064                flash_print_info
+                0x801956a0                sf_cmd
+                0x80194410                SpiFlashReadIDCmd
+                0x801943b4                SetSpiFlashDebugFlag
+                0x8019402c                get_flash_erase_size
+                0x80194294                GetSpiFlashInfoFromID
+                0x80193ee4                put_mtd_device
+                0x80194ab0                sf_erase
+                0x80193f60                add_mtd_device
+                0x801943e8                spi_flash_free
+                0x8019404c                flash_real_protect
+                0x8019527c                sf_read
+                0x80195398                init_flash_info
+                0x801954d4                to_spi_flash
+ .text          0x80195a70        0x0 drivers/pcmcia/libpcmcia.o
+ .text          0x80195a70      0x298 drivers/rtc/librtc.o
+                0x80195a70                GregorianDay
+                0x80195c74                mktime
+                0x80195b64                to_tm
+ .text          0x80195d08      0x240 drivers/serial/libserial.o
+                0x80195e04                _serial_setbrg
+                0x80195dac                NS16550_putc
+                0x80195e94                serial_putc_raw
+                0x80195e30                serial_setbrg
+                0x80195e38                _serial_tstc
+                0x80195e4c                serial_tstc
+                0x80195d08                NS16550_init
+                0x80195ee0                serial_putc
+                0x80195ee8                _serial_puts
+                0x80195e78                _serial_putc_raw
+                0x80195dd4                NS16550_tstc
+                0x80195dc0                NS16550_getc
+                0x80195f20                serial_init
+                0x80195f18                serial_puts
+                0x80195e54                _serial_getc
+                0x80195e70                serial_getc
+                0x80195d58                NS16550_reinit
+                0x80195e9c                _serial_putc
+ .text          0x80195f48      0x53c drivers/spi/libspi.o
+                0x80195f4c                spi_release_bus
+                0x80195fd4                spi_xfer
+                0x80195f48                spi_init
+                0x80195f5c                spi_cs_is_valid
+                0x80196320                SpiHostDriverRegister
+                0x80195f7c                spi_cs_activate
+                0x801960b4                spi_claim_bus
+                0x8019619c                spi_setup_slave
+                0x80196284                SpiHostNameToId
+                0x80196200                GetSpiHostActDevice
+                0x80196198                spi_free_slave
+                0x80195fa0                spi_cs_deactivate
+ .text          0x80196484     0x1058 drivers/usb/musb/libusb_musb.o
+                0x801971f4                musb_start
+                0x80196a90                usb_lowlevel_stop
+                0x8019725c                musb_configure_ep
+                0x8019740c                musb_platform_deinit
+                0x80196718                submit_int_msg
+                0x80196b84                submit_bulk_msg
+                0x80196efc                submit_control_msg
+                0x8019737c                write_fifo
+                0x80196ab4                usb_lowlevel_init
+                0x801973c8                read_fifo
+                0x80197434                musb_platform_init
+ .text          0x801974dc     0x173c fs/fat/libfat.o
+                0x80198a0c                file_cd
+                0x80198938                file_ls
+                0x8019889c                file_read
+                0x80198724                file_fat_read
+                0x80197d6c                do_fat_read
+                0x8019875c                file_fat_ls
+                0x801989c0                file_detectfs
+                0x80198884                file_getfsname
+                0x80197c0c                file_fat_detectfs
+                0x8019876c                fat_register_device
+ .text          0x80198c18     0x5398 lib/libgeneric.o
+                0x8019a430                strcpy
+                0x8019a984                memscan
+                0x8019b2f8                vsprintf
+                0x8019904c                __div64_32
+                0x8019ac14                ustrtoul
+                0x8019a8e8                memmove
+                0x8019922c                gunzip
+                0x80199ca4                hsearch
+                0x8019abec                simple_strtol
+                0x80199c78                himport
+                0x80199690                hexport
+                0x8019c804                inflate
+                0x801996c0                hsearch_r
+                0x8019a31c                qsort
+                0x80199434                hcreate
+                0x8019a86c                memcpy
+                0x8019b7c8                inflate_fast
+                0x8019a778                strswab
+                0x8019a2a4                string_to_ip
+                0x8019a214                __arch_lmb_reserve
+                0x8019938c                hcreate_r
+                0x8019a038                lmb_overlaps_region
+                0x8019aa7c                strmhz
+                0x8019a618                strnlen
+                0x8019930c                hdestroy_r
+                0x8019a5e0                strrchr
+                0x8019c440                inflateInit_
+                0x80199f2c                lmb_add
+                0x80198edc                print_buffer
+                0x8019c4b8                adler32
+                0x8019a474                strcat
+                0x8019c7f4                zcfree
+                0x801992f4                zfree
+                0x80199cd4                lmb_dump_all
+                0x80199440                hexport_r
+                0x80199a24                himport_r
+                0x8019aa18                memchr
+                0x80198d58                crc32
+                0x80199140                zunzip
+                0x8019a9b4                strstr
+                0x80199990                hdelete_r
+                0x8019a544                strncmp
+                0x80198ebc                display_options
+                0x8019a44c                strncpy
+                0x8019aae8                udelay
+                0x80199f30                lmb_free
+                0x8019ad9c                panic
+                0x8019a840                bcopy
+                0x8019a6c4                strtok
+                0x8019a944                memcmp
+                0x8019c2bc                inflateReset
+                0x8019a4a8                strncat
+                0x80198d70                print_size
+                0x80198c18                cyg_crc16
+                0x8019aa48                strdup
+                0x8019a218                lmb_alloc_base
+                0x8019a7c4                memset
+                0x8019a24c                lmb_alloc
+                0x80199380                hdestroy
+                0x8019a50c                strcmp
+                0x8019c7fc                zcalloc
+                0x8019b7a0                sprintf
+                0x8019a0a0                __lmb_alloc_base
+                0x8019a744                strsep
+                0x8019a254                ldiv
+                0x8019a210                board_lmb_reserve
+                0x8019a210                __board_lmb_reserve
+                0x80199d38                lmb_init
+                0x8019ab30                simple_strtoul
+                0x80198d6c                crc32_wd
+                0x801992fc                zalloc
+                0x8019a1b0                lmb_is_reserved
+                0x8019a640                strspn
+                0x8019a5c0                strlen
+                0x8019a594                strchr
+                0x8019c450                inflateEnd
+                0x8019c338                inflateInit2_
+                0x80199a18                hdelete
+                0x8019bd24                inflate_table
+                0x80198c60                crc32_no_comp
+                0x8019a684                strpbrk
+                0x8019a030                lmb_reserve
+                0x8019ac88                simple_strtoull
+ .text          0x8019dfb0      0x440 board/davinci/dm365evm/libdm365evm.o
+                0x8019e264                dm365_init_fpga
+                0x8019e1c0                dm365_reset_fpga
+                0x8019e23c                fpga_status_fn
+                0x8019e3b8                gpio_direction_output
+                0x8019e374                gpio_set_value
+                0x8019e244                fpga_done_fn
+                0x8019dfcc                board_init
+                0x8019e314                gpio_direction_input
+                0x8019e344                gpio_get_value
+                0x8019e068                fpga_wr_fn
+                0x8019dfb0                misc_init_r
+                0x8019e200                fpga_config_fn
+                0x8019e060                fpga_null_fn
+ .text          0x8019e3f0       0x20 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+                0x8019e3f0                __aeabi_unwind_cpp_pr0
+                0x8019e3f4                raise
+ .text          0x8019e410      0x20c /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o)
+                0x8019e410                __udivsi3
+                0x8019e410                __aeabi_uidiv
+                0x8019e5fc                __aeabi_uidivmod
+ .text          0x8019e61c      0x240 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divsi3.o)
+                0x8019e61c                __aeabi_idiv
+                0x8019e61c                __divsi3
+                0x8019e83c                __aeabi_idivmod
+ .text          0x8019e85c       0x1c /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_lshrdi3.o)
+                0x8019e85c                __aeabi_llsr
+                0x8019e85c                __lshrdi3
+ .text          0x8019e878       0x1c /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_ashldi3.o)
+                0x8019e878                __ashldi3
+                0x8019e878                __aeabi_llsl
+ .text          0x8019e894       0x3c /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_aeabi_uldivmod.o)
+                0x8019e894                __aeabi_uldivmod
+ .text          0x8019e8d0       0x10 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_dvmd_lnx.o)
+                0x8019e8d0                __aeabi_ldiv0
+                0x8019e8d0                __aeabi_idiv0
+ .text          0x8019e8e0       0x78 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+                0x8019e8e0                __gnu_uldivmod_helper
+                0x8019e91c                __gnu_ldivmod_helper
+ .text          0x8019e958      0x5a0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+                0x8019e958                __divdi3
+ .text          0x8019eef8      0x528 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+                0x8019eef8                __udivdi3
+ .text          0x8019f420        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_clz.o)
+
+.glue_7         0x8019f420        0x0
+ .glue_7        0x00000000        0x0 linker stubs
+
+.glue_7t        0x8019f420        0x0
+ .glue_7t       0x00000000        0x0 linker stubs
+
+.vfp11_veneer   0x8019f420        0x0
+ .vfp11_veneer  0x00000000        0x0 linker stubs
+
+.v4_bx          0x8019f420        0x0
+ .v4_bx         0x00000000        0x0 linker stubs
+                0x8019f420                . = ALIGN (0x4)
+
+.rodata         0x8019f420     0x8688
+ *(SORT(.rodata*))
+ .rodata        0x8019f420       0xac arch/arm/lib/libarm.o
+                0x8019f420                version_string
+ .rodata        0x8019f4cc      0x10e common/libcommon.o
+ *fill*         0x8019f5da        0x2 00
+ .rodata        0x8019f5dc       0x10 disk/libdisk.o
+ .rodata        0x8019f5ec       0x30 drivers/rtc/librtc.o
+ .rodata        0x8019f61c       0x10 drivers/serial/libserial.o
+ .rodata        0x8019f62c       0x18 fs/fat/libfat.o
+ .rodata        0x8019f644      0xff4 lib/libgeneric.o
+                0x801a0610                z_errmsg
+                0x8019fc5a                hex_asc
+ .rodata        0x801a0638        0xc drivers/usb/musb/libusb_musb.o
+ .rodata        0x801a0644       0x87 drivers/fpga/libfpga.o
+ .rodata        0x801a06cb       0x13 drivers/i2c/libi2c.o
+ .rodata        0x801a06de       0xf4 drivers/mtd/libmtd.o
+ .rodata        0x801a07d2       0x3a drivers/spi/libspi.o
+ .rodata        0x801a080c      0x100 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_clz.o)
+                0x801a080c                __clz_tab
+ .rodata.str1.1
+                0x801a090c       0x22 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .rodata.str1.1
+                0x801a092e      0x31b arch/arm/lib/libarm.o
+                                0x338 (size before relaxing)
+ .rodata.str1.1
+                0x801a0c49     0x5410 common/libcommon.o
+                               0x58ed (size before relaxing)
+ .rodata.str1.1
+                0x801a6059      0x2b9 disk/libdisk.o
+                                0x2db (size before relaxing)
+ .rodata.str1.1
+                0x801a6312      0x4df drivers/fpga/libfpga.o
+                                0x513 (size before relaxing)
+ .rodata.str1.1
+                0x801a67f1       0x36 drivers/i2c/libi2c.o
+ .rodata.str1.1
+                0x801a6827      0xc86 drivers/mtd/libmtd.o
+                                0xca0 (size before relaxing)
+ .rodata.str1.1
+                0x801a74ad       0xe7 drivers/spi/libspi.o
+                                0x114 (size before relaxing)
+ .rodata.str1.1
+                0x801a7594      0x19d fs/fat/libfat.o
+                                0x1ca (size before relaxing)
+ .rodata.str1.1
+                0x801a7731      0x347 lib/libgeneric.o
+                                0x35a (size before relaxing)
+ .rodata.str1.1
+                0x801a7a78       0x15 board/davinci/dm365evm/libdm365evm.o
+ .rodata.str1.1
+                0x801a7a8d       0x1b /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.hash           0x801a7aa8       0x3c
+ .hash          0x801a7aa8       0x3c arch/arm/cpu/arm926ejs/start.o
+
+.ARM.extab      0x801a7ae4        0x0
+ .ARM.extab     0x801a7ae4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+ .ARM.extab     0x801a7ae4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+ .ARM.extab     0x801a7ae4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+
+.ARM.exidx      0x801a7ae4       0x18
+ .ARM.exidx     0x801a7ae4        0x8 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+                                 0x10 (size before relaxing)
+ .ARM.exidx     0x801a7aec        0x8 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+ .ARM.exidx     0x801a7af4        0x8 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+                0x801a7afc                . = ALIGN (0x4)
+
+.data           0x801a7afc      0xf3c
+ *(.data)
+ .data          0x801a7afc        0x0 arch/arm/cpu/arm926ejs/start.o
+ .data          0x801a7afc        0x0 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .data          0x801a7afc        0x0 arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .data          0x801a7afc       0x28 arch/arm/lib/libarm.o
+                0x801a7afc                init_sequence
+ .data          0x801a7b24        0x0 board/davinci/common/libdavinci.o
+ .data          0x801a7b24      0xaac common/libcommon.o
+                0x801a7d30                dp_last_length
+                0x801a7b24                load_addr
+                0x801a7cc4                op_table
+                0x801a8228                default_environment
+                0x801a85c4                stdio_names
+ .data          0x801a85d0        0x0 disk/libdisk.o
+ .data          0x801a85d0        0x4 drivers/fpga/libfpga.o
+ .data          0x801a85d4        0x0 drivers/i2c/libi2c.o
+ .data          0x801a85d4       0xa8 drivers/mtd/libmtd.o
+                0x801a85d4                g_tSpiFlash
+ .data          0x801a867c        0x0 drivers/pcmcia/libpcmcia.o
+ .data          0x801a867c       0x30 drivers/rtc/librtc.o
+ .data          0x801a86ac        0x0 drivers/serial/libserial.o
+ .data          0x801a86ac       0x44 drivers/spi/libspi.o
+                0x801a86ac                g_spi_host
+ .data          0x801a86f0        0xc drivers/usb/musb/libusb_musb.o
+                0x801a86f0                musb_cfg
+ .data          0x801a86fc      0x208 fs/fat/libfat.o
+                0x801a8704                file_cwd
+ .data          0x801a8904      0x100 lib/libgeneric.o
+                0x801a8904                _ctype
+ .data          0x801a8a04       0x34 board/davinci/dm365evm/libdm365evm.o
+                0x801a8a04                cyclone2
+                0x801a8a1c                altera_fns
+ .data          0x801a8a38        0x0 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divsi3.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_lshrdi3.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_ashldi3.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_aeabi_uldivmod.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_dvmd_lnx.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+ .data          0x801a8a38        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_clz.o)
+
+.got            0x801a8a38        0x4
+ .got           0x801a8a38        0x4 arch/arm/cpu/arm926ejs/start.o
+
+.got.plt        0x801a8a3c        0xc
+ .got.plt       0x801a8a3c        0xc arch/arm/cpu/arm926ejs/start.o
+                0x801a8a3c                _GLOBAL_OFFSET_TABLE_
+                0x801a8a48                . = ALIGN (0x4)
+                0x801a8a48                . = .
+                0x801a8a48                __u_boot_cmd_start = .
+
+.u_boot_cmd     0x801a8a48      0x6a8
+ *(.u_boot_cmd)
+ .u_boot_cmd    0x801a8a48      0x6a8 common/libcommon.o
+                0x801a8a48                __u_boot_cmd_bdinfo
+                0x801a8a90                __u_boot_cmd_bootm
+                0x801a8ce8                __u_boot_cmd_md
+                0x801a8cd0                __u_boot_cmd_loady
+                0x801a8d60                __u_boot_cmd_cmp
+                0x801a8ad8                __u_boot_cmd_iminfo
+                0x801a8b20                __u_boot_cmd_exit
+                0x801a8ac0                __u_boot_cmd_bootd
+                0x801a8d30                __u_boot_cmd_mw
+                0x801a8da8                __u_boot_cmd_loop
+                0x801a9018                __u_boot_cmd_physta
+                0x801a8b08                __u_boot_cmd_echo
+                0x801a8fa0                __u_boot_cmd_rd9363
+                0x801a8f28                __u_boot_cmd_ubl
+                0x801a8fe8                __u_boot_cmd_rdfpgaram
+                0x801a8f58                __u_boot_cmd_sspi
+                0x801a8d90                __u_boot_cmd_base
+                0x801a8aa8                __u_boot_cmd_boot
+                0x801a8c40                __u_boot_cmd_question_mark
+                0x801a8b68                __u_boot_cmd_fatinfo
+                0x801a8c70                __u_boot_cmd_itest
+                0x801a8f40                __u_boot_cmd_source
+                0x801a8e98                __u_boot_cmd_editenv
+                0x801a8ca0                __u_boot_cmd_saves
+                0x801a8cb8                __u_boot_cmd_loadb
+                0x801a8ef8                __u_boot_cmd_run
+                0x801a8e80                __u_boot_cmd_env
+                0x801a8e68                __u_boot_cmd_sleep
+                0x801a8d00                __u_boot_cmd_mm
+                0x801a90a8                __u_boot_cmd_version
+                0x801a8bf8                __u_boot_cmd_loaduImage
+                0x801a8e50                __u_boot_cmd_dmarev
+                0x801a8af0                __u_boot_cmd_coninfo
+                0x801a8dd8                __u_boot_cmd_mdc
+                0x801a8be0                __u_boot_cmd_updateuboot
+                0x801a8c88                __u_boot_cmd_loads
+                0x801a8d78                __u_boot_cmd_crc32
+                0x801a9078                __u_boot_cmd_usb
+                0x801a9048                __u_boot_cmd_false
+                0x801a8f88                __u_boot_cmd_SPIWrite
+                0x801a90c0                __u_boot_cmd_imxtract
+                0x801a90d8                __u_boot_cmd_showvar
+                0x801a8ee0                __u_boot_cmd_askenv
+                0x801a8df0                __u_boot_cmd_mwc
+                0x801a8f10                __u_boot_cmd_sf
+                0x801a8c58                __u_boot_cmd_i2c
+                0x801a8bc8                __u_boot_cmd_loadfpga
+                0x801a8d18                __u_boot_cmd_nm
+                0x801a8eb0                __u_boot_cmd_printenv
+                0x801a8e20                __u_boot_cmd_dmacp
+                0x801a8fb8                __u_boot_cmd_wrfpga
+                0x801a8fd0                __u_boot_cmd_rdfpga
+                0x801a8b80                __u_boot_cmd_fpga
+                0x801a8bb0                __u_boot_cmd_updatefpga
+                0x801a8a78                __u_boot_cmd_reset
+                0x801a9090                __u_boot_cmd_usbboot
+                0x801a8b98                __u_boot_cmd_resetfpga
+                0x801a9000                __u_boot_cmd_fpgaramtest
+                0x801a8e08                __u_boot_cmd_gpio
+                0x801a8b38                __u_boot_cmd_fatload
+                0x801a8b50                __u_boot_cmd_fatls
+                0x801a8dc0                __u_boot_cmd_mtest
+                0x801a9060                __u_boot_cmd_true
+                0x801a8a60                __u_boot_cmd_go
+                0x801a8d48                __u_boot_cmd_cp
+                0x801a8c28                __u_boot_cmd_help
+                0x801a8e38                __u_boot_cmd_dmasend
+                0x801a9030                __u_boot_cmd_test
+                0x801a8c10                __u_boot_cmd_updateuImage
+                0x801a8ec8                __u_boot_cmd_setenv
+                0x801a8f70                __u_boot_cmd_wr9363
+                0x801a90f0                __u_boot_cmd_end = .
+                0x801a90f0                . = ALIGN (0x4)
+
+.rel.dyn        0x801a90f0     0x4a40
+                0x801a90f0                __rel_dyn_start = .
+ *(.rel*)
+ .rel.got       0x801a90f0        0x8 arch/arm/cpu/arm926ejs/start.o
+ .rel.plt       0x00000000        0x0 arch/arm/cpu/arm926ejs/start.o
+ .rel.text      0x801a90f8     0x3090 arch/arm/cpu/arm926ejs/start.o
+ .rel.rodata    0x801ac188      0x198 arch/arm/cpu/arm926ejs/start.o
+ .rel.data      0x801ac320      0xf40 arch/arm/cpu/arm926ejs/start.o
+ .rel.u_boot_cmd
+                0x801ad260      0x8d0 arch/arm/cpu/arm926ejs/start.o
+                0x801adb30                __rel_dyn_end = .
+
+.dynsym         0x801adb30       0xa0
+                0x801adb30                __dynsym_start = .
+ *(.dynsym)
+ .dynsym        0x801adb30       0xa0 arch/arm/cpu/arm926ejs/start.o
+
+.bss            0x801a90f0    0x439d4
+                0x801a90f0                __bss_start = .
+ *(.bss)
+ .bss           0x801a90f0        0x0 arch/arm/cpu/arm926ejs/start.o
+ .bss           0x801a90f0        0x0 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .bss           0x801a90f0        0x0 arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .bss           0x801a90f0        0x8 arch/arm/lib/libarm.o
+                0x801a90f0                monitor_flash_len
+ .bss           0x801a90f8        0x0 board/davinci/common/libdavinci.o
+ .bss           0x801a90f8    0x11084 common/libcommon.o
+                0x801a92ac                dp_last_size
+                0x801ae920                console_buffer
+                0x801ae8d0                hist_list
+                0x801a98bc                hist_lines
+                0x801b9778                usb_started
+                0x801a9318                mem_malloc_end
+                0x801a92a8                dp_last_addr
+                0x801a9268                his_pad_char
+                0x801a9350                env_ptr
+                0x801a92a4                mm_last_size
+                0x801a924c                os_data_init
+                0x801a92a0                mm_last_addr
+                0x801a98a8                nesting_level
+                0x801a926c                send_ptr
+                0x801a98b8                hist_num
+                0x801a9314                mem_malloc_start
+                0x801a98a0                last_return_code
+                0x801a925c                os_data_char
+                0x801aed60                stdio_devices
+                0x801a931c                mem_malloc_brk
+                0x801a9269                his_eol
+                0x801a9260                his_quote
+                0x801a9270                send_parms
+                0x801a9264                his_pad_count
+ .bss           0x801ba17c        0x0 disk/libdisk.o
+ .bss           0x801ba17c       0x28 drivers/fpga/libfpga.o
+ .bss           0x801ba1a4        0x0 drivers/i2c/libi2c.o
+ .bss           0x801ba1a4     0x28f4 drivers/mtd/libmtd.o
+                0x801ba224                flash_info
+                0x801bca38                g_ptSpiFlashAct
+                0x801bca58                g_acspi_host_name
+                0x801ba1a4                mtd_table
+                0x801bca40                g_ulSpiFlashDebug
+                0x801bca3c                g_ulSpiFlashProbeDone
+ .bss           0x801bca98        0x0 drivers/pcmcia/libpcmcia.o
+ .bss           0x801bca98        0x0 drivers/rtc/librtc.o
+ .bss           0x801bca98        0x0 drivers/serial/libserial.o
+ .bss           0x801bca98        0x8 drivers/spi/libspi.o
+                0x801bca98                g_ulspihostdriverregflag
+                0x801bca9c                g_ptspihostdevice
+ .bss           0x801bcaa0        0x8 drivers/usb/musb/libusb_musb.o
+                0x801bcaa0                musbr
+                0x801bcaa4                dregs
+ .bss           0x801bcaa8    0x30008 fs/fat/libfat.o
+                0x801bcab0                get_vfatname_block
+                0x801dcab0                get_dentfromdir_block
+                0x801ccab0                do_fat_read_block
+ .bss           0x801ecab0       0x14 lib/libgeneric.o
+                0x801ecab0                errno
+                0x801ecac0                ___strtok
+ .bss           0x801ecac4        0x0 board/davinci/dm365evm/libdm365evm.o
+ .bss           0x801ecac4        0x0 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divsi3.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_lshrdi3.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_ashldi3.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_aeabi_uldivmod.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_dvmd_lnx.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+ .bss           0x801ecac4        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_clz.o)
+                0x801ecac4                . = ALIGN (0x4)
+                0x801ecac4                _end = .
+
+.dynbss         0x801ecac4        0x0
+ .dynbss        0x00000000        0x0 arch/arm/cpu/arm926ejs/start.o
+
+/DISCARD/
+ *(.dynstr*)
+ *(.dynamic*)
+ *(.plt*)
+ *(.interp*)
+ *(.gnu*)
+Address of section .text set to 0x80180000
+LOAD arch/arm/cpu/arm926ejs/start.o
+START GROUP
+LOAD api/libapi.o
+LOAD arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+LOAD arch/arm/cpu/arm926ejs/libarm926ejs.o
+LOAD arch/arm/lib/libarm.o
+LOAD board/davinci/common/libdavinci.o
+LOAD common/libcommon.o
+LOAD disk/libdisk.o
+LOAD drivers/bios_emulator/libatibiosemu.o
+LOAD drivers/block/libblock.o
+LOAD drivers/dma/libdma.o
+LOAD drivers/fpga/libfpga.o
+LOAD drivers/gpio/libgpio.o
+LOAD drivers/hwmon/libhwmon.o
+LOAD drivers/i2c/libi2c.o
+LOAD drivers/input/libinput.o
+LOAD drivers/misc/libmisc.o
+LOAD drivers/mmc/libmmc.o
+LOAD drivers/mtd/libmtd.o
+LOAD drivers/mtd/nand/libnand.o
+LOAD drivers/mtd/onenand/libonenand.o
+LOAD drivers/mtd/spi/libspi_flash.o
+LOAD drivers/mtd/ubi/libubi.o
+LOAD drivers/pcmcia/libpcmcia.o
+LOAD drivers/power/libpower.o
+LOAD drivers/rtc/librtc.o
+LOAD drivers/serial/libserial.o
+LOAD drivers/spi/libspi.o
+LOAD drivers/twserial/libtws.o
+LOAD drivers/usb/gadget/libusb_gadget.o
+LOAD drivers/usb/host/libusb_host.o
+LOAD drivers/usb/musb/libusb_musb.o
+LOAD drivers/usb/phy/libusb_phy.o
+LOAD drivers/video/libvideo.o
+LOAD drivers/watchdog/libwatchdog.o
+LOAD fs/cramfs/libcramfs.o
+LOAD fs/ext2/libext2fs.o
+LOAD fs/fat/libfat.o
+LOAD fs/fdos/libfdos.o
+LOAD fs/jffs2/libjffs2.o
+LOAD fs/reiserfs/libreiserfs.o
+LOAD fs/ubifs/libubifs.o
+LOAD fs/yaffs2/libyaffs2.o
+LOAD lib/libfdt/libfdt.o
+LOAD lib/libgeneric.o
+LOAD lib/lzma/liblzma.o
+LOAD lib/lzo/liblzo.o
+LOAD post/libpost.o
+LOAD board/davinci/dm365evm/libdm365evm.o
+END GROUP
+LOAD /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+LOAD /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a
+OUTPUT(u-boot elf32-littlearm)
+
+.ARM.attributes
+                0x00000000       0x27
+ .ARM.attributes
+                0x00000000       0x1b arch/arm/cpu/arm926ejs/start.o
+ .ARM.attributes
+                0x0000001b       0x29 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .ARM.attributes
+                0x00000044       0x2b arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .ARM.attributes
+                0x0000006f       0x2b arch/arm/lib/libarm.o
+ .ARM.attributes
+                0x0000009a       0x2b board/davinci/common/libdavinci.o
+ .ARM.attributes
+                0x000000c5       0x2b common/libcommon.o
+ .ARM.attributes
+                0x000000f0       0x2b disk/libdisk.o
+ .ARM.attributes
+                0x0000011b       0x2b drivers/fpga/libfpga.o
+ .ARM.attributes
+                0x00000146       0x2b drivers/i2c/libi2c.o
+ .ARM.attributes
+                0x00000171       0x2b drivers/mtd/libmtd.o
+ .ARM.attributes
+                0x0000019c       0x2b drivers/pcmcia/libpcmcia.o
+ .ARM.attributes
+                0x000001c7       0x2b drivers/rtc/librtc.o
+ .ARM.attributes
+                0x000001f2       0x2b drivers/serial/libserial.o
+ .ARM.attributes
+                0x0000021d       0x2b drivers/spi/libspi.o
+ .ARM.attributes
+                0x00000248       0x2b drivers/usb/musb/libusb_musb.o
+ .ARM.attributes
+                0x00000273       0x2b fs/fat/libfat.o
+ .ARM.attributes
+                0x0000029e       0x2b lib/libgeneric.o
+ .ARM.attributes
+                0x000002c9       0x2b board/davinci/dm365evm/libdm365evm.o
+ .ARM.attributes
+                0x000002f4       0x2b /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+ .ARM.attributes
+                0x0000031f       0x16 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o)
+ .ARM.attributes
+                0x00000335       0x16 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divsi3.o)
+ .ARM.attributes
+                0x0000034b       0x16 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_lshrdi3.o)
+ .ARM.attributes
+                0x00000361       0x16 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_ashldi3.o)
+ .ARM.attributes
+                0x00000377       0x16 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_aeabi_uldivmod.o)
+ .ARM.attributes
+                0x0000038d       0x14 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_dvmd_lnx.o)
+ .ARM.attributes
+                0x000003a1       0x31 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+ .ARM.attributes
+                0x000003d2       0x31 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+ .ARM.attributes
+                0x00000403       0x31 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+ .ARM.attributes
+                0x00000434       0x31 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_clz.o)
+
+.note.GNU-stack
+                0x00000000        0x0
+ .note.GNU-stack
+                0x00000000        0x0 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .note.GNU-stack
+                0x00000000        0x0 arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .note.GNU-stack
+                0x00000000        0x0 arch/arm/lib/libarm.o
+ .note.GNU-stack
+                0x00000000        0x0 board/davinci/common/libdavinci.o
+ .note.GNU-stack
+                0x00000000        0x0 common/libcommon.o
+ .note.GNU-stack
+                0x00000000        0x0 disk/libdisk.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/fpga/libfpga.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/i2c/libi2c.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/mtd/libmtd.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/pcmcia/libpcmcia.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/rtc/librtc.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/serial/libserial.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/spi/libspi.o
+ .note.GNU-stack
+                0x00000000        0x0 drivers/usb/musb/libusb_musb.o
+ .note.GNU-stack
+                0x00000000        0x0 fs/fat/libfat.o
+ .note.GNU-stack
+                0x00000000        0x0 lib/libgeneric.o
+ .note.GNU-stack
+                0x00000000        0x0 board/davinci/dm365evm/libdm365evm.o
+ .note.GNU-stack
+                0x00000000        0x0 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divsi3.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_lshrdi3.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_ashldi3.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_aeabi_uldivmod.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_dvmd_lnx.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+ .note.GNU-stack
+                0x00000000        0x0 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_clz.o)
+
+.comment        0x00000000      0xf9f
+ .comment       0x00000000       0xac arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .comment       0x000000ac       0x2b arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .comment       0x000000d7      0x102 arch/arm/lib/libarm.o
+ .comment       0x000001d9       0x2b board/davinci/common/libdavinci.o
+ .comment       0x00000204      0x68d common/libcommon.o
+ .comment       0x00000891       0x56 disk/libdisk.o
+ .comment       0x000008e7       0x81 drivers/fpga/libfpga.o
+ .comment       0x00000968       0x2b drivers/i2c/libi2c.o
+ .comment       0x00000993       0x81 drivers/mtd/libmtd.o
+ .comment       0x00000a14       0x56 drivers/pcmcia/libpcmcia.o
+ .comment       0x00000a6a       0x2b drivers/rtc/librtc.o
+ .comment       0x00000a95       0x56 drivers/serial/libserial.o
+ .comment       0x00000aeb       0x56 drivers/spi/libspi.o
+ .comment       0x00000b41       0x81 drivers/usb/musb/libusb_musb.o
+ .comment       0x00000bc2       0x56 fs/fat/libfat.o
+ .comment       0x00000c18      0x2db lib/libgeneric.o
+ .comment       0x00000ef3       0x81 board/davinci/dm365evm/libdm365evm.o
+ .comment       0x00000f74       0x2b /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.debug_line     0x00000000     0xa1da
+ .debug_line    0x00000000       0xb2 arch/arm/cpu/arm926ejs/start.o
+ .debug_line    0x000000b2      0x36c arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_line    0x0000041e       0x3e arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .debug_line    0x0000045c      0x7b3 arch/arm/lib/libarm.o
+ .debug_line    0x00000c0f      0x12b board/davinci/common/libdavinci.o
+ .debug_line    0x00000d3a     0x5503 common/libcommon.o
+ .debug_line    0x0000623d      0x359 disk/libdisk.o
+ .debug_line    0x00006596      0x499 drivers/fpga/libfpga.o
+ .debug_line    0x00006a2f      0x1b0 drivers/i2c/libi2c.o
+ .debug_line    0x00006bdf      0x7cc drivers/mtd/libmtd.o
+ .debug_line    0x000073ab       0x3a drivers/pcmcia/libpcmcia.o
+ .debug_line    0x000073e5       0xc6 drivers/rtc/librtc.o
+ .debug_line    0x000074ab      0x272 drivers/serial/libserial.o
+ .debug_line    0x0000771d      0x25e drivers/spi/libspi.o
+ .debug_line    0x0000797b      0x5d3 drivers/usb/musb/libusb_musb.o
+ .debug_line    0x00007f4e      0x505 fs/fat/libfat.o
+ .debug_line    0x00008453     0x1985 lib/libgeneric.o
+ .debug_line    0x00009dd8      0x3bf board/davinci/dm365evm/libdm365evm.o
+ .debug_line    0x0000a197       0x43 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.debug_info     0x00000000    0x24797
+ .debug_info    0x00000000       0x7e arch/arm/cpu/arm926ejs/start.o
+ .debug_info    0x0000007e      0x8cc arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_info    0x0000094a       0xc6 arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .debug_info    0x00000a10     0x1dc2 arch/arm/lib/libarm.o
+ .debug_info    0x000027d2      0x421 board/davinci/common/libdavinci.o
+ .debug_info    0x00002bf3    0x13d1d common/libcommon.o
+ .debug_info    0x00016910      0xdbe disk/libdisk.o
+ .debug_info    0x000176ce      0xc86 drivers/fpga/libfpga.o
+ .debug_info    0x00018354      0x327 drivers/i2c/libi2c.o
+ .debug_info    0x0001867b     0x22a1 drivers/mtd/libmtd.o
+ .debug_info    0x0001a91c       0xec drivers/pcmcia/libpcmcia.o
+ .debug_info    0x0001aa08      0x258 drivers/rtc/librtc.o
+ .debug_info    0x0001ac60      0xb39 drivers/serial/libserial.o
+ .debug_info    0x0001b799      0x9b6 drivers/spi/libspi.o
+ .debug_info    0x0001c14f     0x226c drivers/usb/musb/libusb_musb.o
+ .debug_info    0x0001e3bb     0x15e8 fs/fat/libfat.o
+ .debug_info    0x0001f9a3     0x41a0 lib/libgeneric.o
+ .debug_info    0x00023b43      0xba2 board/davinci/dm365evm/libdm365evm.o
+ .debug_info    0x000246e5       0xb2 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.debug_abbrev   0x00000000     0x98c9
+ .debug_abbrev  0x00000000       0x14 arch/arm/cpu/arm926ejs/start.o
+ .debug_abbrev  0x00000014      0x407 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_abbrev  0x0000041b       0x87 arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .debug_abbrev  0x000004a2      0x90d arch/arm/lib/libarm.o
+ .debug_abbrev  0x00000daf      0x166 board/davinci/common/libdavinci.o
+ .debug_abbrev  0x00000f15     0x4bfe common/libcommon.o
+ .debug_abbrev  0x00005b13      0x44c disk/libdisk.o
+ .debug_abbrev  0x00005f5f      0x48e drivers/fpga/libfpga.o
+ .debug_abbrev  0x000063ed      0x11b drivers/i2c/libi2c.o
+ .debug_abbrev  0x00006508      0x671 drivers/mtd/libmtd.o
+ .debug_abbrev  0x00006b79       0x66 drivers/pcmcia/libpcmcia.o
+ .debug_abbrev  0x00006bdf      0x110 drivers/rtc/librtc.o
+ .debug_abbrev  0x00006cef      0x2e5 drivers/serial/libserial.o
+ .debug_abbrev  0x00006fd4      0x37a drivers/spi/libspi.o
+ .debug_abbrev  0x0000734e      0x6bb drivers/usb/musb/libusb_musb.o
+ .debug_abbrev  0x00007a09      0x4ec fs/fat/libfat.o
+ .debug_abbrev  0x00007ef5     0x15f1 lib/libgeneric.o
+ .debug_abbrev  0x000094e6      0x375 board/davinci/dm365evm/libdm365evm.o
+ .debug_abbrev  0x0000985b       0x6e /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.debug_aranges  0x00000000      0xb40
+ .debug_aranges
+                0x00000000       0x20 arch/arm/cpu/arm926ejs/start.o
+ .debug_aranges
+                0x00000020       0xa0 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_aranges
+                0x000000c0       0x20 arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .debug_aranges
+                0x000000e0       0xc0 arch/arm/lib/libarm.o
+ .debug_aranges
+                0x000001a0       0x20 board/davinci/common/libdavinci.o
+ .debug_aranges
+                0x000001c0      0x4c0 common/libcommon.o
+ .debug_aranges
+                0x00000680       0x40 disk/libdisk.o
+ .debug_aranges
+                0x000006c0       0x60 drivers/fpga/libfpga.o
+ .debug_aranges
+                0x00000720       0x20 drivers/i2c/libi2c.o
+ .debug_aranges
+                0x00000740       0x60 drivers/mtd/libmtd.o
+ .debug_aranges
+                0x000007a0       0x20 drivers/rtc/librtc.o
+ .debug_aranges
+                0x000007c0       0x40 drivers/serial/libserial.o
+ .debug_aranges
+                0x00000800       0x40 drivers/spi/libspi.o
+ .debug_aranges
+                0x00000840       0x60 drivers/usb/musb/libusb_musb.o
+ .debug_aranges
+                0x000008a0       0x40 fs/fat/libfat.o
+ .debug_aranges
+                0x000008e0      0x1e0 lib/libgeneric.o
+ .debug_aranges
+                0x00000ac0       0x60 board/davinci/dm365evm/libdm365evm.o
+ .debug_aranges
+                0x00000b20       0x20 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.debug_pubnames
+                0x00000000     0x3454
+ .debug_pubnames
+                0x00000000      0x104 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_pubnames
+                0x00000104       0x2b arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .debug_pubnames
+                0x0000012f      0x34a arch/arm/lib/libarm.o
+ .debug_pubnames
+                0x00000479       0x80 board/davinci/common/libdavinci.o
+ .debug_pubnames
+                0x000004f9     0x1e05 common/libcommon.o
+ .debug_pubnames
+                0x000022fe       0xb9 disk/libdisk.o
+ .debug_pubnames
+                0x000023b7       0xe4 drivers/fpga/libfpga.o
+ .debug_pubnames
+                0x0000249b       0x55 drivers/i2c/libi2c.o
+ .debug_pubnames
+                0x000024f0      0x2c1 drivers/mtd/libmtd.o
+ .debug_pubnames
+                0x000027b1       0x38 drivers/rtc/librtc.o
+ .debug_pubnames
+                0x000027e9      0x164 drivers/serial/libserial.o
+ .debug_pubnames
+                0x0000294d      0x151 drivers/spi/libspi.o
+ .debug_pubnames
+                0x00002a9e      0x133 drivers/usb/musb/libusb_musb.o
+ .debug_pubnames
+                0x00002bd1      0x123 fs/fat/libfat.o
+ .debug_pubnames
+                0x00002cf4      0x5d1 lib/libgeneric.o
+ .debug_pubnames
+                0x000032c5      0x158 board/davinci/dm365evm/libdm365evm.o
+ .debug_pubnames
+                0x0000341d       0x37 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.debug_frame    0x00000000     0x49ec
+ .debug_frame   0x00000000      0x14c arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_frame   0x0000014c       0x28 arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .debug_frame   0x00000174      0x3c4 arch/arm/lib/libarm.o
+ .debug_frame   0x00000538       0x78 board/davinci/common/libdavinci.o
+ .debug_frame   0x000005b0     0x2870 common/libcommon.o
+ .debug_frame   0x00002e20      0x16c disk/libdisk.o
+ .debug_frame   0x00002f8c      0x1c8 drivers/fpga/libfpga.o
+ .debug_frame   0x00003154       0xe0 drivers/i2c/libi2c.o
+ .debug_frame   0x00003234      0x364 drivers/mtd/libmtd.o
+ .debug_frame   0x00003598       0x6c drivers/rtc/librtc.o
+ .debug_frame   0x00003604      0x198 drivers/serial/libserial.o
+ .debug_frame   0x0000379c      0x144 drivers/spi/libspi.o
+ .debug_frame   0x000038e0      0x200 drivers/usb/musb/libusb_musb.o
+ .debug_frame   0x00003ae0      0x250 fs/fat/libfat.o
+ .debug_frame   0x00003d30      0xa3c lib/libgeneric.o
+ .debug_frame   0x0000476c      0x140 board/davinci/dm365evm/libdm365evm.o
+ .debug_frame   0x000048ac       0x38 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+ .debug_frame   0x000048e4       0x20 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivsi3.o)
+ .debug_frame   0x00004904       0x20 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divsi3.o)
+ .debug_frame   0x00004924       0x58 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(bpabi.o)
+ .debug_frame   0x0000497c       0x38 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_divdi3.o)
+ .debug_frame   0x000049b4       0x38 /opt/arm-2009q1/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.3/libgcc.a(_udivdi3.o)
+
+.debug_str      0x00000000     0x6d46
+ .debug_str     0x00000000      0x312 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+                                0x6b0 (size before relaxing)
+ .debug_str     0x00000312       0x6e arch/arm/cpu/arm926ejs/libarm926ejs.o
+                                0x109 (size before relaxing)
+ .debug_str     0x00000380      0x7b9 arch/arm/lib/libarm.o
+                               0x1248 (size before relaxing)
+ .debug_str     0x00000b39       0xc7 board/davinci/common/libdavinci.o
+                                0x2af (size before relaxing)
+ .debug_str     0x00000c00     0x37d0 common/libcommon.o
+                               0x8cd4 (size before relaxing)
+ .debug_str     0x000043d0      0x253 disk/libdisk.o
+                                0x69d (size before relaxing)
+ .debug_str     0x00004623      0x3ae drivers/fpga/libfpga.o
+                                0x83c (size before relaxing)
+ .debug_str     0x000049d1       0x8e drivers/i2c/libi2c.o
+                                0x18f (size before relaxing)
+ .debug_str     0x00004a5f      0x81a drivers/mtd/libmtd.o
+                                0xf9a (size before relaxing)
+ .debug_str     0x00005279       0x62 drivers/pcmcia/libpcmcia.o
+                                0x1d1 (size before relaxing)
+ .debug_str     0x000052db       0x8f drivers/rtc/librtc.o
+                                0x17d (size before relaxing)
+ .debug_str     0x0000536a      0x24d drivers/serial/libserial.o
+                                0x6b9 (size before relaxing)
+ .debug_str     0x000055b7      0x1e5 drivers/spi/libspi.o
+                                0x4e7 (size before relaxing)
+ .debug_str     0x0000579c      0x578 drivers/usb/musb/libusb_musb.o
+                               0x10e8 (size before relaxing)
+ .debug_str     0x00005d14      0x54e fs/fat/libfat.o
+                                0x879 (size before relaxing)
+ .debug_str     0x00006262      0x8fd lib/libgeneric.o
+                               0x1ab1 (size before relaxing)
+ .debug_str     0x00006b5f      0x1b5 board/davinci/dm365evm/libdm365evm.o
+                                0x8f8 (size before relaxing)
+ .debug_str     0x00006d14       0x32 /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+                                0x10a (size before relaxing)
+
+.debug_loc      0x00000000    0x16fc3
+ .debug_loc     0x00000000      0x1b8 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_loc     0x000001b8       0x1f arch/arm/cpu/arm926ejs/libarm926ejs.o
+ .debug_loc     0x000001d7      0x55e arch/arm/lib/libarm.o
+ .debug_loc     0x00000735      0x11c board/davinci/common/libdavinci.o
+ .debug_loc     0x00000851     0xd600 common/libcommon.o
+ .debug_loc     0x0000de51      0x560 disk/libdisk.o
+ .debug_loc     0x0000e3b1      0x7ac drivers/fpga/libfpga.o
+ .debug_loc     0x0000eb5d      0x3dd drivers/i2c/libi2c.o
+ .debug_loc     0x0000ef3a     0x12f2 drivers/mtd/libmtd.o
+ .debug_loc     0x0001022c      0x178 drivers/rtc/librtc.o
+ .debug_loc     0x000103a4      0x298 drivers/serial/libserial.o
+ .debug_loc     0x0001063c      0x533 drivers/spi/libspi.o
+ .debug_loc     0x00010b6f      0xc10 drivers/usb/musb/libusb_musb.o
+ .debug_loc     0x0001177f     0x107f fs/fat/libfat.o
+ .debug_loc     0x000127fe     0x4526 lib/libgeneric.o
+ .debug_loc     0x00016d24      0x262 board/davinci/dm365evm/libdm365evm.o
+ .debug_loc     0x00016f86       0x3d /home/dm368/ti-dvsdk_dm368-evm_4_02_00_06/psp/u-boot-/arch/arm/lib/eabi_compat.o
+
+.debug_ranges   0x00000000     0x1310
+ .debug_ranges  0x00000000       0x18 arch/arm/cpu/arm926ejs/davinci/libdavinci.o
+ .debug_ranges  0x00000018      0x128 arch/arm/lib/libarm.o
+ .debug_ranges  0x00000140       0x18 board/davinci/common/libdavinci.o
+ .debug_ranges  0x00000158      0xc88 common/libcommon.o
+ .debug_ranges  0x00000de0       0x48 disk/libdisk.o
+ .debug_ranges  0x00000e28       0x70 drivers/fpga/libfpga.o
+ .debug_ranges  0x00000e98       0x18 drivers/mtd/libmtd.o
+ .debug_ranges  0x00000eb0      0x120 drivers/usb/musb/libusb_musb.o
+ .debug_ranges  0x00000fd0      0x1a8 fs/fat/libfat.o
+ .debug_ranges  0x00001178      0x198 lib/libgeneric.o
