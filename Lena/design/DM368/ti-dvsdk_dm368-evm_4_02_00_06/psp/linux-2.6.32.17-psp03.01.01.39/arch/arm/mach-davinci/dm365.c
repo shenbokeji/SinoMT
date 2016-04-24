@@ -329,24 +329,28 @@ static struct clk pwm0_clk = {
 	.name		= "pwm0",
 	.parent		= &pll1_aux_clk,
 	.lpsc		= DAVINCI_LPSC_PWM0,
+        .flags		= ALWAYS_ENABLED,
 };
 
 static struct clk pwm1_clk = {
 	.name		= "pwm1",
 	.parent		= &pll1_aux_clk,
 	.lpsc		= DAVINCI_LPSC_PWM1,
+        .flags		= ALWAYS_ENABLED,
 };
 
 static struct clk pwm2_clk = {
 	.name		= "pwm2",
 	.parent		= &pll1_aux_clk,
 	.lpsc		= DAVINCI_LPSC_PWM2,
+        .flags		= ALWAYS_ENABLED,
 };
 
 static struct clk pwm3_clk = {
 	.name		= "pwm3",
 	.parent		= &ref_clk,
 	.lpsc		= DM365_LPSC_PWM3,
+        .flags		= ALWAYS_ENABLED,
 };
 
 static struct clk timer0_clk = {
@@ -488,7 +492,7 @@ MUX_CFG(DM365,	SD1_CLK,	0,   16,    3,	  1,	 false)
 MUX_CFG(DM365,	SD1_CMD,	4,   30,    3,	  1,	 false)
 MUX_CFG(DM365,	SD1_DATA3,	4,   28,    3,	  1,	 false)
 MUX_CFG(DM365,	SD1_DATA2,	4,   26,    3,	  1,	 false)
-//config TVP5151 RESET,will delete in future
+//config ADV7611 TVP5151 RESET,will delete in future
 MUX_CFG(DM365,	SD1_DATA1,	4,   24,    3,	  0,	 false)
 MUX_CFG(DM365,	SD1_DATA0,	4,   22,    3,	  1,	 false)
 
@@ -596,7 +600,7 @@ MUX_CFG(DM365,	VOUT_COUTH_EN,	1,   8,     0xff, 0x55,  false)
 MUX_CFG(DM365,	VIN_CAM_WEN,	0,   14,    3,	  0,	 false)
 MUX_CFG(DM365,	VIN_CAM_VD,	0,   13,    1,	  0,	 false)
 MUX_CFG(DM365,	VIN_CAM_HD,	0,   12,    1,	  0,	 false)
-MUX_CFG(DM365,	VIN_YIN4_7_EN,	0,   0,     0xff, 1,	 false)
+MUX_CFG(DM365,	VIN_YIN4_7_EN,	0,   0,     0xff, 0,	 false)
 MUX_CFG(DM365,	VIN_YIN0_3_EN,	0,   8,     0xf,  0,	 false)
 
 INT_CFG(DM365,  INT_EDMA_CC,         2,     1,    1,     false)

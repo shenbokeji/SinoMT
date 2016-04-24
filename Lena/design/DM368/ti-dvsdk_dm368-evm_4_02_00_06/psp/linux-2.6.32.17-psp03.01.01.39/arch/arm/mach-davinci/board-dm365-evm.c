@@ -128,19 +128,6 @@ void __iomem *fpga;
 
 unsigned char device_lena_air_id=LENA_NULL;
 
-static struct tvp514x_platform_data tvp5146_pdata = {
-       .clk_polarity = 0,
-       .hs_polarity = 1,
-       .vs_polarity = 1
-};
-
-/* tvp7002 platform data, used during reset and probe operations */
-static struct tvp7002_platform_data tvp7002_pdata = {
-       .clk_polarity = 0,
-       .hs_polarity = 0,
-       .vs_polarity = 0,
-       .fid_polarity = 0,
-};
 
 /* NOTE:  this is geared for the standard config, with a socketed
  * 2 GByte Micron NAND (MT29F16G08FAA) using 128KB sectors.  If you
@@ -225,27 +212,6 @@ static struct platform_device davinci_nand_device = {
  */
 static void dm365evm_reset_imager(int rst)
 {
-	u8 val;
-#if 0
-   val = __raw_readb(cpld + CPLD_POWER) | BIT(3) | BIT(11) | BIT(19) | BIT(27);
-	__raw_writeb(val, (cpld + CPLD_POWER));
-
-   val = __raw_readb(cpld + CPLD_MUX) | BIT(6) | BIT(14) | BIT(22) | BIT(30);
-	__raw_writeb(val, (cpld + CPLD_MUX));
-
-	/* Reset bit6 of CPLD_IMG_DIR2 */
-	val = __raw_readb(cpld + CPLD_IMG_DIR2) & ~BIT(6);
-	__raw_writeb(val, (cpld + CPLD_IMG_DIR2));	
-
-	/* Set bit5 of CPLD_IMG_MUX5 */
-	val = __raw_readb(cpld + CPLD_IMG_MUX5) | BIT(5);
-	__raw_writeb(val, (cpld + CPLD_IMG_MUX5));	
-
-	/* Reset bit 0 of CPLD_IMG_MUX5 */
-	val = __raw_readb(cpld + CPLD_IMG_MUX5) & ~BIT(0);
-	__raw_writeb(val, (cpld + CPLD_IMG_MUX5));	
-#endif
-
 #if 1
 /*need code to reset adv7611 tvp5151 ad9363*/
 	gpio_direction_output(40, 1);
@@ -265,72 +231,6 @@ static void dm365evm_reset_imager(int rst)
 	
 }
 
-#define V4L2_STD_MT9P031_STD_ALL  (V4L2_STD_525_60\
-	|V4L2_STD_625_50|V4L2_STD_525P_60\
-	|V4L2_STD_625P_50|V4L2_STD_720P_30\
-   |V4L2_STD_720P_50|V4L2_STD_720P_60\
-   |V4L2_STD_1080I_30|V4L2_STD_1080I_50\
-	|V4L2_STD_1080I_60|V4L2_STD_1080P_30\
-   |V4L2_STD_1080P_50|V4L2_STD_1080P_60)
-
-/* Input available at the mt9p031 */
-static struct v4l2_input mt9p031_inputs[] = {
-	{
-		.index = 0,
-		.name = "Camera",
-		.type = V4L2_INPUT_TYPE_CAMERA,
-      .std = V4L2_STD_MT9P031_STD_ALL,
-	}
-};
-
-#define TVP5150_STD_ALL        (V4L2_STD_NTSC | V4L2_STD_PAL)
-/* Inputs available at the TVP5146 */
-static struct v4l2_input tvp5150_inputs[] = {
-	{
-		.index = 0,
-		.name = "Composite",
-		.type = V4L2_INPUT_TYPE_CAMERA,
-		.std = TVP5150_STD_ALL,
-	},
-	{
-		.index = 1,
-		.name = "S-Video",
-		.type = V4L2_INPUT_TYPE_CAMERA,
-		.std = TVP5150_STD_ALL,
-	},
-};
-
-#define TVP7002_STD_ALL        (V4L2_STD_525P_60   | V4L2_STD_625P_50 	|\
-				V4L2_STD_NTSC      | V4L2_STD_PAL   	|\
-				V4L2_STD_720P_50   | V4L2_STD_720P_60 	|\
-				V4L2_STD_1080I_50  | V4L2_STD_1080I_60 	|\
-				V4L2_STD_1080P_50  | V4L2_STD_1080P_60)
-
-/* Inputs available at the TVP7002 */
-static struct v4l2_input tvp7002_inputs[] = {
-	{
-		.index = 0,
-		.name = "Component",
-		.type = V4L2_INPUT_TYPE_CAMERA,
-		.std = TVP7002_STD_ALL,
-	},
-};
-
-/*
- * this is the route info for connecting each input to decoder
- * ouput that goes to vpfe. There is a one to one correspondence
- * with tvp5146_inputs
- */
-static struct vpfe_route tvp5150_routes[] = {
-	{
-		.input = INPUT_CVBS_VI2B,
-		.output = OUTPUT_10BIT_422_EMBEDDED_SYNC,
-	},
-{
-		.input = INPUT_SVIDEO_VI2C_VI1C,
-		.output = OUTPUT_10BIT_422_EMBEDDED_SYNC,
-	},
-};
 
 #define ADV7611_STD_ALL        (V4L2_STD_720P_50   | V4L2_STD_720P_60 	|\
 				V4L2_STD_1080I_50  | V4L2_STD_1080I_60 	|\
@@ -349,40 +249,18 @@ static struct v4l2_input adv7611_inputs[] = {
 
 
 static struct vpfe_subdev_info vpfe_sub_devs[] = {
-	#if 0
-	{
-		.module_name = "tvp5150",
-		.grp_id = VPFE_SUBDEV_TVP5150,
-		.num_inputs = ARRAY_SIZE(tvp5150_inputs),
-		.inputs = tvp5150_inputs,
-		.routes = tvp5150_routes,
-		.can_route = 1,
-		.ccdc_if_params = {
-			.if_type = VPFE_BT656,
-			.hdpol = VPFE_PINPOL_POSITIVE,
-			.vdpol = VPFE_PINPOL_POSITIVE,
-		},
-		.board_info = {
-			I2C_BOARD_INFO("tvp5150", 0x5C),
-			//.platform_data = &tvp5150_pdata,
-		},
-	},
-	#endif
 	{
 		.module_name = "adv7611",
 		.grp_id = VPFE_SUBDEV_ADV7611,
 		.num_inputs = ARRAY_SIZE(adv7611_inputs),
 		.inputs = adv7611_inputs,
-		//.routes = tvp5150_routes,
-		//.can_route = 1,
 		.ccdc_if_params = {
 			.if_type = VPFE_YCBCR_SYNC_16,
-			.hdpol = VPFE_PINPOL_POSITIVE,
-			.vdpol = VPFE_PINPOL_POSITIVE,
+			.hdpol = VPFE_PINPOL_NEGATIVE,
+			.vdpol = VPFE_PINPOL_NEGATIVE,
 		},		
 		.board_info = {
 			I2C_BOARD_INFO("adv7611", 0x4C),
-			//.platform_data = &adv7611_pdata,	
 		},
 	},
 
@@ -391,43 +269,6 @@ static struct vpfe_subdev_info vpfe_sub_devs[] = {
 /* Set the input mux for TVP7002/TVP5146/MTxxxx sensors */
 static int dm365evm_setup_video_input(enum vpfe_subdev_id id)
 {
-#if 0
-	const char *label;
-	u8 mux, resets;
-
-	mux = __raw_readb(cpld + CPLD_MUX);
-	mux &= ~CPLD_VIDEO_INPUT_MUX_MASK;
-	resets = __raw_readb(cpld + CPLD_RESETS);
-	switch (id) {
-		case VPFE_SUBDEV_TVP5146:
-			mux |= CPLD_VIDEO_INPUT_MUX_TVP5146;
-			resets &= ~BIT(0);
-			label = "tvp5146 SD";
-			dm365evm_reset_imager(0);
-			break;
-		case VPFE_SUBDEV_MT9P031:
-			mux |= CPLD_VIDEO_INPUT_MUX_IMAGER;
-			resets |= BIT(0); /* Put TVP5146 in reset */
-			label = "HD imager";
-
-			dm365evm_reset_imager(1);
-			/* Switch on pca9543a i2c switch */
-			if (have_imager())
-				dm365evm_enable_pca9543a(1);
-			break;
-		case VPFE_SUBDEV_TVP7002:
-			resets &= ~BIT(2);
-			mux |= CPLD_VIDEO_INPUT_MUX_TVP7002;
-			label = "tvp7002 HD";
-			break;
-		default:
-			return 0;
-	}
-	__raw_writeb(mux, cpld + CPLD_MUX);
-	__raw_writeb(resets, cpld + CPLD_RESETS);
-
-	pr_info("EVM: switch to %s video input\n", label);
-#endif
 	return 0;
 
 }
@@ -509,27 +350,6 @@ static const struct {
 	{ "dm365evm::ds9", "heartbeat", },
 };
 
-static void cpld_led_set(struct led_classdev *cdev, enum led_brightness b)
-{
-	//struct cpld_led *led = container_of(cdev, struct cpld_led, cdev);
-	//u8 reg = __raw_readb(cpld + CPLD_LEDS);
-
-	//if (b != LED_OFF)
-	//	reg &= ~led->mask;
-	//else
-		//reg |= led->mask;
-	//__raw_writeb(reg, cpld + CPLD_LEDS);
-}
-
-static enum led_brightness cpld_led_get(struct led_classdev *cdev)
-{
-	//struct cpld_led *led = container_of(cdev, struct cpld_led, cdev);
-	//u8 reg = __raw_readb(cpld + CPLD_LEDS);
-
-	//return (reg & led->mask) ? LED_OFF : LED_FULL;
-	return LED_OFF;
-}
-
 static int __init cpld_leds_init(void)
 {
 	//int	i;
@@ -548,7 +368,7 @@ fs_initcall(cpld_leds_init);
 
 static void __init evm_init(void)
 {
-	u8 mux, resets;
+	u8 mux;
 	const char *label;
 	struct clk *aemif_clk;
 	struct davinci_soc_info *soc_info = &davinci_soc_info;
@@ -578,73 +398,30 @@ fail:
 	/* External muxing for some signals */
 	mux = 0;
 
-	
-
-
 	/* Read CPLD version number */
 	//soc_info->cpld_version = __raw_readb(cpld + CPLD_VERSION);
 	soc_info->cpld_version = 0x21;//for lena,this is init by ourself,please refer to cputype.h
-	/* Read SW5 to set up NAND + keypad _or_ OneNAND (sync read).
-	 * NOTE:  SW4 bus width setting must match!
-	 */
 
-
-		//platform_add_devices(dm365_evm_nand_devices,ARRAY_SIZE(dm365_evm_nand_devices));
-
-
-	/* Leave external chips in reset when unused. */
-	//resets = BIT(3) | BIT(2) | BIT(1) | BIT(0);
-
-
-
-	/* Static video input config with SN74CBT16214 1-of-3 mux:
-	 *  - port b1 == tvp7002 (mux lowbits == 1 or 6)
-	 *  - port b2 == imager (mux lowbits == 2 or 7)
-	 *  - port b3 == tvp5146 (mux lowbits == 5)
-	 *
-	 * Runtime switching could work too, with limitations.
-	 */
       if(device_lena_air_id == LENA_AIR){
-
-		/* we can use MMC1 ... */
-		//dm365evm_mmc_configure();
-		//davinci_setup_mmc(1, &dm365evm_mmc_config);
 
 		if (have_adv7611()) {
 			mux |= VIDEO_INPUT_MUX_ADV7611;
-			resets &= ~BIT(2);
 			label = "ADV7611 HD";
 		} else if (have_tvp5150()){
 			/* default to tvp5146 */
 			mux |= VIDEO_INPUT_MUX_TVP5150;
-			resets &= ~BIT(0);
 			label = "tvp5150 SD";
 			dm365evm_reset_imager(0);
 		}
 	}
-	//__raw_writeb(mux, cpld + CPLD_MUX);
-	///__raw_writeb(resets, cpld + CPLD_RESETS);
 
 	pr_info("EVM: %s video input\n", label);
 
-	/* REVISIT export switches: NTSC/PAL (SW5.6), EXTRA1 (SW5.2), etc */
 }
 
 void enable_lcd(void)
 {
-	/* Turn on LCD backlight for DM368 */
-	//if (cpu_is_davinci_dm368()) {
-		///davinci_cfg_reg(DM365_GPIO80);
-
-		/* Configure 9.25MHz clock to LCD */
-		//__raw_writeb(0x80, cpld + CPLD_RESETS);
-
-		/* CPLD_CONN_GIO17 is level high */
-		//__raw_writeb(0xff, cpld + CPLD_CCD_IO1);
-
-		/* CPLD_CONN_GIO17 is an output */
-		//__raw_writeb(0xfb, cpld + CPLD_CCD_DIR1);
-	
+	return;	
 }
 EXPORT_SYMBOL(enable_lcd);
 
@@ -703,6 +480,13 @@ static struct spi_board_info dm365_evm_spi4_info[] __initconst = {
 #define IT66121_POWERON	(103)
 #define ADV7611_POWERON	(39)
 
+#define GROUND_LED_GPIO81  (81) 
+#define AIR_LED_GPIO91 (91) //GREEN
+#define AIR_LED_GPIO92 (92) //RED
+#define AIR_LED_GPIO86	(86) //RED
+#define AIR_LED_GPIO90	(90) //GREEN
+
+
 /*--------------------------------------------------------------------------
   * function : GPIO_init
   * output	 : GPIO init
@@ -718,6 +502,14 @@ void GPIORequsetInit(void)
 	gpio_request( FPGA_RESET_GPIO, "FPGA_RESET_GPIO" );
 	gpio_request( IT66121_POWERON, "IT66121_POWERON" );
 	gpio_request( ADV7611_POWERON, "ADV7611_POWERON" );
+
+	//gpio requset for LED
+	gpio_request( GROUND_LED_GPIO81, "GROUND_LED_GPIO81" );
+	gpio_request( AIR_LED_GPIO91, "AIR_LED_GPIO91" );
+	gpio_request( AIR_LED_GPIO92, "AIR_LED_GPIO92" );
+	gpio_request( AIR_LED_GPIO86, "AIR_LED_GPIO86" );
+	gpio_request( AIR_LED_GPIO90, "AIR_LED_GPIO90" );
+	
   	return;
 }
  /*--------------------------------------------------------------------------
@@ -736,6 +528,11 @@ void GetAirGroundStationFlag(void)
 	uiFlag = gpio_get_value( AIR_GROUND_GPIO );
 	if( uiFlag ) 
 	{
+		davinci_cfg_reg(DM365_VIN_CAM_WEN);
+		davinci_cfg_reg(DM365_VIN_CAM_VD);
+		davinci_cfg_reg(DM365_VIN_CAM_HD);
+		davinci_cfg_reg(DM365_VIN_YIN4_7_EN);
+		davinci_cfg_reg(DM365_VIN_YIN0_3_EN);		
 		davinci_cfg_reg( DM365_SD1_DATA1 );//config the gio39
 		gpio_direction_output( ADV7611_POWERON, 1 );//supply the 5v for adv7611	
 		device_lena_air_id = LENA_AIR;
@@ -743,6 +540,9 @@ void GetAirGroundStationFlag(void)
 	}
 	else 
 	{
+		davinci_cfg_reg(DM365_VOUT_FIELD_G81);
+		davinci_cfg_reg(DM365_VOUT_COUTL_EN);
+		davinci_cfg_reg(DM365_VOUT_COUTH_EN);		
 		davinci_cfg_reg( DM365_VOUT_LCDOE );//config the gio82 to LCD_OE
 		davinci_cfg_reg( DM365_GPIO103 );//config the gio103 
 		gpio_direction_output( IT66121_POWERON, 1 );//supply the 5v for it66121

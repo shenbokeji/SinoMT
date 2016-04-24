@@ -1,6 +1,5 @@
 /*
  * This source file is FPGA drirver
-
  *****************************************************************************
  * Copyright(C) 2015, SinoMartin Corp.
  *----------------------------------------------------------------------------
@@ -29,7 +28,7 @@
 #include <mach/edma.h>
 #include <linux/uaccess.h>
 #include <linux/miscdevice.h>  
-
+#include <linux/delay.h>
 
 #define FPGA_DRIVER_NAME  "fpga"
 #define FPGA_MINOR (223)
@@ -58,17 +57,17 @@ extern unsigned char device_lena_air_id;
 
 
 #if 1
-  #define EDMA_CHA_CNT         64
-  #define EDMA_BASE_PRAM       0x01C04000u
-  #define EDMA_PRAM_START      EDMA_BASE_PRAM
-  #define EDMA_PRAM_SIZE       0x00001000u
-  #define EDMA_PRAM_SIZE_ERASE        0x00001400u
-  #define EDMA_PRAM_ERASE      0x00000200u
+#define EDMA_CHA_CNT         64
+#define EDMA_BASE_PRAM       0x01C04000u
+#define EDMA_PRAM_START      EDMA_BASE_PRAM
+#define EDMA_PRAM_SIZE       0x00001000u
+#define EDMA_PRAM_SIZE_ERASE        0x00001400u
+#define EDMA_PRAM_ERASE      0x00000200u
 
 
-  #define EDMA_ENTRY_SIZE      0x00000020u
-  #define EDMA_LINK_START      (EDMA_PRAM_START+EDMA_ENTRY_SIZE*EDMA_CHA_CNT)
-  #define EDMA_LINK_CNT          64
+#define EDMA_ENTRY_SIZE      0x00000020u
+#define EDMA_LINK_START      (EDMA_PRAM_START+EDMA_ENTRY_SIZE*EDMA_CHA_CNT)
+#define EDMA_LINK_CNT          64
 
 
 #define _EDMA_OPT_OFFSET			 0
@@ -184,6 +183,15 @@ static inline void EDMA_config(unsigned char channel_num, EDMA_Config *config)
 	return;
 
 }
+#define BUFFER_LEN_ERR (0X80000000)
+#define IOMAP_ERR (0X40000000)
+#define TIMEOUT_ERR (0X20000000)
+#define BUFFER_OVERFLOW_ERR (0X10000000)
+#define RECE_LEN_ERROR (0x08000000)
+#define CRC_ERROR (0x04000000)
+#define RECE_FRAMELEN_ERROR (0x02000000)
+#define RECE_TBLEN_ERROR (0x01000000)
+#define FRAME_NUM_ERROR (0x00800000)
  /*----------------------------------------------------------------------------
   * name	 : emif_send
   * function	 : emif_send 
@@ -191,83 +199,85 @@ static inline void EDMA_config(unsigned char channel_num, EDMA_Config *config)
   * feller	 1.0	 20151229
   *----------------------------------------------------------------------------
  */
+static int siSendFrameCount = 0;
 int emif_send(struct fpga_data *transfer)
 {
 	ulong	addr,count,write_count;
 	volatile unsigned short *frame_header_p=NULL;
-	unsigned int tb_payplod;
+	unsigned int tb_payplod,tb_datalen;
 	unsigned int len;
+	unsigned int iFrameNum=0;
+	//calc the TBX data payload, we keep some bytes as frame header
 
-	
-	printk("..");
-	count = transfer->tb_size-0x10;
+	tb_payplod = transfer->tb_size-0x10;
 	len = transfer->byte_size;
-	tb_payplod = count/2;
 
 	fpga_buf = ioremap(transfer->source_addr,len);
 	if(fpga_buf==NULL) 
 	{
 		printk("ioremap error!\n");
+		return IOMAP_ERR;
 	}
 	addr =(unsigned int)fpga_buf;
 
-	
-
-	while(len>=count)
+	while(len>0)
 	{
+		//clear the event from FPGA ,period 10ms
 		__raw_writel(1<<3, IO_ADDRESS(0x01c67034));
 
-		while((__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) ==0);
+		if( len == transfer->byte_size )
+		{
+			frame_header[0]=0xAAAAAAAA;//first wireless frame for pic frame
+		}
+		else 
+		{
+			//frame_header[0]=0x55555555;
+			frame_header[0] = iFrameNum++;
+		}
+		//printk( "frame_header[0]=%#x\n", frame_header[0] );
+		frame_header[1] = transfer->byte_size;
+		frame_header[2] = siSendFrameCount++;
+		//calc the wireless frame payload 
+		if(len >= tb_payplod)
+		{	
+			tb_datalen = tb_payplod;
+		}
+		else 
+		{	
+			tb_datalen = len;
+		}
+		frame_header[3]=(tb_datalen<<16)|tb_datalen;
 
-		frame_header_p = (volatile unsigned short *)addr;
-		for(write_count=0;write_count<tb_payplod;write_count++,frame_header_p++)
-				__raw_writew(*frame_header_p, ( 4 + fpga ));
-
-		frame_header[1]=0;
-		frame_header[2]=(count<<16)|count;
-		frame_header[3]	= crc32_le(~0, (unsigned char const *)frame_header, 0xC);
 		
+		//wait for 10ms event from FPGA
+		while((__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) == 0)
+		{
+			//msleep(5);
+		}
+		//send frame header
 		frame_header_p = (volatile unsigned short *)frame_header;
-		for(write_count=0;write_count<8;write_count++)
+		for(write_count=0;write_count<8;write_count++,frame_header_p++)
+		{
 				__raw_writew(*frame_header_p, ( 4 + fpga ));
-
-		frame_header[0]++;
-		
-		len -= count;
-		addr += count;
+		}
+		count = (tb_datalen+1)/2;
+		//send the data to FPGA
+		frame_header_p = (volatile unsigned short *)addr;
+		for(write_count=0;write_count<count;write_count++,frame_header_p++)
+		{
+				__raw_writew(*frame_header_p, ( 4 + fpga ));
+		}		
+		//update the addresd and rest length 
+		len -= tb_datalen;
+		addr += tb_datalen;
 	
 	}
-
-	if(len>0)
-	{
-		__raw_writel(1<<3, IO_ADDRESS(0x01c67034));
-
-		while((__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) ==0);
-
-		frame_header_p = (volatile unsigned short *)addr;
-		for(write_count=0;write_count<(len/2);write_count++,frame_header_p++)
-				__raw_writew(*frame_header_p, ( 4 + fpga ));
-
-		frame_header[1]=0;
-		frame_header[2]=(len<<16)|len;
-		frame_header[3]	= crc32_le(~0, (unsigned char const *)frame_header, 0xC);
-		
-		frame_header_p = (volatile unsigned short *)frame_header;
-		for(write_count=0;write_count<8;write_count++)
-				__raw_writew(*frame_header_p, ( 4 + fpga ));		
-		
-		frame_header[0]++;
-		addr += len;
-		len =0;
-	
-	}
-
 	iounmap(fpga_buf);
 
 	return 0;
 
 }
-#define FRAME_HEADER_TIMEOUT (6000)
+
  /*----------------------------------------------------------------------------
   * name	 : emif_recv
   * function	 : emif_recv 
@@ -275,96 +285,183 @@ int emif_send(struct fpga_data *transfer)
   * feller	 1.0	 20151229
   *----------------------------------------------------------------------------
  */
+
 int emif_recv(struct fpga_data *transfer)
 {
-		ulong	addr,count,write_count;
-		volatile unsigned short *frame_header_p=NULL;
+	ulong	addr,count,read_count;
+	volatile unsigned short *frame_header_p = NULL;
+	volatile int wait_10ms = 1000;
+	unsigned int tb_datalen = 0;
+	unsigned int tb_payplod;
+	unsigned int frame_length = 0;
+	unsigned int frame_rece_count = 0;
+	unsigned int uifound_frame_header = 0;
+	int frame_tb_count = 0;
+	unsigned short usCRCRecord = 0;
+	unsigned int uiCRCReg ;
+	unsigned int uiAirFrameNum = 0;
+	unsigned int uiReturn = 0;
 
-		unsigned int len;
-		unsigned int iSearchFrameHeader = 0 ; // search frame header time out counter
-		unsigned int iRet = 0;
-		unsigned int tb_payplod;
-		count = transfer->tb_size-0x10;
-		tb_payplod = count/2;
-
-		len = transfer->byte_size;
-
-		fpga_buf = ioremap(transfer->dst_addr,len);
-		if(fpga_buf==NULL) printk("ioremap error!\n");
-
-		addr =(unsigned int)fpga_buf;
-
-		while(len>=count)
-		{
-			printk(".");
-
-			__raw_writel(1<<3, IO_ADDRESS(0x01c67034));
-
-			while((__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) ==0);
-
-			frame_header_p = (volatile unsigned short *)addr;
-			for(write_count=0;write_count<tb_payplod;write_count++,frame_header_p++)
-					*frame_header_p = __raw_readw((0x20 + fpga ));
-
-			frame_header_p = (volatile unsigned short *)frame_header;
-			for(write_count=0;write_count<8;write_count++,frame_header_p++)
-					*frame_header_p = __raw_readw((0x20 + fpga ));
-
-			//frame_header[1]=0;
-			//frame_header[2]=0x42504250;
-			///frame_header[3]	= crc32_le(~0, (unsigned char const *)frame_header, 0xC);
-			
-			if((frame_header[0]!=0)&&(0==frame_num)) 
-			{
-				iSearchFrameHeader++;
-				if( iSearchFrameHeader >  FRAME_HEADER_TIMEOUT )// for timeout return
-				{
-					printk("<");
-					iounmap(fpga_buf);
-					iRet = -1;
-					return iRet;
-				}					
-				else 
-				{
-					continue;
-				}
-			}
-			len -= count;
-			addr += count;
-			frame_num++;
-
-
-		}
+	//calc the TBX data payload, we keep some bytes as frame header
+	tb_payplod = transfer->tb_size-0x10;
 	
-		if(len>0)
+	//set sync lost time
+	if( ( transfer->source_addr < 10000 ) && ( transfer->source_addr > 1 )) 
+	{
+		wait_10ms = transfer->source_addr;
+	}
+
+	if( transfer->byte_size < tb_payplod )	
+	{
+		printk( "input buffer size smaller than tb_payplod size\n" );
+		return BUFFER_LEN_ERR;			
+	}	
+	
+	fpga_buf = ioremap( transfer->dst_addr, transfer->byte_size );
+	if( NULL ==fpga_buf ) 
+	{
+		printk("ioremap error!\n");
+		return IOMAP_ERR;
+	}
+
+	uiCRCReg = (unsigned int)( ( 0x688<<1)  + fpga );
+
+	uifound_frame_header = 0;
+	addr =(unsigned int)fpga_buf;
+	//search the frame header
+	do{
+		//clear the event from FPGA ,period 10ms
+		__raw_writel(1<<3, IO_ADDRESS(0x01c67034));
+		//wait for 10ms event from FPGA
+		while( (__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) == 0 )
 		{
-			printk("*\n");
-			__raw_writel(1<<3, IO_ADDRESS(0x01c67034));
-
-			while((__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) ==0);
-
-			frame_header_p = (volatile unsigned short *)addr;
-			for(write_count=0;write_count<(len/2);write_count++,frame_header_p++)
-					*frame_header_p = __raw_readw((0x20 + fpga ));
-
-			frame_header_p = (volatile unsigned short *)frame_header;
-			for(write_count=0;write_count<8;write_count++,frame_header_p++)
-					*frame_header_p = __raw_readw((0x20 + fpga ));
-
-			//frame_header[1]=0;
-			//frame_header[2]=0x42504250;
-			///frame_header[3]	= crc32_le(~0, (unsigned char const *)frame_header, 0xC);
-			
-			//if((frame_header[0]!=0)&&(0==frame_num)) continue;
-
-			addr += len;
-			len -= len;
-
-			frame_num++;
-
+			//msleep(4);
 		}
-		iounmap(fpga_buf);
-		return iRet;
+		frame_tb_count++;
+		usCRCRecord = __raw_readw( uiCRCReg );
+		//check the TB CRC 
+
+		if( ( usCRCRecord & 0xFF00 ) != 0xFF00 ) 
+		{	
+			wait_10ms -= frame_tb_count;
+			frame_tb_count = 0;
+			if(wait_10ms <= 0) 
+			{	
+				uiReturn = TIMEOUT_ERR;
+				break;							
+			}
+			printk("c");
+			//wait_10ms--;
+			continue;
+		}
+
+		//receive frame header
+		frame_header_p = (volatile unsigned short *)frame_header;
+		for( read_count=0; read_count<8; read_count++,frame_header_p++)
+		{
+			*frame_header_p = __raw_readw((0x20 + fpga ));
+		}
+
+		//check the first wireless header field of pic   
+		if( frame_header[0] != 0xAAAAAAAA )
+		{
+			//printk("2");
+			wait_10ms--;
+			continue;			
+		}		
+		else
+		{	
+			frame_length = frame_header[1];//get the total length of pic 
+			if( frame_length > transfer->byte_size ) 
+			{ 
+				printk( ">" );
+				uiReturn = BUFFER_OVERFLOW_ERR;//buffer overflow
+				break;
+			}
+			frame_rece_count = 0;							
+			uifound_frame_header = 1;
+			usCRCRecord = 0XFF00;//clear for receive frame
+			break;
+		}
+	}while( wait_10ms > 0 );//check the frame header
+			
+	while( 1 == uifound_frame_header  )
+	{
+		//decode the frame header
+		tb_datalen = frame_header[3]&0xFFFF;
+
+		if( tb_datalen > tb_payplod )
+		{
+			printk("t=%d", tb_datalen );
+			uiReturn = RECE_TBLEN_ERROR;
+			break;
+		}	
+
+
+		//calc the number ,and receive wireless frame data
+		frame_header_p = (volatile unsigned short *)addr;
+		count = (tb_datalen+1)/2;
+			
+		for(read_count=0;read_count<count;read_count++,frame_header_p++)
+		{
+			*frame_header_p = __raw_readw((0x20 + fpga ));
+		}
+
+		frame_rece_count += tb_datalen;//have received data length
+					
+		if( frame_rece_count == frame_length )//must be equal 
+		{
+			//printk("i");
+			break;
+		}
+		else if( frame_rece_count > frame_length )
+		{
+			printk("f");
+			uiReturn = RECE_LEN_ERROR;
+			break;
+		}		
+		addr += tb_datalen;
+		//clear the event from FPGA ,period 10ms
+		__raw_writel(1<<3, IO_ADDRESS(0x01c67034));
+		//wait for 10ms event from FPGA
+		while( (__raw_readl(IO_ADDRESS(0x01c67034))&(1<<3)) == 0 )
+		{
+			//msleep(4);//release CPU for load
+		}	
+		frame_tb_count++;
+		usCRCRecord &= __raw_readw( uiCRCReg );
+						
+		//receive frame header
+		
+		frame_header_p = (volatile unsigned short *)frame_header;
+		for(read_count=0;read_count<8;read_count++,frame_header_p++)
+		{
+			*frame_header_p = __raw_readw((0x20 + fpga ));
+		}
+		if( frame_header[1] != frame_length ) //for frame lost, dynamic pic
+		{
+			printk("f");
+			uiReturn = RECE_FRAMELEN_ERROR;
+			break;
+		}
+		if( uiAirFrameNum != frame_header[0] ) //for static pic 
+		{
+			printk( "n" );
+			uiReturn = FRAME_NUM_ERROR;
+			break;
+		}
+		uiAirFrameNum++;
+		
+	}
+	iounmap(fpga_buf);
+		
+	if( 0XFF00 != ( usCRCRecord & 0XFF00 ) )
+	{
+		printk( "C" );
+		uiReturn |=  CRC_ERROR;
+	}
+	transfer->byte_size = frame_rece_count;
+	return uiReturn;
 	
 }
 #endif
@@ -456,6 +553,7 @@ static int fpga_ioctl(struct inode *inode, struct file *file,
 		     u_int cmd, u_long arg)
 {
 	int  ret = 0;
+	int  iret = 0;
 	unsigned int __user *argp = (unsigned int __user *)arg;
 
 	if (cmd>FPGA_CMD_SIZE) return -EFAULT;
@@ -469,8 +567,9 @@ static int fpga_ioctl(struct inode *inode, struct file *file,
 			frame_header[3]=0;
 			frame_num = 0;
 	
-			ret = copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));		
+			iret = copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));		
 			ret = emif_recv(&fpga_transfer_param);
+			iret = copy_to_user( (void*)argp, &fpga_transfer_param, sizeof(fpga_transfer_param) );
 			break;	
 
 		case DMA_SEND:
@@ -479,8 +578,9 @@ static int fpga_ioctl(struct inode *inode, struct file *file,
 			frame_header[2]=0;
 			frame_header[3]=0;
 			frame_num = 0;
-			ret = copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));
+			iret = copy_from_user( (void*)&fpga_transfer_param, argp, sizeof(fpga_transfer_param));
 			ret = emif_send(&fpga_transfer_param);
+			iret = copy_to_user(argp, (void*)&fpga_transfer_param, sizeof(fpga_transfer_param));
 			break;		
 	
 		default:
@@ -543,4 +643,3 @@ module_exit(fpga_cleanup_module);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("zhushukui");
 MODULE_DESCRIPTION(" Direct character-device access to FPGA devices");
-

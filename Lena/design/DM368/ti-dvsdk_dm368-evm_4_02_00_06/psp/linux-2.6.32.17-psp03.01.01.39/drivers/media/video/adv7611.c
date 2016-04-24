@@ -37,6 +37,7 @@ MODULE_PARM_DESC(debug, "Debug level (0-1)");
 
 struct adv7611_decoder {
 	struct v4l2_subdev sd;
+	const struct adv7611_platform_data *pdata;
 
 	int ver;
 	int streaming;
@@ -123,7 +124,6 @@ int adv7611_write(unsigned char devaddress, unsigned char address, unsigned char
 	unsigned short client_temp;
 	struct i2c_client *client = v4l2_get_subdevdata(adv7611_sd);
 
-	printk("adv7611_write(%02x,%02x,%02x,%02x)\n",client->addr,devaddress,address,value);
 
 
 	client_temp = client->addr;
@@ -156,7 +156,7 @@ void adv7611_reset(void)
 }
 
 // :6-1e Port A, 720p,1080i Any Color Space In (YCrCb 444 24bit from ADV761x) 
-void adv7611_720P_1080i(void)
+void adv7611_720P(void)
 {
 	//adv7611_write(0x98, 0xFF, 0x80); // I2C reset
 	adv7611_write(0x98, 0x01, 0x06); // Prim_Mode =110b HDMI-GR	60 Hz
@@ -164,7 +164,7 @@ void adv7611_720P_1080i(void)
 	//adv7611_write(0x98, 0x03, 0x40); // 24 bit SDR 444 Mode 0
 	adv7611_write(0x98, 0x03, 0x80); // 16-bit 4:2:2 SDR mode 0 
 	//adv7611_write(0x98, 0x04, 0x80); // 16-bit 4:2:2 SDR mode 0 
-	adv7611_write(0x98, 0x05, 0x38); // AV Codes Off
+	adv7611_write(0x98, 0x05, 0x28); // AV Codes Off
 	adv7611_write(0x98, 0x06, 0xA6); // Invert VS,HS pins
 	adv7611_write(0x98, 0x0B, 0x44); // Power up part
 	adv7611_write(0x98, 0x0C, 0x42); // Power up part
@@ -172,7 +172,9 @@ void adv7611_720P_1080i(void)
 	adv7611_write(0x98, 0x15, 0x80); // Disable Tristate of Pins
 	adv7611_write(0x98, 0x19, 0x83); // LLC DLL phase
 	adv7611_write(0x98, 0x33, 0x40); // LLC DLL enable
+	
 	adv7611_write(0x44, 0xBA, 0x01); // Set HDMI FreeRun
+	adv7611_write(0x44, 0x6C, 0x00); // ADI required setting
 	adv7611_write(0x64, 0x40, 0x81); // Disable HDCP 1.1 features
 	adv7611_write(0x68, 0x9B, 0x03); // ADI recommended setting
 	adv7611_write(0x68, 0xC1, 0x01); // ADI recommended setting
@@ -198,6 +200,7 @@ void adv7611_720P_1080i(void)
 	adv7611_write(0x68, 0x57, 0xDA); // ADI recommended setting
 	adv7611_write(0x68, 0x58, 0x01); // ADI recommended setting
 	adv7611_write(0x68, 0x03, 0x98); // DIS_I2C_ZERO_COMPR
+	adv7611_write(0x68, 0x4C, 0x44); // Set NEW_VS_PARAM 0x44[2]=1
 	adv7611_write(0x68, 0x75, 0x10); // DDC drive strength
 }
 
@@ -533,7 +536,7 @@ void adv7611_edid_8_bit(void)
 	adv7611_write(0x6C, 0x80, 0x02); // 
 	adv7611_write(0x6C, 0x81, 0x03); // 
 	adv7611_write(0x6C, 0x82, 0x34); // 
-	adv7611_write(0x6C, 0x83, 0x51); // YUV422,no YUV444
+	adv7611_write(0x6C, 0x83, 0x71); // 
 	adv7611_write(0x6C, 0x84, 0x4D); // 
 	adv7611_write(0x6C, 0x85, 0x82); // 
 	adv7611_write(0x6C, 0x86, 0x05); // 
@@ -657,7 +660,150 @@ void adv7611_edid_8_bit(void)
 	adv7611_write(0x6C, 0xFC, 0x00); // 
 	adv7611_write(0x6C, 0xFD, 0x00); // 
 	adv7611_write(0x6C, 0xFE, 0x00); // 
-	adv7611_write(0x6C, 0xFF, 0xBA); // 
+	adv7611_write(0x6C, 0xFF, 0xDA); // 
+	adv7611_write(0x64, 0x77, 0x00); // Set the Most Significant Bit of the SPA location to 0
+	adv7611_write(0x64, 0x52, 0x20); // Set the SPA for port B.
+	adv7611_write(0x64, 0x53, 0x00); // Set the SPA for port B.
+	adv7611_write(0x64, 0x70, 0x9E); // Set the Least Significant Byte of the SPA location
+	adv7611_write(0x64, 0x74, 0x03); // Enable the Internal EDID for Ports
+}
+
+// ## EDID ##
+// ADV7611 EDID 8 bit only NO DSD or HBR Support:
+void adv7611_edid_8_bit_720p(void)
+{
+	adv7611_write(0x64, 0x74, 0x00); // Disable the Internal EDID
+	adv7611_write(0x6C, 0x00, 0x00); // 
+	adv7611_write(0x6C, 0x01, 0xFF); // 
+	adv7611_write(0x6C, 0x02, 0xFF); // 
+	adv7611_write(0x6C, 0x03, 0xFF); // 
+	adv7611_write(0x6C, 0x04, 0xFF); // 
+	adv7611_write(0x6C, 0x05, 0xFF); // 
+	adv7611_write(0x6C, 0x06, 0xFF); // 
+	adv7611_write(0x6C, 0x07, 0x00); // 
+	adv7611_write(0x6C, 0x08, 0x06); // 
+	adv7611_write(0x6C, 0x09, 0x8F); // 
+	adv7611_write(0x6C, 0x0A, 0x07); // 
+	adv7611_write(0x6C, 0x0B, 0x11); // 
+	adv7611_write(0x6C, 0x0C, 0x01); // 
+	adv7611_write(0x6C, 0x0D, 0x00); // 
+	adv7611_write(0x6C, 0x0E, 0x00); // 
+	adv7611_write(0x6C, 0x0F, 0x00); // 
+	adv7611_write(0x6C, 0x10, 0x17); // 
+	adv7611_write(0x6C, 0x11, 0x11); // 
+	adv7611_write(0x6C, 0x12, 0x01); // 
+	adv7611_write(0x6C, 0x13, 0x03); // 
+	adv7611_write(0x6C, 0x14, 0x80); // 
+	adv7611_write(0x6C, 0x15, 0x0C); // 
+	adv7611_write(0x6C, 0x16, 0x09); // 
+	adv7611_write(0x6C, 0x17, 0x78); // 
+	adv7611_write(0x6C, 0x18, 0x0A); // 
+	adv7611_write(0x6C, 0x19, 0x1E); // 
+	adv7611_write(0x6C, 0x1A, 0xAC); // 
+	adv7611_write(0x6C, 0x1B, 0x98); // 
+	adv7611_write(0x6C, 0x1C, 0x59); // 
+	adv7611_write(0x6C, 0x1D, 0x56); // 
+	adv7611_write(0x6C, 0x1E, 0x85); // 
+	adv7611_write(0x6C, 0x1F, 0x28); // 
+	adv7611_write(0x6C, 0x20, 0x29); // 
+	adv7611_write(0x6C, 0x21, 0x52); // 
+	adv7611_write(0x6C, 0x22, 0x57); // 
+	adv7611_write(0x6C, 0x23, 0x00); // 
+	adv7611_write(0x6C, 0x24, 0x00); // 
+	adv7611_write(0x6C, 0x25, 0x00); // 
+	adv7611_write(0x6C, 0x26, 0x01); // 
+	adv7611_write(0x6C, 0x27, 0x01); // 
+	adv7611_write(0x6C, 0x28, 0x01); // 
+	adv7611_write(0x6C, 0x29, 0x01); // 
+	adv7611_write(0x6C, 0x2A, 0x01); // 
+	adv7611_write(0x6C, 0x2B, 0x01); // 
+	adv7611_write(0x6C, 0x2C, 0x01); // 
+	adv7611_write(0x6C, 0x2D, 0x01); // 
+	adv7611_write(0x6C, 0x2E, 0x01); // 
+	adv7611_write(0x6C, 0x2F, 0x01); // 
+	adv7611_write(0x6C, 0x30, 0x01); // 
+	adv7611_write(0x6C, 0x31, 0x01); // 
+	adv7611_write(0x6C, 0x32, 0x01); // 
+	adv7611_write(0x6C, 0x33, 0x01); // 
+	adv7611_write(0x6C, 0x34, 0x01); // 
+	adv7611_write(0x6C, 0x35, 0x01); // 
+	adv7611_write(0x6C, 0x36, 0x01); // 
+	adv7611_write(0x6C, 0x37, 0x1D); // 
+	adv7611_write(0x6C, 0x38, 0x00); // 
+	adv7611_write(0x6C, 0x39, 0x72); // 
+	adv7611_write(0x6C, 0x3A, 0x51); // 
+	adv7611_write(0x6C, 0x3B, 0xD0); // 
+	adv7611_write(0x6C, 0x3C, 0x1E); // 
+	adv7611_write(0x6C, 0x3D, 0x20); // 
+	adv7611_write(0x6C, 0x3E, 0x6E); // 
+	adv7611_write(0x6C, 0x3F, 0x02); // 
+	adv7611_write(0x6C, 0x40, 0x55); // 
+	adv7611_write(0x6C, 0x41, 0x10); // 
+	adv7611_write(0x6C, 0x42, 0x0F); // 
+	adv7611_write(0x6C, 0x43, 0x48); // 
+	adv7611_write(0x6C, 0x44, 0x42); // 
+	adv7611_write(0x6C, 0x45, 0x00); // 
+	adv7611_write(0x6C, 0x46, 0x00); // 
+	adv7611_write(0x6C, 0x47, 0x1E); // 
+
+	adv7611_write(0x6C, 0x48, 0x00); // 
+	adv7611_write(0x6C, 0x49, 0x00); // 
+	adv7611_write(0x6C, 0x4A, 0x00); // 
+	adv7611_write(0x6C, 0x4B, 0x10); // 
+	adv7611_write(0x6C, 0x4C, 0x00); // 
+	adv7611_write(0x6C, 0x4D, 0x00); // 
+	adv7611_write(0x6C, 0x4E, 0x00); // 
+	adv7611_write(0x6C, 0x4F, 0x00); // 
+	adv7611_write(0x6C, 0x50, 0x00); // 
+	adv7611_write(0x6C, 0x51, 0x00); // 
+	adv7611_write(0x6C, 0x52, 0x00); // 
+	adv7611_write(0x6C, 0x53, 0x00); // 
+	adv7611_write(0x6C, 0x54, 0x00); // 
+	adv7611_write(0x6C, 0x55, 0x00); // 
+	adv7611_write(0x6C, 0x56, 0x00); // 
+	adv7611_write(0x6C, 0x57, 0x00); // 
+	adv7611_write(0x6C, 0x58, 0x00); // 
+	adv7611_write(0x6C, 0x59, 0x00); // 
+
+	adv7611_write(0x6C, 0x5A, 0x00); // 
+	adv7611_write(0x6C, 0x5B, 0x00); // 
+	adv7611_write(0x6C, 0x5C, 0x00); // 
+	adv7611_write(0x6C, 0x5D, 0xFC); // 
+	adv7611_write(0x6C, 0x5E, 0x00); // 
+	adv7611_write(0x6C, 0x5F, 0x56); // 
+	adv7611_write(0x6C, 0x60, 0x41); // 
+	adv7611_write(0x6C, 0x61, 0x2D); // 
+	adv7611_write(0x6C, 0x62, 0x31); // 
+	adv7611_write(0x6C, 0x63, 0x38); // 
+	adv7611_write(0x6C, 0x64, 0x30); // 
+	adv7611_write(0x6C, 0x65, 0x39); // 
+	adv7611_write(0x6C, 0x66, 0x41); // 
+	adv7611_write(0x6C, 0x67, 0x0A); // 
+	adv7611_write(0x6C, 0x68, 0x20); // 
+	adv7611_write(0x6C, 0x69, 0x20); // 
+	adv7611_write(0x6C, 0x6A, 0x20); // 
+	adv7611_write(0x6C, 0x6B, 0x20); // 
+	adv7611_write(0x6C, 0x6C, 0x00); // 
+	adv7611_write(0x6C, 0x6D, 0x00); // 
+	adv7611_write(0x6C, 0x6E, 0x00); // 
+	adv7611_write(0x6C, 0x6F, 0xFD); // 
+	adv7611_write(0x6C, 0x70, 0x00); // 
+	adv7611_write(0x6C, 0x71, 0x17); // 
+	adv7611_write(0x6C, 0x72, 0x3D); // 
+	adv7611_write(0x6C, 0x73, 0x0D); // 
+	adv7611_write(0x6C, 0x74, 0x2E); // 
+	adv7611_write(0x6C, 0x75, 0x11); // 
+	adv7611_write(0x6C, 0x76, 0x00); // 
+	adv7611_write(0x6C, 0x77, 0x0A); // 
+	adv7611_write(0x6C, 0x78, 0x20); // 
+	adv7611_write(0x6C, 0x79, 0x20); // 
+	adv7611_write(0x6C, 0x7A, 0x20); // 
+	adv7611_write(0x6C, 0x7B, 0x20); // 
+	adv7611_write(0x6C, 0x7C, 0x20); // 
+	adv7611_write(0x6C, 0x7D, 0x20); // 
+	adv7611_write(0x6C, 0x7E, 0x00); // 
+	adv7611_write(0x6C, 0x7F, 0x26); // 
+
 	adv7611_write(0x64, 0x77, 0x00); // Set the Most Significant Bit of the SPA location to 0
 	adv7611_write(0x64, 0x52, 0x20); // Set the SPA for port B.
 	adv7611_write(0x64, 0x53, 0x00); // Set the SPA for port B.
@@ -761,20 +907,19 @@ static tadv7611Reg adv7611_reg={0};
 //static unsigned int rw_buf=0;
 ssize_t adv7611_readreg(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
-
-		copy_from_user(&adv7611_reg, buf, 8);
-		adv7611_reg.uiValue = adv7611_read((unsigned char)(adv7611_reg.uiAddr>>16),(unsigned char)(adv7611_reg.uiAddr&0xff));
-		copy_to_user(buf, &adv7611_reg, 8); 
-		//printk("adv7611_readreg(%x,%x)\n",adv7611_reg.uiAddr,adv7611_reg.uiValue);
+	int iRet;
+	iRet = copy_from_user(&adv7611_reg, buf, 8);
+	adv7611_reg.uiValue = adv7611_read((unsigned char)(adv7611_reg.uiAddr>>16),(unsigned char)(adv7611_reg.uiAddr&0xff));
+	iRet = copy_to_user( (void*)buf, &adv7611_reg, 8); 
 		
 		return 8;
 }
 
 ssize_t adv7611_writereg(struct file *file, const char __user *buf, size_t count, loff_t *f_pos)
 {
+	int iRet;
+    iRet = copy_from_user(&adv7611_reg, buf, 8);
 
-    copy_from_user(&adv7611_reg, buf, 8);
-	printk("adv7611_writereg(%x,%x)\n",adv7611_reg.uiAddr,adv7611_reg.uiValue);
 	adv7611_write((unsigned char)(adv7611_reg.uiAddr>>16),(unsigned char)(adv7611_reg.uiAddr&0xff),(unsigned char)adv7611_reg.uiValue);
      
     return 8;
@@ -835,7 +980,7 @@ static int check_hdmi_clock(void)
 	return 0;
 }
 #if 1
-void DumpHDMIRXReg()
+void DumpHDMIRXReg(void)
 {
     int i,j ;
     unsigned char ucData ;
@@ -904,14 +1049,13 @@ static int adv7611_device_init(void)
 	write_map_i2c_address( ADV7611__I2C, sizeof ( i2c_address ) / 2, i2c_address );
 	//write_map_i2c_address( ADV7611__I2C, sizeof ( io_map ) / 2, io_map );
 	//initialize_hdmi_mode ( HDMI_MAP_I2C, sizeof (hdmi_map) / 2, hdmi_map);
-	adv7611_720P_1080i();
-	adv7611_edid_8_bit();
+	adv7611_720P();
+	adv7611_edid_8_bit_720p();
 	reg = check_hdmi_cable();
 	printk("\t[check_hdmi_cable = 0x%02x]\n", reg);
 	reg = check_hdmi_clock();
 	printk("\t[check_hdmi_clock = 0x%02x]\n", reg);
 
-	DumpHDMIRXReg();
 
 	return 0;
 }
@@ -1095,7 +1239,7 @@ static const struct v4l2_subdev_ops adv7611_ops = {
 
 static const struct file_operations adv7611_fops = {
 	.owner		= THIS_MODULE,
-	.read           = adv7611_readreg,
+	.read           = (void*)adv7611_readreg,
 	.write           = adv7611_writereg,
 	.ioctl		= adv7611_ioctl,
 	.open		= adv7611_open,
@@ -1163,7 +1307,7 @@ static struct i2c_driver adv7611_driver = {
 		.owner	= THIS_MODULE,
 		.name	= "adv7611",
 	},	
-	.command = adv7611_ioctl,
+	.command = (void*)adv7611_ioctl,
 	.probe = adv7611_probe,
 	.remove = adv7611_remove,
 	.id_table = adv7611_id,

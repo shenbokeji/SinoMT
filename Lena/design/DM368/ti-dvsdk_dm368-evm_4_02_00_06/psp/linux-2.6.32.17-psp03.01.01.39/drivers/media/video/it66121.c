@@ -353,7 +353,7 @@ int HDMITX_SetI2C_Byte(BYTE Reg,BYTE Mask,BYTE Value)
     return it66121_write(Reg,Temp);
 }
 
-static int it66121_device_init(void);
+static int it66121_device_init(int vic);
 
 static ssize_t it66121_open(struct inode * indoe, struct file * file)
 {
@@ -451,7 +451,7 @@ void hdmitx_LoadRegSetting(RegSetEntry table[])
 {
     int i ;
 
-	printk("table addr =%x\n",(int)table);
+	//printk("table addr =%x\n",(int)table);
     for( i = 0 ;  ; i++ )
     {
     	//printk("table i =%x\n", i);
@@ -462,19 +462,19 @@ void hdmitx_LoadRegSetting(RegSetEntry table[])
         else if( table[i].invAndMask == 0 && table[i].OrMask == 0 )
         {
         	//printk("table case 1\n");
-            printk("delay(%d)\n",(int)table[i].offset);
+            //printk("delay(%d)\n",(int)table[i].offset);
             mdelay(table[i].offset);
         }
         else if( table[i].invAndMask == 0xFF )
         {
         	//printk("table case 2\n");
-            printk("it66121_write(%02x,%02x)\n",(int)table[i].offset,(int)table[i].OrMask);
+           // printk("it66121_write(%02x,%02x)\n",(int)table[i].offset,(int)table[i].OrMask);
             it66121_write(table[i].offset,table[i].OrMask);
         }
         else
         {
         	//printk("table case 3\n");
-            printk("HDMITX_SetI2C_Byte(%02x,%02x,%02x)\n",table[i].offset,table[i].invAndMask,table[i].OrMask);
+            //printk("HDMITX_SetI2C_Byte(%02x,%02x,%02x)\n",table[i].offset,table[i].invAndMask,table[i].OrMask);
             HDMITX_SetI2C_Byte(table[i].offset,table[i].invAndMask,table[i].OrMask);
         }
     }
@@ -564,11 +564,11 @@ void DumpHDMITXReg(void)
 
 void InitHDMITX(void)
 {
-	printk("Init HDMITX in\n");
+	//printk("Init HDMITX in\n");
 
 
     hdmitx_LoadRegSetting(HDMITX_Init_Table);
-	printk("Init HDMITX_Init_Table \n");
+	//printk("Init HDMITX_Init_Table \n");
     it66121_write(REG_TX_PLL_CTRL,0xff);
     hdmiTxDev[0].bIntPOL = (hdmiTxDev[0].bIntType&B_TX_INTPOL_ACTH)?TRUE:FALSE ;
 
@@ -579,10 +579,10 @@ void InitHDMITX(void)
 #ifdef HDMITX_INPUT_INFO
    // hdmiTxDev[0].RCLK = CalcRCLK();
 #endif
-	printk("Init HDMITX_DefaultVideo_Table \n");
+	//printk("Init HDMITX_DefaultVideo_Table \n");
 
     hdmitx_LoadRegSetting(HDMITX_DefaultVideo_Table);
-	printk("Init HDMITX_SetHDMI_Table \n");
+	//printk("Init HDMITX_SetHDMI_Table \n");
     hdmitx_LoadRegSetting(HDMITX_SetHDMI_Table);
    // hdmitx_LoadRegSetting(HDMITX_DefaultAVIInfo_Table);
    // hdmitx_LoadRegSetting(HDMITX_DeaultAudioInfo_Table);
@@ -592,7 +592,7 @@ void InitHDMITX(void)
 
     printk("Init HDMITX\n");
 
-    DumpHDMITXReg();
+    //DumpHDMITXReg();
 
 	
 }
@@ -701,13 +701,13 @@ static void hdmitx_SetupAFE(VIDEOPCLKLEVEL level)
             HDMITX_SetI2C_Byte(0x62, 0x90, 0x80);
             HDMITX_SetI2C_Byte(0x64, 0x89, 0x80);
             HDMITX_SetI2C_Byte(0x68, 0x10, 0x80);
-            printk("hdmitx_SetupAFE()===================HIGHT\n");
+            //printk("hdmitx_SetupAFE()===================HIGHT\n");
             break ;
         default:
             HDMITX_SetI2C_Byte(0x62, 0x90, 0x10);
             HDMITX_SetI2C_Byte(0x64, 0x89, 0x09);
             HDMITX_SetI2C_Byte(0x68, 0x10, 0x10);
-            printk("hdmitx_SetupAFE()===================LOW\n");
+            //printk("hdmitx_SetupAFE()===================LOW\n");
             break ;
     }
     HDMITX_SetI2C_Byte(REG_TX_SW_RST,B_TX_REF_RST_HDMITX|B_HDMITX_VID_RST,0);
@@ -1034,7 +1034,7 @@ BOOL setHDMITX_SyncEmbeddedByVIC(BYTE VIC,BYTE bInputType)
     // if Embedded Video,need to generate timing with pattern register
     Switch_HDMITX_Bank(0);
 
-    printk("setHDMITX_SyncEmbeddedByVIC(%d,%x)\n",(int)VIC,(int)bInputType);
+    //printk("setHDMITX_SyncEmbeddedByVIC(%d,%x)\n",(int)VIC,(int)bInputType);
     if( VIC > 0 )
     {
         for(i=0;i< MaxIndex;i ++)
@@ -2056,15 +2056,15 @@ BOOL HDMITX_EnableHDCP(BYTE bEnable)
 
 
 //int it66121_config_video(struct hdmi_video *vpara)
-int it66121_config_video(void)
+int it66121_config_video(int vic)
 {
 	unsigned int tmdsclk;
 	VIDEOPCLKLEVEL level ;
     struct fb_videomode *vmode;
 	char bHDMIMode, pixelrep, bInputColorMode, bOutputColorMode, aspec, Colorimetry;
 	
-	//vmode = (struct fb_videomode*)hdmi_vic_to_videomode(vpara->vic);
-	vmode = (struct fb_videomode*)hdmi_vic_to_videomode(VIDSTD_TEST);
+	vmode = (struct fb_videomode*)hdmi_vic_to_videomode(vic);
+	//vmode = (struct fb_videomode*)hdmi_vic_to_videomode(VIDSTD_TEST);
 	if(vmode == NULL)
 		return HDMI_ERROR_FALSE;
 	
@@ -2113,7 +2113,7 @@ int it66121_config_video(void)
     #ifdef SUPPORT_SYNCEMBEDDED
 	if(InstanceData.bInputVideoSignalType & T_MODE_SYNCEMB)
 	{
-	    setHDMITX_SyncEmbeddedByVIC(VIDSTD_TEST,InstanceData.bInputVideoSignalType);
+	    setHDMITX_SyncEmbeddedByVIC(vic,InstanceData.bInputVideoSignalType);
 	}
     #endif
 
@@ -2125,7 +2125,7 @@ int it66121_config_video(void)
         #ifdef OUTPUT_3D_MODE
         ConfigfHdmiVendorSpecificInfoFrame(OUTPUT_3D_MODE);
         #endif
-        ConfigAVIInfoFrame(VIDSTD_TEST, pixelrep, aspec, Colorimetry, bOutputColorMode);
+        ConfigAVIInfoFrame(vic, pixelrep, aspec, Colorimetry, bOutputColorMode);
     }
 	else
 	{
@@ -2135,7 +2135,7 @@ int it66121_config_video(void)
 
     setHDMITX_AVMute(0);
 	//HDMITX_PowerOn();
-    DumpHDMITXReg() ;
+    //DumpHDMITXReg() ;
 	
 	return HDMI_ERROR_SUCESS;
 }
@@ -2378,7 +2378,7 @@ int hdmi_edid_parse_base(unsigned char *buf, int *extend_num, struct hdmi_edid *
 	if(buf == NULL || extend_num == NULL)
 		return E_HDMI_EDID_PARAM;
 		
-	#if 1	
+	#if 0	
 	for(i = 0; i < HDMI_EDID_BLOCK_SIZE; i++)
 	{
 		printk("%02x ", buf[i]&0xff);
@@ -2798,7 +2798,6 @@ SYS_STATUS getHDMITX_EDIDBytes(BYTE *pData,BYTE bSegment,BYTE offset,short Count
     {
 
         ReqCount = (RemainedCount > DDC_FIFO_MAXREQ)?DDC_FIFO_MAXREQ:RemainedCount ;
-        printk("getHDMITX_EDIDBytes(): ReqCount = %d,bCurrOffset = %d\n",(int)ReqCount,(int)bCurrOffset);
 
         it66121_write(REG_TX_DDC_MASTER_CTRL,B_TX_MASTERDDC|B_TX_MASTERHOST);
         it66121_write(REG_TX_DDC_CMD,CMD_FIFO_CLR);
@@ -2880,7 +2879,7 @@ static void hdmi_wq_parse_edid(void)
 	
 	//if(hdmi == NULL) return;
 		
-	printk("%s", __FUNCTION__);
+
 	
 	//pedid = &(hdmi->edid);
 	pedid = &(it66121_edid);
@@ -2931,7 +2930,7 @@ out:
 
 #endif
 
-static int it66121_device_init(void)
+static int it66121_device_init(int vic)
 {
 
 	unsigned char VendorID0, VendorID1, DeviceID0, DeviceID1;
@@ -2951,29 +2950,36 @@ static int it66121_device_init(void)
 		
 		HDMITX_PowerOn();
 		hdmi_wq_parse_edid();
-		it66121_config_video();
+		it66121_config_video(vic);
 		return 0;
 	}
 	printk(KERN_ERR "IT66121: Device not found!\n");
 
-	return 1;
+	return -1;
 }
 
 static int it66121_s_std_output(struct v4l2_subdev *sd, v4l2_std_id norm)
 {
 
-	it66121_device_init();
-	if (norm & (V4L2_STD_ALL & ~V4L2_STD_SECAM))
-		return 0;
-	else if (norm & (V4L2_STD_525P_60 | V4L2_STD_625P_50))
-		return 0;
-	else if (norm & (V4L2_STD_720P_60 | V4L2_STD_720P_50 |
-				V4L2_STD_1080I_60 | V4L2_STD_1080I_50))
-		return 0;
-	else if (norm & (V4L2_STD_1080P_60 | V4L2_STD_1080P_50))
-		return 0;
-	else
-		return -EINVAL;
+
+	if (norm & V4L2_STD_720P_60) 
+		{
+			printk("it66121_s_std_output V4L2_STD_720P_60 ");
+			return it66121_device_init(4);
+		}
+	else if (norm & V4L2_STD_1080I_60) 
+		{
+			printk("it66121_s_std_output V4L2_STD_1080I_60 ");
+			return it66121_device_init(5);
+		}
+	else if (norm & V4L2_STD_1080P_30) 
+		{
+			printk("it66121_s_std_output V4L2_STD_1080P_30 ");
+			return it66121_device_init(34);
+		}
+
+	printk("it66121_s_std_output ERROR!! ");
+	return -EINVAL;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -3027,12 +3033,12 @@ static int it66121_probe(struct i2c_client *c,
 	v4l_info(c, "chip found @ 0x%02x (%s)\n",
 		 c->addr << 1, c->adapter->name);
 
-	it66121_device_init();
+	it66121_device_init(VIDSTD_TEST);
 
 	printk("IT66121: probe OK!\n");
 
 	ret = misc_register(&it66121_dev);
-	printk(IT66121_DRIVER_NAME"\t misc initialized %s!\n", (0==ret)?"successed":"failed");
+	//printk(IT66121_DRIVER_NAME"\t misc initialized %s!\n", (0==ret)?"successed":"failed");
 
 	return 0;
 }

@@ -1093,6 +1093,16 @@ static void davinci_enc_set_1080i(struct vid_enc_mode_info *mode_info)
 		davinci_cfg_reg(DM355_VOUT_FIELD);
 		davinci_cfg_reg(DM355_VOUT_COUTL_EN);
 		davinci_cfg_reg(DM355_VOUT_COUTH_EN);
+	}else if (cpu_is_davinci_dm368()) {
+		dispc_reg_out(VENC_CLKCTL, 0x11);
+
+		osd_write_left_margin(mode_info->left_margin);
+		osd_write_upper_margin(mode_info->upper_margin);
+
+		davinci_cfg_reg(DM365_VOUT_FIELD_G81);
+		davinci_cfg_reg(DM365_VOUT_COUTL_EN);
+		davinci_cfg_reg(DM365_VOUT_COUTH_EN);
+
 	} else {
 		osd_write_left_margin(mode_info->left_margin);
 		osd_write_upper_margin(mode_info->upper_margin);
@@ -1110,7 +1120,12 @@ static void davinci_enc_set_1080i(struct vid_enc_mode_info *mode_info)
 		dispc_reg_out(VENC_VMOD,
 			      (VENC_VMOD_VENC | VENC_VMOD_VMD |
 			       VENC_VMOD_NSIT));
-	} else {
+	}else if (cpu_is_davinci_dm368())
+	{
+		dispc_reg_out( VENC_VMOD, 
+			(VENC_VMOD_VENC | (HDTV_1080I << VENC_VMOD_TVTYP_SHIFT) | VENC_VMOD_HDMD) );
+	}
+	else {
 		dispc_reg_out(VENC_VMOD,
 			      (VENC_VMOD_VENC | VENC_VMOD_VMD | VENC_VMOD_HDMD |
 			       VENC_VMOD_NSIT));
