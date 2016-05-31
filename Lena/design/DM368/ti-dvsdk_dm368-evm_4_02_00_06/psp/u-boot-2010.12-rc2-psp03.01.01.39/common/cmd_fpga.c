@@ -402,7 +402,7 @@ U_BOOT_CMD(
 #define COMMAND_DELAY (50000)
 int do_fpga_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	run_command("sf probe 0:0 40000000",0);
+	run_command("sf probe 0:0 42500000",0);
 	udelay(COMMAND_DELAY);
 	run_command("sf erase 0x1500000 0x6C0000",0);
 	udelay(COMMAND_DELAY);
@@ -415,7 +415,7 @@ int do_fpga_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	run_command("cmp.b 0x86000000 0x84000000 0x6b2190",0);	
 	udelay(COMMAND_DELAY);
 
-	printf("FPGA write into SPI FLASH OK!!\n");
+	printf("INOF: please check the same byte is %d\nFPGA write into SPI FLASH OK!!\n", 0xb62190);
 
 	return 0;
 }
@@ -462,7 +462,7 @@ int do_uboot_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	run_command("cmp.b 0x86000000 0x84000000 0x40000",0);	
 	udelay(COMMAND_DELAY);
 
-	printf("u-boot.bin write into SPI FLASH OK!!\n");
+	printf("NFOF:please check the same byte is %d \nu-boot.bin write into SPI FLASH OK!!\n", 0x40000);
 
 	return 0;
 }
@@ -485,10 +485,10 @@ U_BOOT_CMD(
 
 int do_uImage_load( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	printf( "*****uImage size can not bigger than 0xb00000 byte*****\n");
-	run_command("sf probe 0:0 40000000",0);
+	printf( "*****uImage size can not bigger than 0x1000000 byte*****\n");
+	run_command("sf probe 0:0 42500000",0);
 	udelay(COMMAND_DELAY);
-	run_command("sf read 0x84000000 0x300000 0xb00000",0);
+	run_command("sf read 0x84000000 0x300000 0x1000000",0);
 	udelay(COMMAND_DELAY);
 	printf("Read uImage from FLASH over\n");
 	run_command("bootm 0x84000000",0);
@@ -505,7 +505,7 @@ U_BOOT_CMD(
 
 /*----------------------------------------------------------------------------
  * name 		: do_uImage_update
- * function 	: update uImage from PC,and bootm 
+ * function 	: update uImage from PC 
  * input		: none
  * author	version 	date		note
  * feller	1.0 	20160224
@@ -514,21 +514,21 @@ U_BOOT_CMD(
 	
 int do_uImage_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	printf( "*****uImage size can not bigger than 0xb00000 byte*****\n");
-	run_command("sf probe 0:0 40000000",0);
+	printf( "*****uImage size can not bigger than 0x1000000 byte*****\n");
+	run_command("sf probe 0:0 42500000",0);
 	udelay(COMMAND_DELAY);
-	run_command("sf erase 0x300000 0xb00000",0);
+	run_command("sf erase 0x300000 0x1000000",0);
 	udelay(COMMAND_DELAY);
 	run_command("loady 0x84000000",0);
 	udelay(COMMAND_DELAY);
-	run_command("sf write 0x84000000 0x300000 0xb00000",0);
+	run_command("sf write 0x84000000 0x300000 0x1000000",0);
 	udelay(COMMAND_DELAY);
-	run_command("sf read 0x86000000 0x300000 0xb00000",0);
+	run_command("sf read 0x86000000 0x300000 0x1000000",0);
 	udelay(COMMAND_DELAY);
-	run_command("cmp.b 0x86000000 0x84000000 0xb00000",0);	
+	run_command("cmp.b 0x86000000 0x84000000 0x1000000",0);	
 	udelay(COMMAND_DELAY);
 	
-	printf("please check the same byte must be %d\n, meaning uImage write into SPI FLASH OK!!\n", 0xb00000);
+	printf("INFO:please check the same byte must be %d\n, meaning uImage write into SPI FLASH OK!!\n", 0xb00000);
 	
 	return 0;
 }
@@ -538,4 +538,38 @@ U_BOOT_CMD(
 	"updateuImage"
 );
 
+/*----------------------------------------------------------------------------
+ * name 		: do_ubifs_update
+ * function 	: update ubifs from PC 
+ * input		: none
+ * author	version 	date		note
+ * feller	1.0 	20160530
+ *----------------------------------------------------------------------------
+*/
+	
+int do_ubifs_update( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	printf( "*****ubifs size can not bigger than 0x1000000 byte*****\n");
+	run_command("sf probe 0:0 42500000",0);
+	udelay(COMMAND_DELAY);
+	run_command("sf erase 0x1c00000 0x2400000",0);
+	udelay(COMMAND_DELAY);
+	run_command("loady 0x84000000",0);
+	udelay(COMMAND_DELAY);
+	run_command("sf write 0x84000000 0x1c00000 0x1000000",0);
+	udelay(COMMAND_DELAY);
+	run_command("sf read 0x86000000 0x1c00000 0x1000000",0);
+	udelay(COMMAND_DELAY);
+	run_command("cmp.b 0x86000000 0x84000000 0x1000000",0);	
+	udelay(COMMAND_DELAY);
+	
+	printf("INFO:please check the same byte must be %d\n, meaning ubifs write into SPI FLASH OK!!\n", 0x1000000);
+	
+	return 0;
+}
+U_BOOT_CMD(
+	updateubifs,	1,	0,	do_ubifs_update,
+	"update ubifs from PC",
+	"updateubifs"
+);
 
